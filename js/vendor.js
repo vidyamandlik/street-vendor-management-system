@@ -97,6 +97,9 @@ localStorage.setItem(
 // ===============================
 // VENDOR LOGIN
 // ===============================
+// ===============================
+// VENDOR LOGIN
+// ===============================
 
 const vendorLoginForm =
     document.getElementById(
@@ -116,18 +119,20 @@ if (vendorLoginForm) {
             const enteredId =
                 document.getElementById(
                     "vendorIdLogin"
-                ).value;
+                ).value.trim();
 
 
             const enteredMobile =
                 document.getElementById(
                     "vendorMobileLogin"
-                ).value;
+                ).value.trim();
 
+
+            // Get all vendors
 
             const vendorData =
                 localStorage.getItem(
-                    "vendorData"
+                    "vendors"
                 );
 
 
@@ -143,18 +148,38 @@ if (vendorLoginForm) {
             }
 
 
-            const vendor =
+            const vendors =
                 JSON.parse(vendorData);
 
 
-            if (
-                enteredId === vendor.id &&
-                enteredMobile === vendor.mobile
-            ) {
+            // Find matching vendor
+
+            const vendor =
+                vendors.find(function(v) {
+
+                    return (
+                        v.id === enteredId &&
+                        v.mobile === enteredMobile
+                    );
+
+                });
+
+
+            if (vendor) {
+
+                // Save login status
 
                 localStorage.setItem(
                     "vendorLoggedIn",
                     "true"
+                );
+
+
+                // Save which vendor logged in
+
+                localStorage.setItem(
+                    "loggedInVendorId",
+                    vendor.id
                 );
 
 
@@ -176,6 +201,7 @@ if (vendorLoginForm) {
     );
 
 }
+
 // ===============================
 // VENDOR DASHBOARD
 // ===============================
@@ -227,10 +253,22 @@ function loadVendorDashboard() {
         JSON.parse(vendorData);
 
 
-    // For prototype:
-    // display the first registered vendor
+    // Get logged-in vendor ID
 
-    const vendor = vendors[0];
+    const loggedInVendorId =
+        localStorage.getItem(
+            "loggedInVendorId"
+        );
+
+
+    // Find the logged-in vendor
+
+    const vendor =
+        vendors.find(function(v) {
+
+            return v.id === loggedInVendorId;
+
+        });
 
 
     if (!vendor) {
@@ -305,6 +343,8 @@ function loadVendorDashboard() {
 }
 
 
+
+
 // ===============================
 // DISPLAY STATUS
 // ===============================
@@ -357,11 +397,13 @@ function displayVendorStatus(status) {
 
 function vendorLogout() {
 
-
     localStorage.removeItem(
         "vendorLoggedIn"
     );
 
+    localStorage.removeItem(
+        "loggedInVendorId"
+    );
 
     window.location.href =
         "login.html";
