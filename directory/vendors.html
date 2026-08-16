@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Vendor Directory</title>
+
+    <link rel="stylesheet"
+          href="../css/style.css">
+
+</head>
+
+<body>
+
+<header>
+
+    <nav>
+
+        <div class="logo">
+            Street Vendor Management System
+        </div>
+
+        <ul class="nav-links">
+
+            <li>
+                <a href="../index.html">
+                    Home
+                </a>
+            </li>
+
+            <li>
+                <a href="vendors.html">
+                    Vendor Directory
+                </a>
+            </li>
+
+            <li>
+                <a href="../vendor/register.html">
+                    Register
+                </a>
+            </li>
+
+            <li>
+                <a href="../vendor/login.html">
+                    Vendor Login
+                </a>
+            </li>
+
+            <li>
+                <a href="../admin/login.html">
+                    Admin Login
+                </a>
+            </li>
+
+        </ul>
+
+    </nav>
+
+</header>
+
+
+<main class="directory-page">
+
+    <section class="directory-header">
+
+        <h1>Street Vendor Directory</h1>
+
+        <p>
+            Discover verified street vendors
+            in your area.
+        </p>
+
+    </section>
+
+
+    <!-- Search and Filters -->
+
+    <section class="directory-filters">
+
+        <input
+            type="text"
+            id="searchVendor"
+            placeholder="Search vendor or business..."
+        >
+
+
+        <select id="categoryFilter">
+
+            <option value="">
+                All Categories
+            </option>
+
+            <option value="Food & Beverages">
+                Food & Beverages
+            </option>
+
+            <option value="Fruits & Vegetables">
+                Fruits & Vegetables
+            </option>
+
+            <option value="Clothing">
+                Clothing
+            </option>
+
+            <option value="Handicrafts">
+                Handicrafts
+            </option>
+
+            <option value="Groceries">
+                Groceries
+            </option>
+
+            <option value="Other">
+                Other
+            </option>
+
+        </select>
+
+
+        <input
+            type="text"
+            id="districtFilter"
+            placeholder="Enter district"
+        >
+
+    </section>
+
+
+    <!-- Vendor Cards -->
+
+    <section>
+
+        <div
+            id="vendorDirectory"
+            class="vendor-grid"
+        >
+
+        </div>
+
+    </section>
+
+
+</main>
+
+
+<footer>
+
+    <p>
+        © 2026 Street Vendor Management System
+    </p>
+
+</footer>
+
+
+<script src="../js/directory.js"></script>
+
+</body>
+
+</html>
