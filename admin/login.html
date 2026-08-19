@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Admin Login</title>
+
+    <link rel="stylesheet" href="../css/style.css">
+
+</head>
+
+<body>
+
+    <header>
+
+        <nav>
+
+            <div class="logo">
+                Street Vendor Management System
+            </div>
+
+            <ul class="nav-links">
+
+                <li>
+                    <a href="../index.html">Home</a>
+                </li>
+
+                <li>
+                    <a href="../directory/vendors.html">
+                        Vendor Directory
+                    </a>
+                </li>
+
+            </ul>
+
+        </nav>
+
+    </header>
+
+
+    <main>
+
+        <section class="login-section">
+
+            <div class="login-container">
+
+                <h1>Administrator Login</h1>
+
+                <p>
+                    Authorized personnel only
+                </p>
+
+
+                <form id="adminLoginForm">
+
+                    <div class="form-group">
+
+                        <label for="adminUsername">
+                            Username
+                        </label>
+
+                        <input
+                            type="text"
+                            id="adminUsername"
+                            placeholder="Enter username"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="adminPassword">
+                            Password
+                        </label>
+
+                        <input
+                            type="password"
+                            id="adminPassword"
+                            placeholder="Enter password"
+                            required
+                        >
+
+                    </div>
+
+
+                    <button
+                        type="submit"
+                        class="btn submit-btn"
+                    >
+                        Login
+                    </button>
+
+
+                    <p
+                        id="loginError"
+                        class="login-error"
+                    ></p>
+
+                </form>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <footer>
+
+        <p>
+            © 2026 Street Vendor Management System
+        </p>
+
+    </footer>
+
+
+    <script src="../js/admin.js"></script>
+
+</body>
+
+</html>

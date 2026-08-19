@@ -181,3 +181,561 @@ footer {
         font-size: 36px;
     }
 }
+
+/* Registration Page */
+
+.registration-section {
+    padding: 60px 8%;
+    background: #f8f9fa;
+}
+
+.registration-container {
+    max-width: 800px;
+    margin: auto;
+    background: white;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+}
+
+.registration-container h1 {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.registration-container > p {
+    text-align: center;
+    margin-bottom: 35px;
+}
+
+.registration-container h2 {
+    margin-top: 30px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 15px;
+}
+
+.form-group textarea {
+    resize: vertical;
+}
+
+.submit-btn {
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.success-message {
+    text-align: center;
+    padding: 30px;
+    background: #e8f5e9;
+    border-radius: 10px;
+    margin-top: 20px;
+}
+
+.success-message h2 {
+    border: none;
+}
+
+/* =========================
+   ADMIN LOGIN
+========================= */
+
+.login-section {
+    min-height: 70vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 50px 20px;
+    background: #f8f9fa;
+}
+
+.login-container {
+    width: 100%;
+    max-width: 450px;
+    background: white;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+}
+
+.login-container h1 {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.login-container > p {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.login-error {
+    color: #dc3545;
+    text-align: center;
+    margin-top: 15px;
+}
+
+
+/* =========================
+   ADMIN DASHBOARD
+========================= */
+
+.admin-dashboard {
+    padding: 50px 7%;
+    background: #f8f9fa;
+    min-height: 70vh;
+}
+
+.admin-dashboard h1 {
+    margin-bottom: 10px;
+}
+
+.dashboard-subtitle {
+    margin-bottom: 35px;
+    color: #666;
+}
+
+
+/* Statistics */
+
+.stats-container {
+    display: grid;
+    grid-template-columns:
+        repeat(4, 1fr);
+
+    gap: 20px;
+
+    margin-bottom: 40px;
+}
+
+.stat-card {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow:
+        0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.stat-card h3 {
+    margin-bottom: 10px;
+    color: #555;
+}
+
+.stat-card p {
+    font-size: 32px;
+    font-weight: bold;
+    color: #198754;
+}
+
+
+/* Vendor Table */
+
+.vendor-management {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow:
+        0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.vendor-management h2 {
+    margin-bottom: 25px;
+}
+
+.table-container {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th,
+td {
+    padding: 14px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+}
+
+th {
+    background: #f1f3f5;
+}
+
+.approve-btn,
+.reject-btn {
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 2px;
+}
+
+.approve-btn {
+    background: #198754;
+    color: white;
+}
+
+.reject-btn {
+    background: #dc3545;
+    color: white;
+}
+
+.status {
+    font-weight: bold;
+}
+
+
+/* Responsive */
+
+@media (max-width: 900px) {
+
+    .stats-container {
+        grid-template-columns:
+            repeat(2, 1fr);
+    }
+
+}
+
+
+@media (max-width: 600px) {
+
+    .stats-container {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+/* =========================
+   VENDOR DASHBOARD
+========================= */
+
+.vendor-dashboard {
+    padding: 50px 8%;
+    background: #f8f9fa;
+    min-height: 70vh;
+}
+
+.vendor-dashboard h1 {
+    margin-bottom: 10px;
+}
+
+.vendor-status-card {
+    background: white;
+    padding: 30px;
+    margin-top: 30px;
+    border-radius: 10px;
+    box-shadow:
+        0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.vendor-status-card h2 {
+    margin-bottom: 20px;
+}
+
+.verified-status,
+.pending-status,
+.rejected-status {
+    padding: 15px;
+    border-radius: 6px;
+    font-weight: bold;
+}
+
+.verified-status {
+    background: #d1e7dd;
+    color: #0f5132;
+}
+
+.pending-status {
+    background: #fff3cd;
+    color: #664d03;
+}
+
+.rejected-status {
+    background: #f8d7da;
+    color: #842029;
+}
+
+
+/* Vendor Information */
+
+.vendor-info {
+    background: white;
+    padding: 30px;
+    margin-top: 25px;
+    border-radius: 10px;
+    box-shadow:
+        0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.vendor-info h2 {
+    margin-bottom: 25px;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns:
+        repeat(2, 1fr);
+    gap: 20px;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 6px;
+}
+
+.info-item strong {
+    color: #555;
+}
+
+
+/* Business Description */
+
+.vendor-description {
+    background: white;
+    padding: 30px;
+    margin-top: 25px;
+    border-radius: 10px;
+    box-shadow:
+        0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.vendor-description h2 {
+    margin-bottom: 15px;
+}
+
+.vendor-description p {
+    line-height: 1.6;
+}
+
+
+@media (max-width: 700px) {
+
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+/* =========================
+   VENDOR DIRECTORY
+========================= */
+
+.directory-page {
+    padding: 50px 8%;
+    background: #f8f9fa;
+    min-height: 70vh;
+}
+
+.directory-header {
+    text-align: center;
+    margin-bottom: 35px;
+}
+
+.directory-header h1 {
+    font-size: 38px;
+    margin-bottom: 10px;
+}
+
+
+/* Filters */
+
+.directory-filters {
+    display: grid;
+
+    grid-template-columns:
+        2fr 1fr 1fr;
+
+    gap: 15px;
+
+    max-width: 1000px;
+
+    margin: 0 auto 40px;
+}
+
+.directory-filters input,
+.directory-filters select {
+    padding: 13px;
+
+    border: 1px solid #ccc;
+
+    border-radius: 6px;
+
+    font-size: 15px;
+}
+
+
+/* Vendor Cards */
+
+.vendor-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(auto-fit, minmax(280px, 1fr));
+
+    gap: 25px;
+}
+
+.vendor-card {
+    background: white;
+
+    padding: 25px;
+
+    border-radius: 10px;
+
+    box-shadow:
+        0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.vendor-card-header {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 10px;
+
+    margin-bottom: 20px;
+}
+
+.vendor-card-header h2 {
+    font-size: 22px;
+}
+
+.vendor-card p {
+    margin-bottom: 12px;
+
+    line-height: 1.5;
+}
+
+.verified-badge {
+    background: #d1e7dd;
+
+    color: #0f5132;
+
+    padding: 5px 10px;
+
+    border-radius: 20px;
+
+    font-size: 12px;
+
+    font-weight: bold;
+
+    white-space: nowrap;
+}
+
+
+/* No Vendors */
+
+.no-vendors {
+    text-align: center;
+
+    background: white;
+
+    padding: 50px;
+
+    border-radius: 10px;
+
+    box-shadow:
+        0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+
+@media (max-width: 700px) {
+
+    .directory-filters {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+/* ===============================
+   EDIT PROFILE
+================================ */
+
+#editProfileSection {
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 30px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+#editProfileSection h2 {
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+#editProfileForm {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px 25px;
+}
+
+#editProfileForm label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+}
+
+#editProfileForm input,
+#editProfileForm select,
+#editProfileForm textarea {
+    width: 100%;
+    padding: 11px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-size: 14px;
+}
+
+#editProfileForm textarea {
+    resize: vertical;
+    min-height: 90px;
+}
+
+/* Description takes full width */
+
+#editDescription {
+    grid-column: span 2;
+}
+
+/* Buttons */
+
+#editProfileForm button {
+    margin-top: 10px;
+}
+
+#editProfileForm button[type="submit"] {
+    grid-column: 1;
+}
+
+#editProfileForm button[type="button"] {
+    grid-column: 2;
+}

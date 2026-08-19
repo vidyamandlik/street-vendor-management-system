@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Admin Dashboard</title>
+
+    <link rel="stylesheet"
+          href="../css/style.css">
+
+</head>
+
+
+<body>
+
+
+<header>
+
+    <nav>
+
+        <div class="logo">
+            Admin Dashboard
+        </div>
+
+        <ul class="nav-links">
+
+            <li>
+                <a href="../index.html">
+                    Main Website
+                </a>
+            </li>
+
+            <li>
+                <a href="#"
+                   onclick="logout()">
+                    Logout
+                </a>
+            </li>
+
+        </ul>
+
+    </nav>
+
+</header>
+
+
+<main class="admin-dashboard">
+
+
+    <h1>Vendor Management Dashboard</h1>
+
+    <p class="dashboard-subtitle">
+        Manage and verify registered street vendors.
+    </p>
+
+
+    <!-- Statistics -->
+
+    <section class="stats-container">
+
+
+        <div class="stat-card">
+
+            <h3>Total Vendors</h3>
+
+            <p id="totalVendors">
+                0
+            </p>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <h3>Pending</h3>
+
+            <p id="pendingVendors">
+                0
+            </p>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <h3>Verified</h3>
+
+            <p id="verifiedVendors">
+                0
+            </p>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <h3>Rejected</h3>
+
+            <p id="rejectedVendors">
+                0
+            </p>
+
+        </div>
+
+
+    </section>
+
+
+    <!-- Vendor Applications -->
+
+    <section class="vendor-management">
+
+        <h2>Vendor Applications</h2>
+
+
+        <div class="table-container">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>Vendor ID</th>
+
+                        <th>Name</th>
+
+                        <th>Business</th>
+
+                        <th>Category</th>
+
+                        <th>District</th>
+
+                        <th>Status</th>
+
+                        <th>Action</th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="vendorTableBody">
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+
+</main>
+
+
+<footer>
+
+    <p>
+        © 2026 Street Vendor Management System
+    </p>
+
+</footer>
+
+
+<script src="../js/admin.js"></script>
+
+</body>
+
+</html>

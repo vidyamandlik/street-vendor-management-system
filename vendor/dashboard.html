@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Vendor Dashboard</title>
+
+    <link rel="stylesheet"
+          href="../css/style.css">
+
+</head>
+
+<body>
+
+
+<header>
+
+    <nav>
+
+        <div class="logo">
+            Vendor Dashboard
+        </div>
+
+        <ul class="nav-links">
+
+            <li>
+                <a href="../index.html">
+                    Home
+                </a>
+            </li>
+
+            <li>
+                <a href="../directory/vendors.html">
+                    Vendor Directory
+                </a>
+            </li>
+
+            <li>
+                <a href="#"
+                   onclick="vendorLogout()">
+                    Logout
+                </a>
+            </li>
+
+        </ul>
+
+    </nav>
+
+</header>
+
+
+<main class="vendor-dashboard">
+
+    <h1>Welcome, <span id="vendorName"></span> 👋</h1>
+
+    <p>
+        Manage and view your vendor information.
+    </p>
+
+
+    <!-- Status Card -->
+
+    <section class="vendor-status-card">
+
+        <h2>Verification Status</h2>
+
+        <div id="vendorStatus">
+
+        </div>
+
+    </section>
+
+
+    <!-- Vendor Information -->
+
+    <section class="vendor-info">
+
+        <h2>Vendor Information</h2>
+
+
+        <div class="info-grid">
+
+
+            <div class="info-item">
+
+                <strong>Vendor ID</strong>
+
+                <span id="vendorId"></span>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <strong>Business Name</strong>
+
+                <span id="businessName"></span>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <strong>Category</strong>
+
+                <span id="category"></span>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <strong>Mobile</strong>
+
+                <span id="mobile"></span>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <strong>Email</strong>
+
+                <span id="email"></span>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <strong>District</strong>
+
+                <span id="district"></span>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <strong>Years in Business</strong>
+
+                <span id="years"></span>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <strong>Address</strong>
+
+                <span id="address"></span>
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+    <!-- Description -->
+
+    <section class="vendor-description">
+
+        <h2>Business Description</h2>
+
+        <p id="description"></p>
+
+    </section>
+
+    <!-- Edit Profile Section -->
+    <section class="edit-profile-button">
+
+    <button class="btn" onclick="showEditProfile()">
+        Edit Profile
+    </button>
+
+</section>
+
+    
+    <!-- Edit Profile Section -->
+<section id="editProfileSection" style="display: none;">
+
+    <h2>Edit Profile</h2>
+
+    <form id="editProfileForm">
+
+        <div class="edit-form-group">
+           <label>Vendor Name</label>
+           <input type="text" id="editName" required>
+        </div>
+
+        <div class="edit-form-group">
+            <label>Mobile Number</label>
+            <input type="tel" id="editMobile" required>
+        </div>
+         
+        <div class="edit-form-group">
+        <label>Email</label>
+        <input type="email" id="editEmail" required>
+        </div>  
+
+        <div class="edit-form-group">
+            <label>Business Name</label>
+            <input type="text" id="editBusinessName" required>
+        </div>
+
+        <div class="edit-form-group">
+            <label>Business Category</label>
+            <select id="editCategory" required>
+                <option value="Food & Beverages">Food & Beverages</option>
+                <option value="Fruits & Vegetables">Fruits & Vegetables</option>
+                <option value="Clothing">Clothing</option>
+                <option value="Handicrafts">Handicrafts</option>
+                <option value="Groceries">Groceries</option>
+                <option value="Other">Other</option>
+            </select>
+        </div>
+
+        <div class="edit-form-group">
+            <label>District</label>
+            <input type="text" id="editDistrict" required>
+        </div>
+
+        <div class="edit-form-group">
+            <label>Business Address</label>
+            <textarea id="editAddress" required></textarea>
+        </div>
+
+        <div class="edit-form-group">
+            <label>Years in Business</label>
+            <input type="number" id="editYears" min="0" required>
+        </div>
+
+        <div class="edit-form-group">
+            <label>Business Description</label>
+            <textarea id="editDescription"></textarea>
+        </div>
+
+        <button type="submit" class="btn">
+            Save Changes
+        </button>
+
+        <button type="button" class="btn" onclick="cancelEdit()">
+            Cancel
+        </button>
+
+    </form>
+
+</section>
+
+
+</main>
+
+
+<footer>
+
+    <p>
+        © 2026 Street Vendor Management System
+    </p>
+
+</footer>
+
+
+<script src="../js/vendor.js"></script>
+
+</body>
+
+</html>
