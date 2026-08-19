@@ -390,6 +390,118 @@ function displayVendorStatus(status) {
 
 }
 
+// ===============================
+// VENDOR EDIT PROFILE
+// ===============================
+
+function showEditProfile() {
+
+    const vendors = JSON.parse(
+        localStorage.getItem("vendors")
+    );
+
+    const loggedInVendorId =
+        localStorage.getItem("loggedInVendorId");
+
+    const vendor = vendors.find(function(v) {
+        return v.id === loggedInVendorId;
+    });
+
+    if (!vendor) {
+        return;
+    }
+
+    document.getElementById("editName").value = vendor.name;
+    document.getElementById("editMobile").value = vendor.mobile;
+    document.getElementById("editEmail").value = vendor.email;
+    document.getElementById("editBusinessName").value = vendor.businessName;
+    document.getElementById("editCategory").value = vendor.category;
+    document.getElementById("editDistrict").value = vendor.district;
+    document.getElementById("editAddress").value = vendor.address;
+    document.getElementById("editYears").value = vendor.years;
+    document.getElementById("editDescription").value = vendor.description;
+
+    document.getElementById("editProfileSection").style.display = "block";
+}
+
+
+// ===============================
+// VENDOR EDIT PROFILE FORM SUBMISSION
+// ===============================
+
+const editProfileForm = document.getElementById("editProfileForm");
+
+if (editProfileForm) {
+
+    editProfileForm.addEventListener("submit", function(event) {
+
+        event.preventDefault();
+
+        const vendors = JSON.parse(
+            localStorage.getItem("vendors")
+        );
+
+        const loggedInVendorId =
+            localStorage.getItem("loggedInVendorId");
+
+        const vendorIndex = vendors.findIndex(function(v) {
+            return v.id === loggedInVendorId;
+        });
+
+        if (vendorIndex === -1) {
+            return;
+        }
+
+        vendors[vendorIndex].name =
+            document.getElementById("editName").value;
+
+        vendors[vendorIndex].mobile =
+            document.getElementById("editMobile").value;
+
+        vendors[vendorIndex].email =
+            document.getElementById("editEmail").value;
+
+        vendors[vendorIndex].businessName =
+            document.getElementById("editBusinessName").value;
+
+        vendors[vendorIndex].category =
+            document.getElementById("editCategory").value;
+
+        vendors[vendorIndex].district =
+            document.getElementById("editDistrict").value;
+
+        vendors[vendorIndex].address =
+            document.getElementById("editAddress").value;
+
+        vendors[vendorIndex].years =
+            document.getElementById("editYears").value;
+
+        vendors[vendorIndex].description =
+            document.getElementById("editDescription").value;
+
+        localStorage.setItem(
+            "vendors",
+            JSON.stringify(vendors)
+        );
+
+        alert("Profile updated successfully!");
+
+        location.reload();
+
+    });
+
+}
+
+// ===============================
+// VENDOR CANCEL EDIT PROFILE
+// ===============================
+
+function cancelEdit() {
+
+    document.getElementById("editProfileSection").style.display = "none";
+
+}
+
 
 // ===============================
 // VENDOR LOGOUT

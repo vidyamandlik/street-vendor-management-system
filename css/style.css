@@ -669,3 +669,69 @@ th {
     }
 
 }
+
+/* ===============================
+   EDIT PROFILE
+================================ */
+
+#editProfileSection {
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 30px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+#editProfileSection h2 {
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+#editProfileForm {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px 25px;
+}
+
+#editProfileForm label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+}
+
+#editProfileForm input,
+#editProfileForm select,
+#editProfileForm textarea {
+    width: 100%;
+    padding: 11px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-size: 14px;
+}
+
+#editProfileForm textarea {
+    resize: vertical;
+    min-height: 90px;
+}
+
+/* Description takes full width */
+
+#editDescription {
+    grid-column: span 2;
+}
+
+/* Buttons */
+
+#editProfileForm button {
+    margin-top: 10px;
+}
+
+#editProfileForm button[type="submit"] {
+    grid-column: 1;
+}
+
+#editProfileForm button[type="button"] {
+    grid-column: 2;
+}
