@@ -1,11 +1,14 @@
+// ===============================
+// VENDOR REGISTRATION
+// ===============================
+
 const vendorForm = document.getElementById("vendorForm");
 
 if (vendorForm) {
 
-    vendorForm.addEventListener("submit", function(event) {
+    vendorForm.addEventListener("submit", async function(event) {
 
         event.preventDefault();
-
 
         // Generate Vendor ID
 
@@ -52,51 +55,69 @@ if (vendorForm) {
         };
 
 
-        // Get existing vendors
+        try {
 
-let vendors =
-    JSON.parse(
-        localStorage.getItem("vendors")
-    ) || [];
+            // Send vendor data to backend
 
+            const response = await fetch(
+                "http://localhost:5000/api/vendors",
+                {
+                    method: "POST",
 
-// Add new vendor
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
 
-vendors.push(vendor);
-
-
-// Save all vendors
-
-localStorage.setItem(
-    "vendors",
-    JSON.stringify(vendors)
-);
-
-       
+                    body: JSON.stringify(vendor)
+                }
+            );
 
 
-        // Hide form
-
-        vendorForm.style.display = "none";
+            const result = await response.json();
 
 
-        // Show success message
+            if (!response.ok) {
 
-        document.getElementById(
-            "successMessage"
-        ).style.display = "block";
+                throw new Error(
+                    result.message || "Registration failed"
+                );
+
+            }
 
 
-        document.getElementById(
-            "vendorId"
-        ).textContent = vendorId;
+            // Hide form
+
+            vendorForm.style.display = "none";
+
+
+            // Show success message
+
+            document.getElementById(
+                "successMessage"
+            ).style.display = "block";
+
+
+            document.getElementById(
+                "vendorId"
+            ).textContent = vendorId;
+
+
+        } catch (error) {
+
+            console.error(
+                "Registration error:",
+                error
+            );
+
+            alert(
+                "Unable to register vendor. Please try again."
+            );
+
+        }
 
     });
 
 }
-// ===============================
-// VENDOR LOGIN
-// ===============================
 // ===============================
 // VENDOR LOGIN
 // ===============================
@@ -106,21 +127,18 @@ const vendorLoginForm =
         "vendorLoginForm"
     );
 
-
 if (vendorLoginForm) {
 
     vendorLoginForm.addEventListener(
         "submit",
-        function(event) {
+        async function(event) {
 
             event.preventDefault();
-
 
             const enteredId =
                 document.getElementById(
                     "vendorIdLogin"
                 ).value.trim();
-
 
             const enteredMobile =
                 document.getElementById(
@@ -128,44 +146,40 @@ if (vendorLoginForm) {
                 ).value.trim();
 
 
-            // Get all vendors
+            try {
 
-            const vendorData =
-                localStorage.getItem(
-                    "vendors"
+                const response = await fetch(
+                    "http://localhost:5000/api/vendors/login",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            id: enteredId,
+                            mobile: enteredMobile
+                        })
+                    }
                 );
 
 
-            if (!vendorData) {
-
-                document.getElementById(
-                    "vendorLoginError"
-                ).textContent =
-                    "No vendor registration found.";
-
-                return;
-
-            }
+                const result =
+                    await response.json();
 
 
-            const vendors =
-                JSON.parse(vendorData);
+                if (!response.ok) {
 
+                    document.getElementById(
+                        "vendorLoginError"
+                    ).textContent =
+                        result.message ||
+                        "Invalid Vendor ID or mobile number.";
 
-            // Find matching vendor
+                    return;
+                }
 
-            const vendor =
-                vendors.find(function(v) {
-
-                    return (
-                        v.id === enteredId &&
-                        v.mobile === enteredMobile
-                    );
-
-                });
-
-
-            if (vendor) {
 
                 // Save login status
 
@@ -175,25 +189,31 @@ if (vendorLoginForm) {
                 );
 
 
-                // Save which vendor logged in
+                // Save logged-in vendor ID
 
                 localStorage.setItem(
                     "loggedInVendorId",
-                    vendor.id
+                    result.vendor.id
                 );
 
+
+                // Open dashboard
 
                 window.location.href =
                     "dashboard.html";
 
-            }
 
-            else {
+            } catch (error) {
+
+                console.error(
+                    "Login error:",
+                    error
+                );
 
                 document.getElementById(
                     "vendorLoginError"
                 ).textContent =
-                    "Invalid Vendor ID or mobile number.";
+                    "Unable to connect to server. Please try again.";
 
             }
 
@@ -238,22 +258,7 @@ if (vendorDashboard) {
 // LOAD VENDOR INFORMATION
 // ===============================
 
-function loadVendorDashboard() {
-
-    const vendorData =
-        localStorage.getItem("vendors");
-
-
-    if (!vendorData) {
-        return;
-    }
-
-
-    const vendors =
-        JSON.parse(vendorData);
-
-
-    // Get logged-in vendor ID
+async function loadVendorDashboard() {
 
     const loggedInVendorId =
         localStorage.getItem(
@@ -261,88 +266,120 @@ function loadVendorDashboard() {
         );
 
 
-    // Find the logged-in vendor
+    if (!loggedInVendorId) {
 
-    const vendor =
-        vendors.find(function(v) {
+        window.location.href =
+            "login.html";
 
-            return v.id === loggedInVendorId;
-
-        });
-
-
-    if (!vendor) {
         return;
+
     }
 
 
-    document.getElementById(
-        "vendorName"
-    ).textContent =
-        vendor.name;
+    try {
+
+        // Get vendor information from backend
+
+        const response = await fetch(
+            `http://localhost:5000/api/vendors/${loggedInVendorId}`
+        );
 
 
-    document.getElementById(
-        "vendorId"
-    ).textContent =
-        vendor.id;
+        const vendor =
+            await response.json();
 
 
-    document.getElementById(
-        "businessName"
-    ).textContent =
-        vendor.businessName;
+        if (!response.ok) {
+
+            console.error(
+                "Vendor not found:",
+                vendor.message
+            );
+
+            return;
+
+        }
 
 
-    document.getElementById(
-        "category"
-    ).textContent =
-        vendor.category;
+        // Display vendor information
+
+        document.getElementById(
+            "vendorName"
+        ).textContent =
+            vendor.name;
 
 
-    document.getElementById(
-        "mobile"
-    ).textContent =
-        vendor.mobile;
+        document.getElementById(
+            "vendorId"
+        ).textContent =
+            vendor.id;
 
 
-    document.getElementById(
-        "email"
-    ).textContent =
-        vendor.email;
+        document.getElementById(
+            "businessName"
+        ).textContent =
+            vendor.businessName;
 
 
-    document.getElementById(
-        "district"
-    ).textContent =
-        vendor.district;
+        document.getElementById(
+            "category"
+        ).textContent =
+            vendor.category;
 
 
-    document.getElementById(
-        "years"
-    ).textContent =
-        vendor.years;
+        document.getElementById(
+            "mobile"
+        ).textContent =
+            vendor.mobile;
 
 
-    document.getElementById(
-        "address"
-    ).textContent =
-        vendor.address;
+        document.getElementById(
+            "email"
+        ).textContent =
+            vendor.email;
 
 
-    document.getElementById(
-        "description"
-    ).textContent =
-        vendor.description;
+        document.getElementById(
+            "district"
+        ).textContent =
+            vendor.district;
 
 
-    displayVendorStatus(
-        vendor.status
-    );
+        document.getElementById(
+            "years"
+        ).textContent =
+            vendor.years;
+
+
+        document.getElementById(
+            "address"
+        ).textContent =
+            vendor.address;
+
+
+        document.getElementById(
+            "description"
+        ).textContent =
+            vendor.description;
+
+
+        // Display vendor status
+
+        displayVendorStatus(
+            vendor.status
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Error loading vendor:",
+            error
+        );
+
+    }
 
 }
-
-
 
 
 // ===============================
@@ -394,101 +431,270 @@ function displayVendorStatus(status) {
 // VENDOR EDIT PROFILE
 // ===============================
 
-function showEditProfile() {
-
-    const vendors = JSON.parse(
-        localStorage.getItem("vendors")
-    );
+async function showEditProfile() {
 
     const loggedInVendorId =
-        localStorage.getItem("loggedInVendorId");
+        localStorage.getItem(
+            "loggedInVendorId"
+        );
 
-    const vendor = vendors.find(function(v) {
-        return v.id === loggedInVendorId;
-    });
 
-    if (!vendor) {
+    if (!loggedInVendorId) {
+
+        window.location.href =
+            "login.html";
+
         return;
+
     }
 
-    document.getElementById("editName").value = vendor.name;
-    document.getElementById("editMobile").value = vendor.mobile;
-    document.getElementById("editEmail").value = vendor.email;
-    document.getElementById("editBusinessName").value = vendor.businessName;
-    document.getElementById("editCategory").value = vendor.category;
-    document.getElementById("editDistrict").value = vendor.district;
-    document.getElementById("editAddress").value = vendor.address;
-    document.getElementById("editYears").value = vendor.years;
-    document.getElementById("editDescription").value = vendor.description;
 
-    document.getElementById("editProfileSection").style.display = "block";
+    try {
+
+        // Get current vendor information from MongoDB
+
+        const response = await fetch(
+            `http://localhost:5000/api/vendors/${loggedInVendorId}`
+        );
+
+
+        const vendor =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            alert(
+                "Unable to load vendor information."
+            );
+
+            return;
+
+        }
+
+
+        // Fill edit form
+
+        document.getElementById(
+            "editName"
+        ).value =
+            vendor.name;
+
+
+        document.getElementById(
+            "editMobile"
+        ).value =
+            vendor.mobile;
+
+
+        document.getElementById(
+            "editEmail"
+        ).value =
+            vendor.email;
+
+
+        document.getElementById(
+            "editBusinessName"
+        ).value =
+            vendor.businessName;
+
+
+        document.getElementById(
+            "editCategory"
+        ).value =
+            vendor.category;
+
+
+        document.getElementById(
+            "editDistrict"
+        ).value =
+            vendor.district;
+
+
+        document.getElementById(
+            "editAddress"
+        ).value =
+            vendor.address;
+
+
+        document.getElementById(
+            "editYears"
+        ).value =
+            vendor.years;
+
+
+        document.getElementById(
+            "editDescription"
+        ).value =
+            vendor.description;
+
+
+        document.getElementById(
+            "editProfileSection"
+        ).style.display =
+            "block";
+
+
+    } catch (error) {
+
+        console.error(
+            "Error loading edit profile:",
+            error
+        );
+
+        alert(
+            "Unable to connect to server."
+        );
+
+    }
+
 }
-
 
 // ===============================
 // VENDOR EDIT PROFILE FORM SUBMISSION
 // ===============================
 
-const editProfileForm = document.getElementById("editProfileForm");
+const editProfileForm =
+    document.getElementById(
+        "editProfileForm"
+    );
 
 if (editProfileForm) {
 
-    editProfileForm.addEventListener("submit", function(event) {
+    editProfileForm.addEventListener(
+        "submit",
+        async function(event) {
 
-        event.preventDefault();
+            event.preventDefault();
 
-        const vendors = JSON.parse(
-            localStorage.getItem("vendors")
-        );
 
-        const loggedInVendorId =
-            localStorage.getItem("loggedInVendorId");
+            const loggedInVendorId =
+                localStorage.getItem(
+                    "loggedInVendorId"
+                );
 
-        const vendorIndex = vendors.findIndex(function(v) {
-            return v.id === loggedInVendorId;
-        });
 
-        if (vendorIndex === -1) {
-            return;
+            if (!loggedInVendorId) {
+
+                alert(
+                    "Vendor session not found."
+                );
+
+                window.location.href =
+                    "login.html";
+
+                return;
+
+            }
+
+
+            const updatedVendor = {
+
+                name:
+                    document.getElementById(
+                        "editName"
+                    ).value,
+
+                mobile:
+                    document.getElementById(
+                        "editMobile"
+                    ).value,
+
+                email:
+                    document.getElementById(
+                        "editEmail"
+                    ).value,
+
+                businessName:
+                    document.getElementById(
+                        "editBusinessName"
+                    ).value,
+
+                category:
+                    document.getElementById(
+                        "editCategory"
+                    ).value,
+
+                district:
+                    document.getElementById(
+                        "editDistrict"
+                    ).value,
+
+                address:
+                    document.getElementById(
+                        "editAddress"
+                    ).value,
+
+                years:
+                    document.getElementById(
+                        "editYears"
+                    ).value,
+
+                description:
+                    document.getElementById(
+                        "editDescription"
+                    ).value
+
+            };
+
+
+            try {
+
+                const response = await fetch(
+                    `http://localhost:5000/api/vendors/${loggedInVendorId}`,
+                    {
+                        method: "PUT",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body:
+                            JSON.stringify(
+                                updatedVendor
+                            )
+                    }
+                );
+
+
+                const result =
+                    await response.json();
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        result.message ||
+                        "Profile update failed"
+                    );
+
+                }
+
+
+                alert(
+                    "Profile updated successfully!"
+                );
+
+
+                location.reload();
+
+
+            } catch (error) {
+
+                console.error(
+                    "Profile update error:",
+                    error
+                );
+
+                alert(
+                    "Unable to update profile. Please try again."
+                );
+
+            }
+
         }
-
-        vendors[vendorIndex].name =
-            document.getElementById("editName").value;
-
-        vendors[vendorIndex].mobile =
-            document.getElementById("editMobile").value;
-
-        vendors[vendorIndex].email =
-            document.getElementById("editEmail").value;
-
-        vendors[vendorIndex].businessName =
-            document.getElementById("editBusinessName").value;
-
-        vendors[vendorIndex].category =
-            document.getElementById("editCategory").value;
-
-        vendors[vendorIndex].district =
-            document.getElementById("editDistrict").value;
-
-        vendors[vendorIndex].address =
-            document.getElementById("editAddress").value;
-
-        vendors[vendorIndex].years =
-            document.getElementById("editYears").value;
-
-        vendors[vendorIndex].description =
-            document.getElementById("editDescription").value;
-
-        localStorage.setItem(
-            "vendors",
-            JSON.stringify(vendors)
-        );
-
-        alert("Profile updated successfully!");
-
-        location.reload();
-
-    });
+    );
 
 }
 
