@@ -24,10 +24,6 @@ nav {
     align-items: center;
     padding: 20px 7%;
 }
-.logo {
-    display: flex;
-    gap: 10px;
-}
 .logo img {
     width: 350px;
     height: 350px;
