@@ -10,7 +10,7 @@ if (vendorForm) {
 
         event.preventDefault();
 
-        // Generate Vendor ID
+// Generate Vendor ID
 
         const vendorId =
             "VND-" +
@@ -181,21 +181,28 @@ if (vendorLoginForm) {
                 }
 
 
-                // Save login status
+                // Save JWT token
 
-                localStorage.setItem(
-                    "vendorLoggedIn",
-                    "true"
-                );
+                  localStorage.setItem(
+                   "token",
+                    result.token
+              );
 
 
-                // Save logged-in vendor ID
+                 // Save user role
 
-                localStorage.setItem(
-                    "loggedInVendorId",
-                    result.vendor.id
-                );
+                    localStorage.setItem(
+                    "userRole",
+                     result.role
+                  );
 
+
+            // Save logged-in vendor ID
+
+              localStorage.setItem(
+               "loggedInVendorId",
+                result.vendor.id
+            );
 
                 // Open dashboard
 
@@ -234,25 +241,33 @@ const vendorDashboard =
 
 if (vendorDashboard) {
 
+    // Get authentication information
 
-    const loggedIn =
-        localStorage.getItem(
-            "vendorLoggedIn"
+    const token =
+        localStorage.getItem("token");
+
+    const userRole =
+        localStorage.getItem("userRole");
+
+
+    // Check vendor authentication
+
+    if (!token || userRole !== "vendor") {
+
+        alert(
+            "Access denied. Vendor login required."
         );
-
-
-    if (loggedIn !== "true") {
 
         window.location.href =
             "login.html";
 
+    } else {
+
+        loadVendorDashboard();
+
     }
 
-
-    loadVendorDashboard();
-
 }
-
 
 // ===============================
 // LOAD VENDOR INFORMATION
@@ -278,10 +293,29 @@ async function loadVendorDashboard() {
 
     try {
 
-        // Get vendor information from backend
+        // Get JWT token
 
-        const response = await fetch(
-            `http://localhost:5000/api/vendors/${loggedInVendorId}`
+            const token =
+             localStorage.getItem("token");
+
+
+          if (!token) {
+
+                window.location.href =
+                   "login.html";
+
+                  return;
+
+               }
+                //GET VENDOR INFOMATION FROM BACKEND
+              const response = await fetch(
+               `http://localhost:5000/api/vendors/${loggedInVendorId}`,
+         {
+                 headers: {
+                    Authorization:
+                    `Bearer ${token}`
+              }
+            }
         );
 
 

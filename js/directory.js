@@ -30,35 +30,59 @@ const districtFilter =
 // LOAD VERIFIED VENDORS
 // ===============================
 
-function loadDirectory() {
+async function loadDirectory() {
 
-    const vendorData =
-        localStorage.getItem("vendors");
+    try {
 
+        const response = await fetch(
+            "http://localhost:5000/api/vendors"
+        );
 
-    if (!vendorData) {
-
-        showNoVendors();
-
-        return;
-
-    }
+        const vendors = await response.json();
 
 
-    const vendors =
-        JSON.parse(vendorData);
+        if (!response.ok) {
+
+            throw new Error(
+                "Failed to load vendors"
+            );
+
+        }
 
 
-    const verifiedVendors =
-        vendors.filter(
-            vendor =>
-                vendor.status === "Verified"
+        // Only show verified vendors
+
+        const verifiedVendors =
+            vendors.filter(
+                vendor =>
+                    vendor.status === "Verified"
+            );
+
+
+        if (verifiedVendors.length === 0) {
+
+            showNoVendors();
+
+            return;
+
+        }
+
+
+        displayVendors(
+            verifiedVendors
         );
 
 
-    displayVendors(
-        verifiedVendors
-    );
+    } catch (error) {
+
+        console.error(
+            "Error loading directory:",
+            error
+        );
+
+        showNoVendors();
+
+    }
 
 }
 
@@ -172,111 +196,161 @@ function showNoVendors() {
 
 }
 
-
 // ===============================
 // FILTER
 // ===============================
 
-function filterVendors() {
+async function filterVendors() {
+
+    const search =
+        searchInput.value
+            .toLowerCase()
+            .trim();
+
+    const category =
+        categoryFilter.value;
+
+    const district =
+        districtFilter.value
+            .toLowerCase()
+            .trim();
 
 
-    const vendorData =
-        localStorage.getItem(
-            "vendorData"
+    try {
+
+        // Get vendors from MongoDB through backend
+
+        const response = await fetch(
+            "http://localhost:5000/api/vendors"
         );
 
 
-    if (!vendorData) {
-
-        showNoVendors();
-
-        return;
-
-    }
-
-    const vendors =
-    JSON.parse(vendorData);
+        const vendors =
+            await response.json();
 
 
-const verifiedVendors =
-    vendors.filter(
-        vendor =>
-            vendor.status === "Verified"
-    );
+        if (!response.ok) {
 
-
-const filteredVendors =
-    verifiedVendors.filter(
-        vendor => {
-
-            const matchesSearch =
-
-                vendor.name
-                    .toLowerCase()
-                    .includes(search)
-
-                ||
-
-                vendor.businessName
-                    .toLowerCase()
-                    .includes(search);
-
-
-            const matchesCategory =
-
-                category === "" ||
-                vendor.category === category;
-
-
-            const matchesDistrict =
-
-                district === "" ||
-
-                vendor.district
-                    .toLowerCase()
-                    .includes(district);
-
-
-            return (
-                matchesSearch &&
-                matchesCategory &&
-                matchesDistrict
+            throw new Error(
+                "Failed to load vendors"
             );
 
         }
-    );
 
 
-displayVendors(
-    filteredVendors
-);
+        // Only verified vendors
 
-    
+        const verifiedVendors =
+            vendors.filter(
+                vendor =>
+                    vendor.status === "Verified"
+            );
+
+
+        // Apply filters
+
+        const filteredVendors =
+            verifiedVendors.filter(
+                vendor => {
+
+                    const matchesSearch =
+
+                        vendor.name
+                            .toLowerCase()
+                            .includes(search)
+
+                        ||
+
+                        vendor.businessName
+                            .toLowerCase()
+                            .includes(search);
+
+
+                    const matchesCategory =
+
+                        category === "" ||
+                        vendor.category === category;
+
+
+                    const matchesDistrict =
+
+                        district === "" ||
+
+                        vendor.district
+                            .toLowerCase()
+                            .includes(district);
+
+
+                    return (
+
+                        matchesSearch &&
+                        matchesCategory &&
+                        matchesDistrict
+
+                    );
+
+                }
+            );
+
+
+        displayVendors(
+            filteredVendors
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Error filtering vendors:",
+            error
+        );
+
+        showNoVendors();
+
+    }
+
 }
-
 
 // ===============================
 // FILTER EVENTS
 // ===============================
 
-searchInput.addEventListener(
-    "input",
-    filterVendors
-);
+if (searchInput) {
+
+    searchInput.addEventListener(
+        "input",
+        filterVendors
+    );
+
+}
 
 
-categoryFilter.addEventListener(
-    "change",
-    filterVendors
-);
+if (categoryFilter) {
+
+    categoryFilter.addEventListener(
+        "change",
+        filterVendors
+    );
+
+}
 
 
-districtFilter.addEventListener(
-    "input",
-    filterVendors
-);
+if (districtFilter) {
+
+    districtFilter.addEventListener(
+        "input",
+        filterVendors
+    );
+
+}
 
 
-// Load directory
+// ===============================
+// LOAD DIRECTORY
+// ===============================
 
-loadDirectory();
+if (vendorDirectory) {
+
+    loadDirectory();
+
+}

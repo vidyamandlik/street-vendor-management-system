@@ -1,3 +1,7 @@
+// ===============================
+// ADMIN LOGIN
+// ===============================
+
 const adminLoginForm =
     document.getElementById("adminLoginForm");
 
@@ -6,7 +10,7 @@ if (adminLoginForm) {
 
     adminLoginForm.addEventListener(
         "submit",
-        function(event) {
+        async function(event) {
 
             event.preventDefault();
 
@@ -14,38 +18,85 @@ if (adminLoginForm) {
             const username =
                 document.getElementById(
                     "adminUsername"
-                ).value;
+                ).value.trim();
+
 
             const password =
                 document.getElementById(
                     "adminPassword"
-                ).value;
+                ).value.trim();
 
 
-            // Prototype credentials
+            try {
 
-            if (
-                username === "admin" &&
-                password === "admin123"
-            ) {
+                const response = await fetch(
+                    "http://localhost:5000/api/admin/login",
+                    {
+                        method: "POST",
 
-                localStorage.setItem(
-                    "adminLoggedIn",
-                    "true"
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            username: username,
+                            password: password
+                        })
+                    }
                 );
 
+
+                const result =
+                    await response.json();
+
+
+                if (!response.ok) {
+
+                    document.getElementById(
+                        "loginError"
+                    ).textContent =
+                        result.message ||
+                        "Invalid username or password.";
+
+                    return;
+
+                }
+
+
+                // Save JWT token
+
+                localStorage.setItem(
+                    "token",
+                    result.token
+                );
+
+
+                // Save user role
+
+                localStorage.setItem(
+                    "userRole",
+                    result.role
+                );
+
+
+                // Open admin dashboard
 
                 window.location.href =
                     "dashboard.html";
 
-            }
 
-            else {
+            } catch (error) {
+
+                console.error(
+                    "Admin login error:",
+                    error
+                );
+
 
                 document.getElementById(
                     "loginError"
                 ).textContent =
-                    "Invalid username or password.";
+                    "Unable to connect to server.";
 
             }
 
@@ -58,7 +109,6 @@ if (adminLoginForm) {
 // ADMIN DASHBOARD
 // ===============================
 
-
 const vendorTableBody =
     document.getElementById(
         "vendorTableBody"
@@ -67,61 +117,127 @@ const vendorTableBody =
 
 if (vendorTableBody) {
 
+    // Check admin authentication
 
-    // Check admin login
+    const token =
+        localStorage.getItem("token");
 
-    const loggedIn =
-        localStorage.getItem(
-            "adminLoggedIn"
+    const userRole =
+        localStorage.getItem("userRole");
+
+
+    if (!token || userRole !== "admin") {
+
+        alert(
+            "Access denied. Admin login required."
         );
-
-
-    if (loggedIn !== "true") {
 
         window.location.href =
             "login.html";
 
+    } else {
+
+        loadVendorData();
+
     }
 
-
-    loadVendorData();
-
 }
-
 
 // ===============================
 // LOAD VENDOR DATA
 // ===============================
 
-function loadVendorData() {
+async function loadVendorData() {
+
+    const token =
+        localStorage.getItem("token");
 
 
+    if (!token) {
 
-    const vendorData =
-        localStorage.getItem("vendors");
+        alert("Access denied. Please login again.");
 
-
-    if (!vendorData) {
-
-        updateStatistics([]);
+        window.location.href =
+            "login.html";
 
         return;
 
     }
 
 
-    const vendors =
-        JSON.parse(vendorData);
+    try {
+
+        const response = await fetch(
+
+            "http://localhost:5000/api/vendors",
+
+            {
+                headers: {
+
+                    Authorization:
+                        `Bearer ${token}`
+
+                }
+            }
+
+        );
 
 
-    updateStatistics(vendors);
+        const result =
+            await response.json();
 
 
-    displayVendors(vendors);
+        if (!response.ok) {
+
+            alert(
+                result.message ||
+                "Unable to load vendor data."
+            );
+
+            // If token is invalid/expired
+
+            if (
+                response.status === 401 ||
+                response.status === 403
+            ) {
+
+                localStorage.removeItem("token");
+                localStorage.removeItem("userRole");
+
+                window.location.href =
+                    "login.html";
+
+            }
+
+            return;
+
+        }
+
+
+        // MongoDB vendor data
+
+        const vendors = result;
+
+
+        updateStatistics(vendors);
+
+        displayVendors(vendors);
+
+
+    } catch (error) {
+
+        console.error(
+            "Error loading vendor data:",
+            error
+        );
+
+        alert(
+            "Unable to connect to the server."
+        );
+
+    }
 
 }
-
-
 // ===============================
 // DISPLAY VENDORS
 // ===============================
@@ -228,38 +344,37 @@ function updateStatistics(vendors) {
 // APPROVE VENDOR
 // ===============================
 
+async function approveVendor(vendorId) {
 
+    try {
 
-    function approveVendor(vendorId) {
+        const response = await fetch(
+            `http://localhost:5000/api/vendors/${vendorId}`,
+            {
+                method: "PUT",
 
-    const vendorData =
-        localStorage.getItem("vendors");
+                headers: {
+                    "Content-Type": "application/json"
+                },
 
-
-    if (!vendorData) {
-        return;
-    }
-
-
-    const vendors =
-        JSON.parse(vendorData);
-
-
-    const vendor =
-        vendors.find(
-            v => v.id === vendorId
+                body: JSON.stringify({
+                    status: "Verified"
+                })
+            }
         );
 
 
-    if (vendor) {
-
-        vendor.status = "Verified";
+        const result = await response.json();
 
 
-        localStorage.setItem(
-            "vendors",
-            JSON.stringify(vendors)
-        );
+        if (!response.ok) {
+
+            throw new Error(
+                result.message ||
+                "Failed to approve vendor"
+            );
+
+        }
 
 
         alert(
@@ -267,7 +382,19 @@ function updateStatistics(vendors) {
         );
 
 
-        location.reload();
+        loadVendorData();
+
+
+    } catch (error) {
+
+        console.error(
+            "Approve vendor error:",
+            error
+        );
+
+        alert(
+            "Unable to approve vendor. Please try again."
+        );
 
     }
 
@@ -278,36 +405,37 @@ function updateStatistics(vendors) {
 // REJECT VENDOR
 // ===============================
 
-function rejectVendor(vendorId) {
+async function rejectVendor(vendorId) {
 
-    const vendorData =
-        localStorage.getItem("vendors");
+    try {
 
+        const response = await fetch(
+            `http://localhost:5000/api/vendors/${vendorId}`,
+            {
+                method: "PUT",
 
-    if (!vendorData) {
-        return;
-    }
+                headers: {
+                    "Content-Type": "application/json"
+                },
 
-
-    const vendors =
-        JSON.parse(vendorData);
-
-
-    const vendor =
-        vendors.find(
-            v => v.id === vendorId
+                body: JSON.stringify({
+                    status: "Rejected"
+                })
+            }
         );
 
 
-    if (vendor) {
-
-        vendor.status = "Rejected";
+        const result = await response.json();
 
 
-        localStorage.setItem(
-            "vendors",
-            JSON.stringify(vendors)
-        );
+        if (!response.ok) {
+
+            throw new Error(
+                result.message ||
+                "Failed to reject vendor"
+            );
+
+        }
 
 
         alert(
@@ -315,12 +443,23 @@ function rejectVendor(vendorId) {
         );
 
 
-        location.reload();
+        loadVendorData();
+
+
+    } catch (error) {
+
+        console.error(
+            "Reject vendor error:",
+            error
+        );
+
+        alert(
+            "Unable to reject vendor. Please try again."
+        );
 
     }
 
 }
-
 
 // ===============================
 // LOGOUT
