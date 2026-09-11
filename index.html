@@ -2,115 +2,277 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
 
     <title>Street Vendor Management System</title>
 
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet"
+          href="css/style.css">
+
 </head>
 
 <body>
 
-    <!-- Navigation Bar -->
-    <header>
-        <nav>
-            <div class="logo">
-                <img src="img/logo.png" alt="street vendor logo">
-            </div>
 
-            <ul class="nav-links">
-                <li><a href="index.html">Home</a></li>
-                <li><a href="directory/vendors.html">Vendor Directory</a></li>
-                <li><a href="vendor/register.html">Register</a></li>
-                <li><a href="vendor/login.html">Vendor Login</a></li>
-                <li><a href="admin/login.html">Admin Login</a></li>
-            </ul>
-        </nav>
-    </header>
+<!-- ===============================
+     NAVIGATION BAR
+================================ -->
 
+<header>
 
-    <!-- Hero Section -->
-    <main>
+    <nav>
 
-        <section class="hero">
+        <div class="logo">
 
-            <div class="hero-content">
+            <a href="index.html">
+                Street Vendor Management System
+            </a>
 
-                <h1>
-                    Empowering Street Vendors
-                    Through Digital Management
-                </h1>
-
-                <p>
-                    A digital platform to register, manage,
-                    verify and discover street vendors.
-                </p>
-
-                <div class="hero-buttons">
-                    <a href="vendor/register.html" class="btn">
-                        Register as Vendor
-                    </a>
-
-                    <a href="directory/vendors.html" class="btn secondary-btn">
-                        Explore Vendors
-                    </a>
-                </div>
-
-            </div>
-
-        </section>
+        </div>
 
 
-        <!-- Features -->
-        <section class="features">
+        <ul class="nav-links">
 
-            <h2>Our Platform</h2>
+            <li>
+                <a href="index.html">
+                    Home
+                </a>
+            </li>
 
-            <div class="feature-container">
+            <li>
+                <a href="directory/vendors.html">
+                    Vendor Directory
+                </a>
+            </li>
 
-                <div class="feature-card">
-                    <h3>Vendor Registration</h3>
-                    <p>
-                        Easily register your street vending
-                        business through our digital platform.
-                    </p>
-                </div>
+            <li>
+                <a href="vendor/register.html">
+                    Vendor Register
+                </a>
+            </li>
 
-                <div class="feature-card">
-                    <h3>Vendor Directory</h3>
-                    <p>
-                        Discover registered vendors by
-                        category and location.
-                    </p>
-                </div>
+            <li>
+                <a href="vendor/login.html">
+                    Vendor Login
+                </a>
+            </li>
 
-                <div class="feature-card">
-                    <h3>Digital Management</h3>
-                    <p>
-                        Administrators can manage and verify
-                        vendor applications efficiently.
-                    </p>
-                </div>
+            <li>
+                <a href="admin/login.html">
+                    Admin Login
+                </a>
+            </li>
 
-            </div>
+        </ul>
 
-        </section>
+    </nav>
 
-    </main>
+</header>
 
 
-    <!-- Footer -->
-    <footer>
+<!-- ===============================
+     HERO SECTION
+================================ -->
+
+<main>
+
+    <section class="hero">
+
+        <div class="hero-content">
+
+            <h1>
+                Street Vendor Management System
+            </h1>
+
+            <p>
+                Empowering street vendors with digital
+                registration, verification and customer
+                connectivity.
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- ===============================
+         ROLE SELECTION
+    ================================ -->
+
+    <section class="role-selection">
+
+        <h2>
+            Choose Your Role
+        </h2>
 
         <p>
-            © 2026 Street Vendor Management System
+            Select how you want to continue.
         </p>
 
-    </footer>
+
+        <div class="role-container">
 
 
-    <script src="js/main.js"></script>
+            <!-- ===============================
+                 VENDOR
+            ================================ -->
+
+            <div class="role-card vendor-role">
+
+                <h3>
+                    Vendor
+                </h3>
+
+                <p>
+                    Register your street vending business,
+                    manage your profile and reach customers.
+                </p>
+
+
+                <!-- VENDOR LOGIN -->
+
+                <a href="./vendor/login.html"
+                   class="btn role-btn">
+
+                    Continue as Vendor
+
+                </a>
+
+
+                <p class="role-register">
+
+                    New Vendor?
+
+                    <a href="./vendor/register.html">
+                        Register here
+                    </a>
+
+                </p>
+
+            </div>
+
+
+
+            <!-- ===============================
+                 CUSTOMER
+            ================================ -->
+
+            <div class="role-card customer-role">
+
+                <h3>
+                    Customer
+                </h3>
+
+                <p>
+                    Discover verified street vendors
+                    and explore local businesses.
+                </p>
+
+
+                <!-- CUSTOMER LOGIN -->
+
+                <a href="./customer/login.html"
+                   class="btn customer-btn">
+
+                    Continue as Customer
+
+                </a>
+
+
+                <p class="role-register">
+
+                    New Customer?
+
+                    <a href="./customer/register.html">
+                        Register here
+                    </a>
+
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- ===============================
+         FEATURES
+    ================================ -->
+
+    <section class="features">
+
+        <h2>
+            Key Features
+        </h2>
+
+        <div class="feature-container">
+
+            <div class="feature-card">
+
+                <h3>
+                    Vendor Registration
+                </h3>
+
+                <p>
+                    Vendors can digitally register
+                    their businesses.
+                </p>
+
+            </div>
+
+
+            <div class="feature-card">
+
+                <h3>
+                    Vendor Verification
+                </h3>
+
+                <p>
+                    Admin can verify and manage
+                    registered vendors.
+                </p>
+
+            </div>
+
+
+            <div class="feature-card">
+
+                <h3>
+                    Vendor Directory
+                </h3>
+
+                <p>
+                    Customers can discover
+                    verified street vendors.
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<!-- ===============================
+     FOOTER
+================================ -->
+
+<footer>
+
+    <p>
+        © 2026 Street Vendor Management System
+    </p>
+
+</footer>
+
 
 </body>
 

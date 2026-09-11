@@ -5,122 +5,176 @@
 
     <meta charset="UTF-8">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
 
     <title>Admin Login</title>
 
-    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet"
+          href="../css/style.css">
 
 </head>
 
 <body>
 
-    <header>
 
-        <nav>
+<!-- ===============================
+     NAVIGATION BAR
+================================ -->
 
-            <div class="logo">
+<header>
+
+    <nav>
+
+        <div class="logo">
+
+            <a href="../index.html">
                 Street Vendor Management System
-            </div>
+            </a>
 
-            <ul class="nav-links">
-
-                <li>
-                    <a href="../index.html">Home</a>
-                </li>
-
-                <li>
-                    <a href="../directory/vendors.html">
-                        Vendor Directory
-                    </a>
-                </li>
-
-            </ul>
-
-        </nav>
-
-    </header>
+        </div>
 
 
-    <main>
+        <ul class="nav-links">
 
-        <section class="login-section">
+            <li>
+                <a href="../index.html">
+                    Home
+                </a>
+            </li>
 
-            <div class="login-container">
+            <li>
+                <a href="../directory/vendors.html">
+                    Vendor Directory
+                </a>
+            </li>
 
-                <h1>Administrator Login</h1>
+            <li>
+                <a href="../vendor/register.html">
+                    Vendor Register
+                </a>
+            </li>
 
-                <p>
-                    Authorized personnel only
-                </p>
+            <li>
+                <a href="../vendor/login.html">
+                    Vendor Login
+                </a>
+            </li>
 
+            <li>
+                <a href="login.html">
+                    Admin Login
+                </a>
+            </li>
 
-                <form id="adminLoginForm">
+        </ul>
 
-                    <div class="form-group">
+    </nav>
 
-                        <label for="adminUsername">
-                            Username
-                        </label>
-
-                        <input
-                            type="text"
-                            id="adminUsername"
-                            placeholder="Enter username"
-                            required
-                        >
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label for="adminPassword">
-                            Password
-                        </label>
-
-                        <input
-                            type="password"
-                            id="adminPassword"
-                            placeholder="Enter password"
-                            required
-                        >
-
-                    </div>
+</header>
 
 
-                    <button
-                        type="submit"
-                        class="btn submit-btn"
-                    >
-                        Login
-                    </button>
+<!-- ===============================
+     ADMIN LOGIN
+================================ -->
+
+<main>
+
+    <section class="form-section">
+
+        <div class="form-container">
+
+            <h2>
+                Admin Login
+            </h2>
+
+            <p>
+                Login to manage and verify street vendors.
+            </p>
 
 
-                    <p
-                        id="loginError"
-                        class="login-error"
-                    ></p>
+            <!-- ===============================
+                 LOGIN FORM
+            ================================ -->
 
-                </form>
-
-            </div>
-
-        </section>
-
-    </main>
+            <form id="adminLoginForm">
 
 
-    <footer>
+                <!-- Admin Username -->
 
-        <p>
-            © 2026 Street Vendor Management System
-        </p>
+                <label for="adminUsername">
+                    Username
+                </label>
 
-    </footer>
+                <input
+                    type="text"
+                    id="adminUsername"
+                    placeholder="Enter admin username"
+                    required
+                >
 
 
-    <script src="../js/admin.js"></script>
+                <!-- Admin Password -->
+
+                <label for="adminPassword">
+                    Password
+                </label>
+
+                <input
+                    type="password"
+                    id="adminPassword"
+                    placeholder="Enter admin password"
+                    required
+                >
+
+
+                <!-- Login Button -->
+
+                <button type="submit">
+                    Login as Admin
+                </button>
+
+
+                <!-- Login Message -->
+
+                <p id="adminLoginMessage"></p>
+
+            </form>
+
+
+            <p style="margin-top: 20px;">
+
+                <a href="../index.html">
+                    ← Back to Home
+                </a>
+
+            </p>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<!-- ===============================
+     FOOTER
+================================ -->
+
+<footer>
+
+    <p>
+        © 2026 Street Vendor Management System
+    </p>
+
+</footer>
+
+
+<!-- ===============================
+     JAVASCRIPT
+================================ -->
+
+<script src="../js/admin.js"></script>
 
 </body>
 

@@ -29,12 +29,24 @@ const db = client.db("streetVendorDB");
 
 
 // ===============================
+// COLLECTIONS
+// ===============================
+
+const vendorsCollection =
+    db.collection("vendors");
+
+const customersCollection =
+    db.collection("customers");
+
+
+// ===============================
 // AUTHENTICATION MIDDLEWARE
 // ===============================
 
 function authenticateToken(req, res, next) {
 
-    const authHeader = req.headers.authorization;
+    const authHeader =
+        req.headers.authorization;
 
     const token =
         authHeader &&
@@ -44,7 +56,10 @@ function authenticateToken(req, res, next) {
     if (!token) {
 
         return res.status(401).json({
-            message: "Access denied. Please login first."
+
+            message:
+                "Access denied. Please login first."
+
         });
 
     }
@@ -52,21 +67,25 @@ function authenticateToken(req, res, next) {
 
     try {
 
-        const user = jwt.verify(
-            token,
-            process.env.JWT_SECRET
-        );
+        const user =
+            jwt.verify(
+                token,
+                process.env.JWT_SECRET
+            );
 
 
         req.user = user;
 
-
         next();
+
 
     } catch (error) {
 
         return res.status(403).json({
-            message: "Invalid or expired token."
+
+            message:
+                "Invalid or expired token."
+
         });
 
     }
@@ -85,8 +104,10 @@ function authorizeRole(role) {
         if (req.user.role !== role) {
 
             return res.status(403).json({
+
                 message:
                     "You are not authorized to access this resource."
+
             });
 
         }
@@ -109,6 +130,7 @@ async function startServer() {
 
         await client.connect();
 
+
         console.log(
             "MongoDB connected successfully!"
         );
@@ -127,9 +149,9 @@ async function startServer() {
         });
 
 
-        // ===============================
+        // =====================================================
         // ADMIN LOGIN
-        // ===============================
+        // =====================================================
 
         app.post(
             "/api/admin/login",
@@ -143,30 +165,28 @@ async function startServer() {
                     } = req.body;
 
 
-                    // TEMPORARY ADMIN CREDENTIALS
+                    // Temporary admin credentials
 
                     if (
                         username === "admin" &&
                         password === "admin123"
                     ) {
 
+                        const token =
+                            jwt.sign(
 
-                        // CREATE JWT TOKEN
+                                {
+                                    username: username,
+                                    role: "admin"
+                                },
 
-                        const token = jwt.sign(
+                                process.env.JWT_SECRET,
 
-                            {
-                                username: username,
-                                role: "admin"
-                            },
+                                {
+                                    expiresIn: "2h"
+                                }
 
-                            process.env.JWT_SECRET,
-
-                            {
-                                expiresIn: "2h"
-                            }
-
-                        );
+                            );
 
 
                         return res.json({
@@ -212,10 +232,10 @@ async function startServer() {
         );
 
 
-        // ===============================
+        // =====================================================
         // GET ALL VENDORS
         // ADMIN ONLY
-        // ===============================
+        // =====================================================
 
         app.get(
             "/api/vendors",
@@ -229,8 +249,7 @@ async function startServer() {
                 try {
 
                     const vendors =
-                        await db
-                            .collection("vendors")
+                        await vendorsCollection
                             .find({})
                             .toArray();
 
@@ -259,9 +278,9 @@ async function startServer() {
         );
 
 
-        // ===============================
+        // =====================================================
         // VENDOR REGISTRATION
-        // ===============================
+        // =====================================================
 
         app.post(
             "/api/vendors",
@@ -273,8 +292,7 @@ async function startServer() {
 
 
                     const result =
-                        await db
-                            .collection("vendors")
+                        await vendorsCollection
                             .insertOne(vendor);
 
 
@@ -309,88 +327,91 @@ async function startServer() {
             }
         );
 
- // ===============================
-// GET ONE VENDOR
-// VENDOR ONLY - OWN PROFILE
-// ===============================
 
-app.get(
-    "/api/vendors/:id",
+        // =====================================================
+        // GET ONE VENDOR
+        // VENDOR ONLY - OWN PROFILE
+        // =====================================================
 
-    authenticateToken,
+        app.get(
+            "/api/vendors/:id",
 
-    authorizeRole("vendor"),
+            authenticateToken,
 
-    async (req, res) => {
+            authorizeRole("vendor"),
 
-        try {
+            async (req, res) => {
 
-            const vendorId =
-                req.params.id;
+                try {
 
-
-            // Vendor can access only their own data
-
-            if (req.user.id !== vendorId) {
-
-                return res.status(403).json({
-
-                    message:
-                        "You are not authorized to access this vendor profile."
-
-                });
-
-            }
+                    const vendorId =
+                        req.params.id;
 
 
-            const vendor =
-                await db
-                    .collection("vendors")
-                    .findOne({
+                    // Vendor can access only own profile
 
-                        id: vendorId
+                    if (
+                        req.user.id !== vendorId
+                    ) {
+
+                        return res.status(403).json({
+
+                            message:
+                                "You are not authorized to access this vendor profile."
+
+                        });
+
+                    }
+
+
+                    const vendor =
+                        await vendorsCollection
+                            .findOne({
+
+                                id: vendorId
+
+                            });
+
+
+                    if (!vendor) {
+
+                        return res.status(404).json({
+
+                            message:
+                                "Vendor not found"
+
+                        });
+
+                    }
+
+
+                    res.json(vendor);
+
+
+                } catch (error) {
+
+                    console.error(
+                        "Error fetching vendor:",
+                        error
+                    );
+
+
+                    res.status(500).json({
+
+                        message:
+                            "Failed to fetch vendor"
 
                     });
 
-
-            if (!vendor) {
-
-                return res.status(404).json({
-
-                    message:
-                        "Vendor not found"
-
-                });
+                }
 
             }
+        );
 
 
-            res.json(vendor);
-
-
-        } catch (error) {
-
-            console.error(
-                "Error fetching vendor:",
-                error
-            );
-
-
-            res.status(500).json({
-
-                message:
-                    "Failed to fetch vendor"
-
-            });
-
-        }
-
-    }
-);
-        
-        // ===============================
+        // =====================================================
         // UPDATE VENDOR
-        // ===============================
+        // =====================================================
 
         app.put(
             "/api/vendors/:id",
@@ -407,8 +428,7 @@ app.get(
 
 
                     const result =
-                        await db
-                            .collection("vendors")
+                        await vendorsCollection
                             .updateOne(
 
                                 {
@@ -416,7 +436,8 @@ app.get(
                                 },
 
                                 {
-                                    $set: updatedVendor
+                                    $set:
+                                        updatedVendor
                                 }
 
                             );
@@ -465,114 +486,545 @@ app.get(
         );
 
 
-        // ===============================
-// VENDOR LOGIN
-// ===============================
+        // =====================================================
+        // VENDOR LOGIN
+        // =====================================================
 
-app.post(
-    "/api/vendors/login",
-    async (req, res) => {
+        app.post(
+            "/api/vendors/login",
+            async (req, res) => {
 
-        try {
+                try {
 
-            const {
-                id,
-                mobile
-            } = req.body;
+                    const {
+                        id,
+                        mobile
+                    } = req.body;
 
 
-            const vendor =
-                await db
-                    .collection("vendors")
-                    .findOne({
+                    const vendor =
+                        await vendorsCollection
+                            .findOne({
 
-                        id: id,
+                                id: id,
 
-                        mobile: mobile
+                                mobile: mobile
+
+                            });
+
+
+                    if (!vendor) {
+
+                        return res.status(401).json({
+
+                            message:
+                                "Invalid Vendor ID or mobile number."
+
+                        });
+
+                    }
+
+
+                    // Create Vendor JWT
+
+                    const token =
+                        jwt.sign(
+
+                            {
+
+                                id: vendor.id,
+
+                                role: "vendor"
+
+                            },
+
+                            process.env.JWT_SECRET,
+
+                            {
+
+                                expiresIn: "2h"
+
+                            }
+
+                        );
+
+
+                    res.json({
+
+                        message:
+                            "Login successful",
+
+                        token: token,
+
+                        role: "vendor",
+
+                        vendor: {
+
+                            id: vendor.id,
+
+                            name: vendor.name
+
+                        }
 
                     });
 
 
-            if (!vendor) {
+                } catch (error) {
 
-                return res.status(401).json({
+                    console.error(
+                        "Vendor login error:",
+                        error
+                    );
 
-                    message:
-                        "Invalid Vendor ID or mobile number."
 
-                });
+                    res.status(500).json({
+
+                        message:
+                            "Login failed"
+
+                    });
+
+                }
 
             }
+        );
 
 
-            // ===============================
-            // CREATE VENDOR JWT TOKEN
-            // ===============================
+        // =====================================================
+        // PUBLIC VERIFIED VENDORS
+        // CUSTOMER CAN ACCESS
+        // =====================================================
 
-            const token = jwt.sign(
+        app.get(
+            "/api/public/vendors",
+            async (req, res) => {
 
-                {
+                try {
 
-                    id: vendor.id,
+                    const vendors =
+                        await vendorsCollection
+                            .find({
 
-                    role: "vendor"
+                                status: "Verified"
 
-                },
+                            })
+                            .project({
 
-                process.env.JWT_SECRET,
+                                password: 0
 
-                {
+                            })
+                            .toArray();
 
-                    expiresIn: "2h"
+
+                    res.json(vendors);
+
+
+                } catch (error) {
+
+                    console.error(
+                        "Error loading verified vendors:",
+                        error
+                    );
+
+
+                    res.status(500).json({
+
+                        message:
+                            "Failed to load verified vendors"
+
+                    });
 
                 }
 
-            );
+            }
+        );
 
 
-            res.json({
+        // =====================================================
+        // CUSTOMER REGISTRATION
+        // =====================================================
 
-                message:
-                    "Login successful",
+        app.post(
+            "/api/customers",
+            async (req, res) => {
 
-                token: token,
+                try {
 
-                role: "vendor",
+                    const {
+                        name,
+                        mobile,
+                        email,
+                        password
+                    } = req.body;
 
-                vendor: {
 
-                    id: vendor.id,
+                    // Check required fields
 
-                    name: vendor.name
+                    if (
+                        !name ||
+                        !mobile ||
+                        !email ||
+                        !password
+                    ) {
+
+                        return res.status(400).json({
+
+                            message:
+                                "All fields are required"
+
+                        });
+
+                    }
+
+
+                    // Check existing customer
+
+                    const existingCustomer =
+                        await customersCollection.findOne({
+
+                            $or: [
+
+                                {
+                                    email: email
+                                },
+
+                                {
+                                    mobile: mobile
+                                }
+
+                            ]
+
+                        });
+
+
+                    if (existingCustomer) {
+
+                        return res.status(409).json({
+
+                            message:
+                                "Customer with this email or mobile already exists"
+
+                        });
+
+                    }
+
+
+                    // Generate Customer ID
+
+                    const customerId =
+                        "CUS-" +
+                        Math.floor(
+                            1000 +
+                            Math.random() * 9000
+                        );
+
+
+                    // Customer object
+
+                    const customer = {
+
+                        id: customerId,
+
+                        name: name,
+
+                        mobile: mobile,
+
+                        email: email,
+
+                        password: password,
+
+                        createdAt: new Date()
+
+                    };
+
+
+                    // Save customer
+
+                    await customersCollection
+                        .insertOne(customer);
+
+
+                    res.status(201).json({
+
+                        message:
+                            "Customer registered successfully",
+
+                        customer: {
+
+                            id: customerId,
+
+                            name: name,
+
+                            email: email
+
+                        }
+
+                    });
+
+
+                } catch (error) {
+
+                    console.error(
+                        "Customer registration error:",
+                        error
+                    );
+
+
+                    res.status(500).json({
+
+                        message:
+                            "Server error during customer registration"
+
+                    });
 
                 }
 
-            });
+            }
+        );
 
 
-        } catch (error) {
+        // =====================================================
+        // CUSTOMER LOGIN
+        // =====================================================
 
-            console.error(
-                "Vendor login error:",
-                error
-            );
+        app.post(
+            "/api/customers/login",
+            async (req, res) => {
+
+                try {
+
+                    const {
+                        loginId,
+                        password
+                    } = req.body;
 
 
-            res.status(500).json({
+                    // Check input
 
-                message:
-                    "Login failed"
+                    if (
+                        !loginId ||
+                        !password
+                    ) {
 
-            });
+                        return res.status(400).json({
 
-        }
+                            message:
+                                "Email/mobile and password are required"
 
-    }
-);
+                        });
 
-        // ===============================
+                    }
+
+
+                    // Find customer by email OR mobile
+
+                    const customer =
+                        await customersCollection.findOne({
+
+                            $or: [
+
+                                {
+                                    email: loginId
+                                },
+
+                                {
+                                    mobile: loginId
+                                }
+
+                            ]
+
+                        });
+
+
+                    // Customer not found
+
+                    if (!customer) {
+
+                        return res.status(401).json({
+
+                            message:
+                                "Invalid email/mobile or password"
+
+                        });
+
+                    }
+
+
+                    // Check password
+
+                    if (
+                        customer.password !== password
+                    ) {
+
+                        return res.status(401).json({
+
+                            message:
+                                "Invalid email/mobile or password"
+
+                        });
+
+                    }
+
+
+                    // Create Customer JWT
+
+                    const token =
+                        jwt.sign(
+
+                            {
+
+                                id: customer.id,
+
+                                role: "customer"
+
+                            },
+
+                            process.env.JWT_SECRET,
+
+                            {
+
+                                expiresIn: "2h"
+
+                            }
+
+                        );
+
+
+                    res.json({
+
+                        message:
+                            "Customer login successful",
+
+                        token: token,
+
+                        role: "customer",
+
+                        customer: {
+
+                            id: customer.id,
+
+                            name: customer.name,
+
+                            email: customer.email
+
+                        }
+
+                    });
+
+
+                } catch (error) {
+
+                    console.error(
+                        "Customer login error:",
+                        error
+                    );
+
+
+                    res.status(500).json({
+
+                        message:
+                            "Server error during customer login"
+
+                    });
+
+                }
+
+            }
+        );
+
+
+        // =====================================================
+        // GET CUSTOMER PROFILE
+        // CUSTOMER ONLY
+        // =====================================================
+
+        app.get(
+            "/api/customers/:id",
+
+            authenticateToken,
+
+            authorizeRole("customer"),
+
+            async (req, res) => {
+
+                try {
+
+                    const customerId =
+                        req.params.id;
+
+
+                    // Customer can access only own profile
+
+                    if (
+                        req.user.id !== customerId
+                    ) {
+
+                        return res.status(403).json({
+
+                            message:
+                                "You are not authorized to access this profile."
+
+                        });
+
+                    }
+
+
+                    const customer =
+                        await customersCollection
+                            .findOne(
+
+                                {
+                                    id: customerId
+                                },
+
+                                {
+                                    projection: {
+                                        password: 0
+                                    }
+                                }
+
+                            );
+
+
+                    if (!customer) {
+
+                        return res.status(404).json({
+
+                            message:
+                                "Customer not found"
+
+                        });
+
+                    }
+
+
+                    res.json(customer);
+
+
+                } catch (error) {
+
+                    console.error(
+                        "Error fetching customer:",
+                        error
+                    );
+
+
+                    res.status(500).json({
+
+                        message:
+                            "Failed to fetch customer profile"
+
+                    });
+
+                }
+
+            }
+        );
+
+
+        // =====================================================
         // START EXPRESS SERVER
-        // ===============================
+        // =====================================================
 
         app.listen(
             PORT,

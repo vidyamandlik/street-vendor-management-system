@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Customer Login</title>
+
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+
+        <div class="logo">
+            Street Vendor Management
+        </div>
+
+        <div class="nav-links">
+
+            <a href="../index.html">Home</a>
+
+            <a href="../directory/vendors.html">
+                Vendor Directory
+            </a>
+
+            <a href="register.html">
+                Customer Register
+            </a>
+
+        </div>
+
+    </nav>
+
+
+    <!-- Login Section -->
+    <section class="form-section">
+
+        <div class="form-container">
+
+            <h2>Customer Login</h2>
+
+            <p>
+                Login to discover and connect with verified street vendors.
+            </p>
+
+
+            <form id="customerLoginForm">
+
+                <!-- Email / Mobile -->
+                <label for="customerLoginId">
+                    Email or Mobile
+                </label>
+
+                <input
+                    type="text"
+                    id="customerLoginId"
+                    placeholder="Enter email or mobile"
+                    required
+                >
+
+
+                <!-- Password -->
+                <label for="customerLoginPassword">
+                    Password
+                </label>
+
+                <input
+                    type="password"
+                    id="customerLoginPassword"
+                    placeholder="Enter password"
+                    required
+                >
+
+
+                <button type="submit">
+                    Login
+                </button>
+
+            </form>
+
+
+            <!-- Message -->
+            <p id="customerLoginMessage"></p>
+
+
+            <!-- Register -->
+            <p>
+                Don't have an account?
+                <a href="register.html">
+                    Register here
+                </a>
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <footer>
+
+        <p>
+            © 2026 Street Vendor Management System
+        </p>
+
+    </footer>
+
+
+    <script src="../js/customer.js"></script>
+
+</body>
+
+</html>

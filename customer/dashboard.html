@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Customer Dashboard</title>
+
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+
+        <div class="logo">
+            Street Vendor Management
+        </div>
+
+        <div class="nav-links">
+
+            <a href="../index.html">Home</a>
+
+            <a href="../directory/vendors.html">
+                Vendor Directory
+            </a>
+
+            <a href="#" id="customerLogout">
+                Logout
+            </a>
+
+        </div>
+
+    </nav>
+
+
+    <!-- Dashboard -->
+    <main class="customer-dashboard">
+
+        <section class="customer-welcome">
+
+            <h1>
+                Welcome, <span id="customerName">Customer</span>!
+            </h1>
+
+            <p>
+                Discover verified street vendors near you.
+            </p>
+
+        </section>
+
+
+        <!-- Customer Profile -->
+        <section class="customer-profile">
+
+            <h2>My Profile</h2>
+
+            <div class="profile-details">
+
+                <p>
+                    <strong>Customer ID:</strong>
+                    <span id="customerId">Loading...</span>
+                </p>
+
+                <p>
+                    <strong>Name:</strong>
+                    <span id="profileName">Loading...</span>
+                </p>
+
+                <p>
+                    <strong>Email:</strong>
+                    <span id="profileEmail">Loading...</span>
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- Vendor Search -->
+        <section class="vendor-discovery">
+
+            <h2>Find Verified Vendors</h2>
+
+            <p>
+                Browse vendors approved by the administration.
+            </p>
+
+
+            <div class="vendor-filters">
+
+                <input
+                    type="text"
+                    id="vendorSearch"
+                    placeholder="Search vendor by name..."
+                >
+
+
+                <select id="categoryFilter">
+
+                    <option value="">
+                        All Categories
+                    </option>
+
+                    <option value="Food">
+                        Food
+                    </option>
+
+                    <option value="Clothing">
+                        Clothing
+                    </option>
+
+                    <option value="Fruit">
+                        Fruit
+                    </option>
+
+                    <option value="Vegetables">
+                        Vegetables
+                    </option>
+
+                    <option value="Other">
+                        Other
+                    </option>
+
+                </select>
+
+
+                <select id="districtFilter">
+
+                    <option value="">
+                        All Districts
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- Vendor Cards -->
+            <div
+                id="vendorList"
+                class="vendor-list"
+            >
+
+                <p>
+                    Loading verified vendors...
+                </p>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <footer>
+
+        <p>
+            © 2026 Street Vendor Management System
+        </p>
+
+    </footer>
+
+
+    <script src="../js/customer.js"></script>
+
+</body>
+
+</html>

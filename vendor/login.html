@@ -17,13 +17,23 @@
 
 <body>
 
+
+<!-- ===============================
+     NAVIGATION BAR
+================================ -->
+
 <header>
 
     <nav>
 
         <div class="logo">
-            Street Vendor Management System
+
+            <a href="../index.html">
+                Street Vendor Management System
+            </a>
+
         </div>
+
 
         <ul class="nav-links">
 
@@ -41,7 +51,7 @@
 
             <li>
                 <a href="register.html">
-                    Register
+                    Vendor Register
                 </a>
             </li>
 
@@ -64,67 +74,93 @@
 </header>
 
 
+<!-- ===============================
+     VENDOR LOGIN
+================================ -->
+
 <main>
 
-    <section class="login-section">
+    <section class="form-section">
 
-        <div class="login-container">
+        <div class="form-container">
 
-            <h1>Vendor Login</h1>
+            <h2>
+                Vendor Login
+            </h2>
 
             <p>
-                Login to view your vendor profile and status.
+                Login using your Vendor ID and
+                registered mobile number.
             </p>
 
 
+            <!-- ===============================
+                 LOGIN FORM
+            ================================ -->
+
             <form id="vendorLoginForm">
 
-                <div class="form-group">
 
-                    <label for="vendorIdLogin">
-                        Vendor ID
-                    </label>
+                <!-- Vendor ID -->
 
-                    <input
-                        type="text"
-                        id="vendorIdLogin"
-                        placeholder="Example: VND-1234"
-                        required
-                    >
+                <label for="vendorIdLogin">
+                    Vendor ID
+                </label>
 
-                </div>
-
-
-                <div class="form-group">
-
-                    <label for="vendorMobileLogin">
-                        Mobile Number
-                    </label>
-
-                    <input
-                        type="tel"
-                        id="vendorMobileLogin"
-                        placeholder="Enter registered mobile number"
-                        required
-                    >
-
-                </div>
-
-
-                <button
-                    type="submit"
-                    class="btn submit-btn"
+                <input
+                    type="text"
+                    id="vendorIdLogin"
+                    placeholder="Example: VND-1234"
+                    required
                 >
-                    Login
+
+
+                <!-- Mobile Number -->
+
+                <label for="vendorMobileLogin">
+                    Registered Mobile Number
+                </label>
+
+                <input
+                    type="tel"
+                    id="vendorMobileLogin"
+                    placeholder="Enter registered mobile number"
+                    required
+                >
+
+
+                <!-- Login Button -->
+
+                <button type="submit">
+                    Login as Vendor
                 </button>
 
 
+                <!-- Login Error -->
+
                 <p
                     id="vendorLoginError"
-                    class="login-error"
+                    style="color: red;"
                 ></p>
 
+
             </form>
+
+
+            <!-- ===============================
+                 REGISTER LINK
+            ================================ -->
+
+            <p style="margin-top: 20px;">
+
+                Don't have a vendor account?
+
+                <a href="register.html">
+                    Register as Vendor
+                </a>
+
+            </p>
+
 
         </div>
 
@@ -133,17 +169,20 @@
 </main>
 
 
+<!-- ===============================
+     FOOTER
+================================ -->
+
 <footer>
 
     <p>
         © 2026 Street Vendor Management System
     </p>
-
 </footer>
 
 
-<script src="../js/vendor.js"></script>
+<!-- ===============================
+     JAVASCRIPT
+================================ -->
 
-</body>
-
-</html>
+<script src="../js/vendor.js"></script> </body> </html>
