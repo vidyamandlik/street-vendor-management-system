@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Online Payment Information</title>
+
+    <link rel="stylesheet"
+          href="../css/style.css">
+
+</head>
+
+<body>
+
+
+<header>
+
+    <nav>
+
+        <div class="logo">
+            Online Payments
+        </div>
+
+        <ul class="nav-links">
+
+            <li>
+                <a href="dashboard.html">
+                    Dashboard
+                </a>
+            </li>
+
+            <li>
+                <a href="../directory/vendors.html">
+                    Vendor Directory
+                </a>
+            </li>
+
+            <li>
+                <a href="#"
+                   onclick="vendorLogout()">
+                    Logout
+                </a>
+            </li>
+
+        </ul>
+
+    </nav>
+
+</header>
+
+
+<main class="payment-page">
+
+    <!-- Page Introduction -->
+
+    <section class="payment-hero">
+
+        <h1>💳 Online Payment Information</h1>
+
+        <p>
+            Accepting digital payments can make it easier for
+            customers to pay and can help vendors maintain
+            a record of their transactions.
+        </p>
+
+    </section>
+
+
+    <!-- Payment Methods -->
+
+    <section class="payment-section">
+
+        <h2>Popular Digital Payment Methods</h2>
+
+        <div class="payment-grid">
+
+
+            <!-- UPI -->
+
+            <div class="payment-card">
+
+                <div class="payment-icon">
+                    📱
+                </div>
+
+                <h3>UPI Payments</h3>
+
+                <p>
+                    Vendors can accept payments through UPI
+                    using a supported bank account and UPI ID.
+                </p>
+
+                <ul>
+
+                    <li>Fast digital payments</li>
+
+                    <li>No need to handle cash</li>
+
+                    <li>Transaction records are available</li>
+
+                </ul>
+
+            </div>
+
+
+            <!-- QR Code -->
+
+            <div class="payment-card">
+
+                <div class="payment-icon">
+                    🔳
+                </div>
+
+                <h3>QR Code Payments</h3>
+
+                <p>
+                    Display your UPI QR code at your stall so
+                    customers can scan it and make payments.
+                </p>
+
+                <ul>
+
+                    <li>Easy for customers to scan</li>
+
+                    <li>Useful for small businesses</li>
+
+                    <li>Reduces cash handling</li>
+
+                </ul>
+
+            </div>
+
+
+            <!-- Bank Transfer -->
+
+            <div class="payment-card">
+
+                <div class="payment-icon">
+                    🏦
+                </div>
+
+                <h3>Bank Transfer</h3>
+
+                <p>
+                    Customers or business partners can use
+                    bank-based digital payment methods where
+                    appropriate.
+                </p>
+
+                <ul>
+
+                    <li>Useful for larger transactions</li>
+
+                    <li>Digital transaction record</li>
+
+                    <li>Directly linked with bank account</li>
+
+                </ul>
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+    <!-- How to Accept UPI -->
+
+    <section class="payment-section">
+
+        <h2>How to Start Accepting UPI Payments</h2>
+
+        <div class="steps-container">
+
+
+            <div class="payment-step">
+
+                <span>1</span>
+
+                <div>
+
+                    <h3>Have a Bank Account</h3>
+
+                    <p>
+                        Keep an active bank account that can
+                        be linked with a supported UPI service.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="payment-step">
+
+                <span>2</span>
+
+                <div>
+
+                    <h3>Set Up UPI</h3>
+
+                    <p>
+                        Register your bank account with a
+                        supported UPI application and create
+                        your UPI ID if required.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="payment-step">
+
+                <span>3</span>
+
+                <div>
+
+                    <h3>Create Your QR Code</h3>
+
+                    <p>
+                        Use your payment service provider's
+                        official process to obtain your
+                        merchant or UPI QR code.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="payment-step">
+
+                <span>4</span>
+
+                <div>
+
+                    <h3>Display the QR Code</h3>
+
+                    <p>
+                        Place the QR code where customers
+                        can easily see and scan it.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="payment-step">
+
+                <span>5</span>
+
+                <div>
+
+                    <h3>Confirm the Payment</h3>
+
+                    <p>
+                        Always verify the payment in your
+                        official payment application or bank
+                        account before handing over goods.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+    <!-- Benefits -->
+
+    <section class="payment-section">
+
+        <h2>Benefits of Digital Payments</h2>
+
+        <div class="benefits-grid">
+
+
+            <div class="benefit-card">
+
+                <h3>⚡ Faster Transactions</h3>
+
+                <p>
+                    Digital payments can make transactions
+                    quick and convenient.
+                </p>
+
+            </div>
+
+
+            <div class="benefit-card">
+
+                <h3>📊 Transaction Records</h3>
+
+                <p>
+                    Digital transactions provide records
+                    that can help vendors track payments.
+                </p>
+
+            </div>
+
+
+            <div class="benefit-card">
+
+                <h3>💰 Less Cash Handling</h3>
+
+                <p>
+                    Reduce the need to keep large amounts
+                    of cash at the vending location.
+                </p>
+
+            </div>
+
+
+            <div class="benefit-card">
+
+                <h3>🤝 Customer Convenience</h3>
+
+                <p>
+                    Customers can choose a convenient
+                    digital payment method.
+                </p>
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+    <!-- Safety Tips -->
+
+    <section class="payment-section payment-safety">
+
+        <h2>🔐 Digital Payment Safety Tips</h2>
+
+        <div class="safety-box">
+
+            <ul>
+
+                <li>
+                    Never share your UPI PIN with anyone.
+                </li>
+
+                <li>
+                    Your UPI PIN is generally used to
+                    authorize payments, not to receive money.
+                </li>
+
+                <li>
+                    Always verify the payment in your own
+                    banking or payment application.
+                </li>
+
+                <li>
+                    Do not rely only on SMS screenshots or
+                    messages as proof of payment.
+                </li>
+
+                <li>
+                    Never scan an unknown QR code just because
+                    someone asks you to receive money.
+                </li>
+
+                <li>
+                    Do not share OTPs, passwords or banking
+                    credentials with anyone.
+                </li>
+
+                <li>
+                    If you suspect fraud, contact your bank
+                    or the relevant official cyber-fraud
+                    reporting channel immediately.
+                </li>
+
+            </ul>
+
+        </div>
+
+    </section>
+
+
+    <!-- Back Button -->
+
+    <section class="payment-actions">
+
+        <a href="dashboard.html"
+           class="btn">
+
+            ← Back to Dashboard
+
+        </a>
+
+    </section>
+
+
+</main>
+
+
+<footer>
+
+    <p>
+        © 2026 Street Vendor Management System
+    </p>
+
+</footer>
+
+
+<script src="../js/vendor.js"></script>
+
+</body>
+
+</html>

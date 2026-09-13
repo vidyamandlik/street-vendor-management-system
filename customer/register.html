@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Customer Registration | Street Vendor Management System</title>
+
+<link rel="stylesheet" href="../css/style.css">
+
+</head>
+
+<body>
+<!-- ============================= -->
+<!-- NAVBAR -->
+<!-- ============================= -->
+
+<header>
+    <nav class="navbar">
+
+        <div class="logo">
+            <a href="../index.html">
+                <img src="../img/logo.png" alt="Street Vendor Management System">
+            </a>
+        </div>
+
+        <ul class="nav-links">
+            <li>
+                <a href="../index.html">Home</a>
+            </li>
+
+            <li>
+                <a href="../directory/vendors.html">Vendor Directory</a>
+            </li>
+
+            <li>
+                <a href="login.html">Customer Login</a>
+            </li>
+        </ul>
+
+    </nav>
+</header>
+
+
+<!-- ============================= -->
+<!-- REGISTRATION SECTION -->
+<!-- ============================= -->
+
+<main>
+
+    <section class="registration-section">
+
+        <div class="registration-container">
+
+            <h1>Customer Registration</h1>
+
+            <p class="registration-subtitle">
+                Create your account to discover and connect with verified street vendors.
+            </p>
+
+
+            <!-- Registration Form -->
+
+            <form id="customerRegisterForm">
+
+                <!-- Name -->
+
+                <div class="form-group">
+
+                    <label for="customerName">
+                        Full Name
+                    </label>
+
+                    <input
+                        type="text"
+                        id="customerName"
+                        name="name"
+                        placeholder="Enter your full name"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- Mobile -->
+
+                <div class="form-group">
+
+                    <label for="customerMobile">
+                        Mobile Number
+                    </label>
+
+                    <input
+                        type="tel"
+                        id="customerMobile"
+                        name="mobile"
+                        placeholder="Enter 10-digit mobile number"
+                        pattern="[0-9]{10}"
+                        maxlength="10"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- Email -->
+
+                <div class="form-group">
+
+                    <label for="customerEmail">
+                        Email Address
+                    </label>
+
+                    <input
+                        type="email"
+                        id="customerEmail"
+                        name="email"
+                        placeholder="Enter your email address"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- Password -->
+
+                <div class="form-group">
+
+                    <label for="customerPassword">
+                        Password
+                    </label>
+
+                    <input
+                        type="password"
+                        id="customerPassword"
+                        name="password"
+                        placeholder="Create a password"
+                        minlength="6"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- Confirm Password -->
+
+                <div class="form-group">
+
+                    <label for="confirmPassword">
+                        Confirm Password
+                    </label>
+
+                    <input
+                        type="password"
+                        id="confirmPassword"
+                        name="confirmPassword"
+                        placeholder="Re-enter your password"
+                        minlength="6"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- Register Button -->
+
+                <button
+                    type="submit"
+                    class="btn"
+                >
+                    Create Customer Account
+                </button>
+
+            </form>
+
+
+            <!-- Message -->
+
+            <div
+                id="customerRegisterMessage"
+                class="form-message"
+            ></div>
+
+
+            <!-- Login Link -->
+
+            <p class="login-link">
+
+                Already have an account?
+
+                <a href="login.html">
+                    Login here
+                </a>
+
+            </p>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<!-- ============================= -->
+<!-- FOOTER -->
+<!-- ============================= -->
+
+<footer>
+
+    <p>
+        © 2026 Street Vendor Management System.
+

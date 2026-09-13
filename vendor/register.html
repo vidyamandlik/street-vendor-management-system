@@ -5,315 +5,343 @@
 
     <meta charset="UTF-8">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
 
     <title>Vendor Registration</title>
 
-    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet"
+          href="../css/style.css">
 
 </head>
 
 <body>
 
-    <!-- Navigation -->
 
-    <header>
+<!-- ===============================
+     NAVIGATION BAR
+================================ -->
 
-        <nav>
+<header>
 
-            <div class="logo">
+    <nav>
+
+        <div class="logo">
+
+            <a href="../index.html">
                 Street Vendor Management System
-            </div>
+            </a>
 
-            <ul class="nav-links">
+        </div>
 
-                <li>
-                    <a href="../index.html">Home</a>
-                </li>
 
-                <li>
-                    <a href="../directory/vendors.html">
-                        Vendor Directory
-                    </a>
-                </li>
+        <ul class="nav-links">
 
-                <li>
-                    <a href="register.html">
-                        Register
-                    </a>
-                </li>
+            <li>
+                <a href="../index.html">
+                    Home
+                </a>
+            </li>
 
-                <li>
-                    <a href="login.html">
-                        Vendor Login
-                    </a>
-                </li>
+            <li>
+                <a href="../directory/vendors.html">
+                    Vendor Directory
+                </a>
+            </li>
 
-                <li>
-                    <a href="../admin/login.html">
-                        Admin Login
-                    </a>
-                </li>
+            <li>
+                <a href="register.html">
+                    Vendor Register
+                </a>
+            </li>
 
-            </ul>
+            <li>
+                <a href="login.html">
+                    Vendor Login
+                </a>
+            </li>
 
-        </nav>
+            <li>
+                <a href="../admin/login.html">
+                    Admin Login
+                </a>
+            </li>
 
-    </header>
+        </ul>
 
+    </nav>
 
-    <!-- Registration Section -->
+</header>
 
-    <main>
 
-        <section class="registration-section">
+<!-- ===============================
+     VENDOR REGISTRATION
+================================ -->
 
-            <div class="registration-container">
+<main>
 
-                <h1>Vendor Registration</h1>
+    <section class="form-section">
 
-                <p>
-                    Register your street vending business
-                    with the Street Vendor Management System.
-                </p>
+        <div class="form-container">
 
+            <h2>
+                Vendor Registration
+            </h2>
 
-                <form id="vendorForm">
+            <p>
+                Register your street vending business
+                with the Street Vendor Management System.
+            </p>
 
 
-                    <!-- Personal Information -->
+            <!-- ===============================
+                 VENDOR FORM
+            ================================ -->
 
-                    <h2>Personal Information</h2>
+            <form id="vendorForm">
 
-                    <div class="form-group">
 
-                        <label for="vendorName">
-                            Vendor Name
-                        </label>
+                <!-- Vendor Name -->
 
-                        <input
-                            type="text"
-                            id="vendorName"
-                            placeholder="Enter your full name"
-                            required
-                        >
+                <label for="vendorName">
+                    Vendor / Owner Name
+                </label>
 
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label for="mobile">
-                            Mobile Number
-                        </label>
-
-                        <input
-                            type="tel"
-                            id="mobile"
-                            placeholder="Enter mobile number"
-                            required
-                        >
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label for="email">
-                            Email
-                        </label>
-
-                        <input
-                            type="email"
-                            id="email"
-                            placeholder="Enter email address"
-                            required
-                        >
-
-                    </div>
-
-
-                    <!-- Business Information -->
-
-                    <h2>Business Information</h2>
-
-
-                    <div class="form-group">
-
-                        <label for="businessName">
-                            Business Name
-                        </label>
-
-                        <input
-                            type="text"
-                            id="businessName"
-                            placeholder="Enter business name"
-                            required
-                        >
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label for="category">
-                            Business Category
-                        </label>
-
-                        <select id="category" required>
-
-                            <option value="">
-                                Select Category
-                            </option>
-
-                            <option value="Food & Beverages">
-                                Food & Beverages
-                            </option>
-
-                            <option value="Fruits & Vegetables">
-                                Fruits & Vegetables
-                            </option>
-
-                            <option value="Clothing">
-                                Clothing
-                            </option>
-
-                            <option value="Handicrafts">
-                                Handicrafts
-                            </option>
-
-                            <option value="Groceries">
-                                Groceries
-                            </option>
-
-                            <option value="Other">
-                                Other
-                            </option>
-
-                        </select>
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label for="district">
-                            District
-                        </label>
-
-                        <input
-                            type="text"
-                            id="district"
-                            placeholder="Enter district"
-                            required
-                        >
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label for="address">
-                            Business Address
-                        </label>
-
-                        <textarea
-                            id="address"
-                            rows="4"
-                            placeholder="Enter your business address"
-                            required
-                        ></textarea>
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label for="years">
-                            Years in Business
-                        </label>
-
-                        <input
-                            type="number"
-                            id="years"
-                            min="0"
-                            placeholder="Example: 5"
-                            required
-                        >
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label for="description">
-                            Business Description
-                        </label>
-
-                        <textarea
-                            id="description"
-                            rows="4"
-                            placeholder="Describe your business"
-                        ></textarea>
-
-                    </div>
-
-
-                    <button
-                        type="submit"
-                        class="btn submit-btn"
-                    >
-                        Submit Registration
-                    </button>
-
-
-                </form>
-
-
-                <!-- Success Message -->
-
-                <div
-                    id="successMessage"
-                    class="success-message"
-                    style="display: none;"
+                <input
+                    type="text"
+                    id="vendorName"
+                    placeholder="Enter vendor name"
+                    required
                 >
 
-                    <h2>Registration Successful! 🎉</h2>
 
-                    <p>
-                        Your vendor registration has been submitted.
-                    </p>
+                <!-- Mobile -->
 
-                    <p>
-                        Your Vendor ID is:
-                        <strong id="vendorId"></strong>
-                    </p>
+                <label for="mobile">
+                    Mobile Number
+                </label>
 
-                    <p>
-                        Status:
-                        <strong>Pending Verification</strong>
-                    </p>
+                <input
+                    type="tel"
+                    id="mobile"
+                    placeholder="Enter mobile number"
+                    required
+                >
 
-                </div>
 
+                <!-- Email -->
+
+                <label for="email">
+                    Email Address
+                </label>
+
+                <input
+                    type="email"
+                    id="email"
+                    placeholder="Enter email address"
+                    required
+                >
+
+
+                <!-- Business Name -->
+
+                <label for="businessName">
+                    Business Name
+                </label>
+
+                <input
+                    type="text"
+                    id="businessName"
+                    placeholder="Enter business name"
+                    required
+                >
+
+
+                <!-- Category -->
+
+                <label for="category">
+                    Business Category
+                </label>
+
+                <select id="category" required>
+
+                    <option value="">
+                        Select category
+                    </option>
+
+                    <option value="Food">
+                        Food
+                    </option>
+
+                    <option value="Fruits and Vegetables">
+                        Fruits and Vegetables
+                    </option>
+
+                    <option value="Clothing">
+                        Clothing
+                    </option>
+
+                    <option value="Accessories">
+                        Accessories
+                    </option>
+
+                    <option value="Grocery">
+                        Grocery
+                    </option>
+
+                    <option value="Other">
+                        Other
+                    </option>
+
+                </select>
+
+
+                <!-- District -->
+
+                <label for="district">
+                    District
+                </label>
+
+                <input
+                    type="text"
+                    id="district"
+                    placeholder="Enter district"
+                    required
+                >
+
+
+                <!-- Address -->
+
+                <label for="address">
+                    Business Address
+                </label>
+
+                <textarea
+                    id="address"
+                    placeholder="Enter business address"
+                    rows="3"
+                    required
+                ></textarea>
+
+
+                <!-- Years -->
+
+                <label for="years">
+                    Years in Business
+                </label>
+
+                <input
+                    type="number"
+                    id="years"
+                    placeholder="Enter years in business"
+                    min="0"
+                    required
+                >
+
+
+                <!-- Description -->
+
+                <label for="description">
+                    Business Description
+                </label>
+
+                <textarea
+                    id="description"
+                    placeholder="Describe your business"
+                    rows="4"
+                ></textarea>
+
+
+                <!-- Submit -->
+
+                <button type="submit">
+                    Register as Vendor
+                </button>
+
+
+            </form>
+
+
+            <!-- ===============================
+                 SUCCESS MESSAGE
+            ================================ -->
+
+            <div
+                id="successMessage"
+                style="display: none;"
+            >
+
+                <h3>
+                    ✓ Vendor Registration Successful!
+                </h3>
+
+                <p>
+                    Your vendor application has been submitted
+                    successfully.
+                </p>
+
+                <p>
+                    Your Vendor ID is:
+                </p>
+
+                <h2 id="vendorId"></h2>
+
+                <p>
+                    Please save this Vendor ID for login.
+                </p>
+
+                <p>
+                    Your application is currently
+                    <strong>Pending Verification</strong>.
+                </p>
+
+                <br>
+
+                <a href="login.html">
+                    Go to Vendor Login
+                </a>
 
             </div>
 
-        </section>
 
-    </main>
+            <!-- Login link -->
+
+            <p style="margin-top: 20px;">
+
+                Already registered?
+
+                <a href="login.html">
+                    Vendor Login
+                </a>
+
+            </p>
 
 
-    <footer>
+        </div>
 
-        <p>
-            © 2026 Street Vendor Management System
-        </p>
+    </section>
 
-    </footer>
+</main>
 
 
-    <script src="../js/vendor.js"></script>
+<!-- ===============================
+     FOOTER
+================================ -->
+
+<footer>
+
+    <p>
+        © 2026 Street Vendor Management System
+    </p>
+
+</footer>
+
+
+<!-- ===============================
+     JAVASCRIPT
+================================ -->
+
+<script src="../js/vendor.js"></script>
 
 </body>
 
