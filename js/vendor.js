@@ -65,8 +65,9 @@ if (vendorForm) {
                     method: "POST",
 
                     headers: {
-                        "Content-Type": "application/json"
-                    },
+                         "Content-Type": "application/json",
+                         "Authorization": `Bearer ${localStorage.getItem("vendorToken")}`
+                     },
 
                     body: JSON.stringify(vendor)
                 }
@@ -153,9 +154,10 @@ if (vendorLoginForm) {
                     {
                         method: "POST",
 
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
+                         headers: {
+                               "Content-Type": "application/json",
+                                "Authorization": `Bearer ${localStorage.getItem("token")}`
+                           },
 
                         body: JSON.stringify({
                             id: enteredId,

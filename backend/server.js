@@ -217,47 +217,35 @@ async function startServer() {
         // ADMIN ONLY
         // ===============================
 
-        app.get(
-            "/api/vendors",
+app.get(
+    "/api/vendors",
+    async (req, res) => {
 
-            authenticateToken,
+        try {
 
-            authorizeRole("admin"),
+            const vendors =
+                await db
+                    .collection("vendors")
+                    .find({})
+                    .toArray();
 
-            async (req, res) => {
+            res.json(vendors);
 
-                try {
+        } catch (error) {
 
-                    const vendors =
-                        await db
-                            .collection("vendors")
-                            .find({})
-                            .toArray();
+            console.error(
+                "Error fetching vendors:",
+                error
+            );
 
+            res.status(500).json({
+                message: "Failed to fetch vendors"
+            });
 
-                    res.json(vendors);
+        }
 
-
-                } catch (error) {
-
-                    console.error(
-                        "Error fetching vendors:",
-                        error
-                    );
-
-
-                    res.status(500).json({
-
-                        message:
-                            "Failed to fetch vendors"
-
-                    });
-
-                }
-
-            }
-        );
-
+    }
+);
 
         // ===============================
         // VENDOR REGISTRATION
@@ -393,15 +381,23 @@ app.get(
         // ===============================
 
         app.put(
-            "/api/vendors/:id",
-            async (req, res) => {
-
+                 "/api/vendors/:id",
+                authenticateToken,
+                authorizeRole("vendor"),
+                async (req, res) => {
                 try {
 
                     const vendorId =
                         req.params.id;
+                       // Vendor can update only their own profile
+                       if (req.user.id !== vendorId) {
 
+                        return res.status(403).json({
+                    message:
+                    "You are not authorized to update this vendor profile."
+             });
 
+           }
                     const updatedVendor =
                         req.body;
 
