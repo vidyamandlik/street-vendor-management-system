@@ -27,12 +27,10 @@
     <nav>
 
         <div class="logo">
-
-            <a href="../index.html">
-                Street Vendor Management System
-            </a>
-
-        </div>
+    <a href="../index.html">
+        <img src="../img/logo.png" alt="Street Vendor Management System">
+    </a>
+</div>
 
 
         <ul class="nav-links">
@@ -80,9 +78,9 @@
 
 <main>
 
-    <section class="form-section">
+    <section class="form-section vendor-registration-section">
 
-        <div class="form-container">
+        <div class="form-container vendor-registration-container">
 
             <h2>
                 Vendor Registration
@@ -162,38 +160,15 @@
                 <label for="category">
                     Business Category
                 </label>
-
-                <select id="category" required>
-
-                    <option value="">
-                        Select category
-                    </option>
-
-                    <option value="Food">
-                        Food
-                    </option>
-
-                    <option value="Fruits and Vegetables">
-                        Fruits and Vegetables
-                    </option>
-
-                    <option value="Clothing">
-                        Clothing
-                    </option>
-
-                    <option value="Accessories">
-                        Accessories
-                    </option>
-
-                    <option value="Grocery">
-                        Grocery
-                    </option>
-
-                    <option value="Other">
-                        Other
-                    </option>
-
-                </select>
+<select id="categoryFilter">
+    <option value="">All Categories</option>
+    <option value="Food">Food</option>
+    <option value="Fruits and Vegetables">Fruits and Vegetables</option>
+    <option value="Clothing">Clothing</option>
+    <option value="Accessories">Accessories</option>
+    <option value="Grocery">Grocery</option>
+    <option value="Other">Other</option>
+</select>
 
 
                 <!-- District -->
@@ -266,10 +241,7 @@
                  SUCCESS MESSAGE
             ================================ -->
 
-            <div
-                id="successMessage"
-                style="display: none;"
-            >
+           <div id="successMessage" class="vendor-registration-success" style="display: none;">
 
                 <h3>
                     ✓ Vendor Registration Successful!

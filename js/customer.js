@@ -257,61 +257,118 @@ if (customerDashboard) {
     const role =
         localStorage.getItem("customerRole");
 
+    const customerId =
+        localStorage.getItem("customerId");
+
 
     // Check customer login
+    if (!token || role !== "customer" || !customerId) {
 
-    if (!token || role !== "customer") {
+        alert("Please login as a customer first.");
 
-        alert(
-            "Please login as a customer first."
-        );
-
-        window.location.href =
-            "login.html";
+        window.location.href = "login.html";
 
     } else {
 
-        const customerName =
-            localStorage.getItem("customerName");
+        // Load customer profile
+        loadCustomerProfile(customerId, token);
 
-        const customerId =
-            localStorage.getItem("customerId");
+        // Load verified vendors
+        loadVerifiedVendors();
+    }
+}
 
 
-        const nameElement =
-            document.getElementById("customerName");
+// =====================================================
+// LOAD CUSTOMER PROFILE
+// =====================================================
 
+async function loadCustomerProfile(customerId, token) {
+
+    try {
+
+        const response = await fetch(
+            `http://localhost:5000/api/customers/${customerId}`,
+            {
+                method: "GET",
+
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            }
+        );
+
+
+        const data = await response.json();
+
+
+        if (!response.ok) {
+
+            console.error(
+                "Customer profile error:",
+                data
+            );
+
+            return;
+        }
+
+
+        // Customer ID
         const idElement =
             document.getElementById("customerId");
 
-
-        if (nameElement) {
-
-            nameElement.textContent =
-                customerName || "Customer";
-
-        }
-
-
         if (idElement) {
-
             idElement.textContent =
-                customerId || "-";
-
+                data.id || "-";
         }
 
 
-        loadVerifiedVendors();
+        // Profile name
+        const profileName =
+            document.getElementById("profileName");
+
+        if (profileName) {
+            profileName.textContent =
+                data.name || "-";
+        }
+
+
+        // Welcome name
+        const welcomeName =
+            document.getElementById("customerName");
+
+        if (welcomeName) {
+            welcomeName.textContent =
+                data.name || "Customer";
+        }
+
+
+        // Email
+        const profileEmail =
+            document.getElementById("profileEmail");
+
+        if (profileEmail) {
+            profileEmail.textContent =
+                data.email || "-";
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Error loading customer profile:",
+            error
+        );
 
     }
-
 }
-
 
 
 // =====================================================
 // LOAD VERIFIED VENDORS
 // =====================================================
+
+let allVerifiedVendors = [];
+
 
 async function loadVerifiedVendors() {
 
@@ -320,9 +377,7 @@ async function loadVerifiedVendors() {
 
 
     if (!vendorList) {
-
         return;
-
     }
 
 
@@ -337,19 +392,223 @@ async function loadVerifiedVendors() {
             await response.json();
 
 
+        if (!response.ok) {
+
+            vendorList.innerHTML =
+                "<p>Unable to load vendors.</p>";
+
+            return;
+        }
+
+
+        // Store vendors for filtering
+        allVerifiedVendors = vendors;
+
+
+        // Populate district filter
+        populateDistrictFilter(vendors);
+
+
+        // Display all vendors
         displayVendors(vendors);
+
+
+        // Activate filters
+        setupVendorFilters();
 
     } catch (error) {
 
-        console.error(error);
+        console.error(
+            "Error loading vendors:",
+            error
+        );
 
         vendorList.innerHTML =
             "<p>Unable to load vendors.</p>";
-
     }
-
 }
 
+
+// =====================================================
+// POPULATE DISTRICT FILTER
+// =====================================================
+
+function populateDistrictFilter(vendors) {
+
+    const districtFilter =
+        document.getElementById("districtFilter");
+
+
+    if (!districtFilter) {
+        return;
+    }
+
+
+    // Remove old district options
+    districtFilter.innerHTML =
+        '<option value="">All Districts</option>';
+
+
+    const districts =
+        [...new Set(
+            vendors
+                .map(function(vendor) {
+                    return vendor.district;
+                })
+                .filter(function(district) {
+                    return district;
+                })
+        )];
+
+
+    districts.sort();
+
+
+    districts.forEach(function(district) {
+
+        const option =
+            document.createElement("option");
+
+        option.value = district;
+
+        option.textContent = district;
+
+        districtFilter.appendChild(option);
+
+    });
+}
+
+
+// =====================================================
+// VENDOR FILTERS
+// =====================================================
+
+function setupVendorFilters() {
+
+    const searchInput =
+        document.getElementById("vendorSearch");
+
+    const categoryFilter =
+        document.getElementById("categoryFilter");
+
+    const districtFilter =
+        document.getElementById("districtFilter");
+
+
+    if (
+        !searchInput ||
+        !categoryFilter ||
+        !districtFilter
+    ) {
+        return;
+    }
+
+
+    // Search vendor by name
+    searchInput.addEventListener(
+        "input",
+        applyVendorFilters
+    );
+
+
+    // Filter by category
+    categoryFilter.addEventListener(
+        "change",
+        applyVendorFilters
+    );
+
+
+    // Filter by district
+    districtFilter.addEventListener(
+        "change",
+        applyVendorFilters
+    );
+}
+
+
+// =====================================================
+// APPLY VENDOR FILTERS
+// =====================================================
+
+function applyVendorFilters() {
+
+    const searchInput =
+        document.getElementById("vendorSearch");
+
+    const categoryFilter =
+        document.getElementById("categoryFilter");
+
+    const districtFilter =
+        document.getElementById("districtFilter");
+
+
+    const searchText =
+        searchInput.value
+            .trim()
+            .toLowerCase();
+
+
+    const selectedCategory =
+        categoryFilter.value
+            .trim()
+            .toLowerCase();
+
+
+    const selectedDistrict =
+        districtFilter.value
+            .trim()
+            .toLowerCase();
+
+
+    const filteredVendors =
+        allVerifiedVendors.filter(
+            function(vendor) {
+
+                const vendorName =
+                    (vendor.name || "")
+                        .toLowerCase();
+
+
+                const vendorCategory =
+                    (vendor.category || "")
+                        .toLowerCase();
+
+
+                const vendorDistrict =
+                    (vendor.district || "")
+                        .toLowerCase();
+
+
+                const matchesSearch =
+                    vendorName.includes(
+                        searchText
+                    );
+
+
+                const matchesCategory =
+                    !selectedCategory ||
+                    vendorCategory ===
+                    selectedCategory;
+
+
+                const matchesDistrict =
+                    !selectedDistrict ||
+                    vendorDistrict ===
+                    selectedDistrict;
+
+
+                return (
+                    matchesSearch &&
+                    matchesCategory &&
+                    matchesDistrict
+                );
+
+            }
+        );
+
+
+    displayVendors(filteredVendors);
+}
 
 
 // =====================================================
@@ -363,31 +622,33 @@ function displayVendors(vendors) {
 
 
     if (!vendorList) {
-
         return;
-
     }
 
 
     vendorList.innerHTML = "";
 
 
-    if (!vendors || vendors.length === 0) {
+    if (
+        !vendors ||
+        vendors.length === 0
+    ) {
 
         vendorList.innerHTML =
-            "<p>No verified vendors available.</p>";
+            "<p>No vendors found matching your filters.</p>";
 
         return;
-
     }
 
 
-    vendors.forEach(function (vendor) {
+    vendors.forEach(function(vendor) {
 
         const card =
             document.createElement("div");
 
-        card.className = "vendor-card";
+
+        card.className =
+            "vendor-card";
 
 
         card.innerHTML = `
@@ -431,10 +692,7 @@ function displayVendors(vendors) {
         vendorList.appendChild(card);
 
     });
-
 }
-
-
 
 // =====================================================
 // CUSTOMER LOGOUT

@@ -471,6 +471,73 @@ app.get("/api/vendors", async (req, res) => {
             }
         );
 
+        // =====================================================
+// ADMIN UPDATE VENDOR STATUS
+// ADMIN ONLY
+// =====================================================
+
+app.put(
+    "/api/admin/vendors/:id/status",
+    authenticateToken,
+    authorizeRole("admin"),
+    async (req, res) => {
+
+        try {
+
+            const vendorId = req.params.id;
+            const { status } = req.body;
+
+            // Only allow valid statuses
+            if (
+                status !== "Verified" &&
+                status !== "Rejected" &&
+                status !== "Pending"
+            ) {
+
+                return res.status(400).json({
+                    message: "Invalid vendor status."
+                });
+
+            }
+
+            const result =
+                await vendorsCollection.updateOne(
+                    { id: vendorId },
+                    {
+                        $set: {
+                            status: status
+                        }
+                    }
+                );
+
+            if (result.matchedCount === 0) {
+
+                return res.status(404).json({
+                    message: "Vendor not found."
+                });
+
+            }
+
+            res.json({
+                message: `Vendor ${status.toLowerCase()} successfully.`
+            });
+
+        } catch (error) {
+
+            console.error(
+                "Admin vendor status update error:",
+                error
+            );
+
+            res.status(500).json({
+                message: "Failed to update vendor status."
+            });
+
+        }
+
+    }
+);
+
 
         // =====================================================
         // VENDOR LOGIN

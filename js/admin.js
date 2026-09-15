@@ -53,10 +53,10 @@ if (adminLoginForm) {
                 if (!response.ok) {
 
                     document.getElementById(
-                        "loginError"
-                    ).textContent =
-                        result.message ||
-                        "Invalid username or password.";
+                     "adminLoginMessage"
+                   ).textContent =
+                     result.message ||
+                     "Invalid username or password.";
 
                     return;
 
@@ -94,9 +94,9 @@ if (adminLoginForm) {
 
 
                 document.getElementById(
-                    "loginError"
-                ).textContent =
-                    "Unable to connect to server.";
+                   "adminLoginMessage"
+                 ).textContent =
+                   "Unable to connect to server.";
 
             }
 
@@ -346,15 +346,18 @@ function updateStatistics(vendors) {
 
 async function approveVendor(vendorId) {
 
+    const token = localStorage.getItem("token");
+
     try {
 
         const response = await fetch(
-            `http://localhost:5000/api/vendors/${vendorId}`,
+            `http://localhost:5000/api/admin/vendors/${vendorId}/status`,
             {
                 method: "PUT",
 
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
                 },
 
                 body: JSON.stringify({
@@ -363,9 +366,7 @@ async function approveVendor(vendorId) {
             }
         );
 
-
         const result = await response.json();
-
 
         if (!response.ok) {
 
@@ -376,14 +377,9 @@ async function approveVendor(vendorId) {
 
         }
 
-
-        alert(
-            "Vendor approved successfully!"
-        );
-
+        alert("Vendor approved successfully!");
 
         loadVendorData();
-
 
     } catch (error) {
 
@@ -393,6 +389,7 @@ async function approveVendor(vendorId) {
         );
 
         alert(
+            error.message ||
             "Unable to approve vendor. Please try again."
         );
 
@@ -407,15 +404,18 @@ async function approveVendor(vendorId) {
 
 async function rejectVendor(vendorId) {
 
+    const token = localStorage.getItem("token");
+
     try {
 
         const response = await fetch(
-            `http://localhost:5000/api/vendors/${vendorId}`,
+            `http://localhost:5000/api/admin/vendors/${vendorId}/status`,
             {
                 method: "PUT",
 
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
                 },
 
                 body: JSON.stringify({
@@ -424,9 +424,7 @@ async function rejectVendor(vendorId) {
             }
         );
 
-
         const result = await response.json();
-
 
         if (!response.ok) {
 
@@ -437,14 +435,9 @@ async function rejectVendor(vendorId) {
 
         }
 
-
-        alert(
-            "Vendor rejected."
-        );
-
+        alert("Vendor rejected successfully!");
 
         loadVendorData();
-
 
     } catch (error) {
 
@@ -454,6 +447,7 @@ async function rejectVendor(vendorId) {
         );
 
         alert(
+            error.message ||
             "Unable to reject vendor. Please try again."
         );
 
@@ -467,12 +461,8 @@ async function rejectVendor(vendorId) {
 
 function logout() {
 
-    localStorage.removeItem(
-        "adminLoggedIn"
-    );
+    localStorage.removeItem("token");
+    localStorage.removeItem("userRole");
 
-
-    window.location.href =
-        "login.html";
-
+    window.location.href = "login.html";
 }

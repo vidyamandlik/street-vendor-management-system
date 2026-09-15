@@ -65,8 +65,7 @@ if (vendorForm) {
                     method: "POST",
 
                     headers: {
-                         "Content-Type": "application/json",
-                         "Authorization": `Bearer ${localStorage.getItem("vendorToken")}`
+                         "Content-Type": "application/json"
                      },
 
                     body: JSON.stringify(vendor)
@@ -124,9 +123,7 @@ if (vendorForm) {
 // ===============================
 
 const vendorLoginForm =
-    document.getElementById(
-        "vendorLoginForm"
-    );
+    document.getElementById("vendorLoginForm");
 
 if (vendorLoginForm) {
 
@@ -146,7 +143,6 @@ if (vendorLoginForm) {
                     "vendorMobileLogin"
                 ).value.trim();
 
-
             try {
 
                 const response = await fetch(
@@ -154,10 +150,9 @@ if (vendorLoginForm) {
                     {
                         method: "POST",
 
-                         headers: {
-                               "Content-Type": "application/json",
-                                "Authorization": `Bearer ${localStorage.getItem("token")}`
-                           },
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
 
                         body: JSON.stringify({
                             id: enteredId,
@@ -166,10 +161,13 @@ if (vendorLoginForm) {
                     }
                 );
 
-
                 const result =
                     await response.json();
 
+                console.log(
+                    "Login response:",
+                    result
+                );
 
                 if (!response.ok) {
 
@@ -182,35 +180,34 @@ if (vendorLoginForm) {
                     return;
                 }
 
-
                 // Save JWT token
-
-                  localStorage.setItem(
-                   "token",
+                localStorage.setItem(
+                    "token",
                     result.token
-              );
+                );
 
-
-                 // Save user role
-
-                    localStorage.setItem(
+                // Save user role
+                localStorage.setItem(
                     "userRole",
-                     result.role
-                  );
+                    result.role
+                );
 
+                // Save logged-in vendor ID
+                localStorage.setItem(
+                    "loggedInVendorId",
+                    result.vendor.id
+                );
 
-            // Save logged-in vendor ID
-
-              localStorage.setItem(
-               "loggedInVendorId",
-                result.vendor.id
-            );
+                console.log(
+                    "Saved Vendor ID:",
+                    localStorage.getItem(
+                        "loggedInVendorId"
+                    )
+                );
 
                 // Open dashboard
-
                 window.location.href =
                     "dashboard.html";
-
 
             } catch (error) {
 
@@ -223,14 +220,12 @@ if (vendorLoginForm) {
                     "vendorLoginError"
                 ).textContent =
                     "Unable to connect to server. Please try again.";
-
             }
 
         }
     );
 
 }
-
 // ===============================
 // VENDOR DASHBOARD
 // ===============================
@@ -489,9 +484,22 @@ async function showEditProfile() {
 
         // Get current vendor information from MongoDB
 
-        const response = await fetch(
-            `http://localhost:5000/api/vendors/${loggedInVendorId}`
-        );
+     const token = localStorage.getItem("token");
+
+if (!token) {
+    alert("Vendor session expired. Please login again.");
+    window.location.href = "login.html";
+    return;
+}
+
+       const response = await fetch(
+             `http://localhost:5000/api/vendors/${loggedInVendorId}`,
+         {
+               headers: {
+               "Authorization": `Bearer ${token}`
+             }
+           }
+       );
 
 
         const vendor =
@@ -676,26 +684,32 @@ if (editProfileForm) {
 
             try {
 
-                const response = await fetch(
-                    `http://localhost:5000/api/vendors/${loggedInVendorId}`,
-                    {
-                        method: "PUT",
+                 const token = localStorage.getItem("token");
 
-                        headers: {
-                            "Content-Type":
-                                "application/json"
-                        },
+           if (!token) {
+                   alert("Vendor session expired. Please login again.");
+                   window.location.href = "login.html";
+                   return;
+                 }
 
-                        body:
-                            JSON.stringify(
-                                updatedVendor
-                            )
-                    }
-                );
+                   const response = await fetch(
+                  `http://localhost:5000/api/vendors/${loggedInVendorId}`,
+            {
+                       method: "PUT",
+
+                      headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                     },
+
+                      body: JSON.stringify(updatedVendor)
+                     }
+                  );
 
 
-                const result =
-                    await response.json();
+                   const result = await response.json();
+
+                   console.log("Update response:", result);
 
 
                 if (!response.ok) {
@@ -718,16 +732,12 @@ if (editProfileForm) {
 
             } catch (error) {
 
-                console.error(
-                    "Profile update error:",
-                    error
-                );
+                 console.error("Profile update error:", error);
 
-                alert(
-                    "Unable to update profile. Please try again."
-                );
-
-            }
+                 alert(
+                 "Profile update failed:\n\n" + error.message
+              );
+             }
 
         }
     );
@@ -751,15 +761,14 @@ function cancelEdit() {
 
 function vendorLogout() {
 
-    localStorage.removeItem(
-        "vendorLoggedIn"
-    );
+    localStorage.removeItem("token");
 
-    localStorage.removeItem(
-        "loggedInVendorId"
-    );
+    localStorage.removeItem("userRole");
 
-    window.location.href =
-        "login.html";
+    localStorage.removeItem("loggedInVendorId");
+
+    localStorage.removeItem("vendorLoggedIn");
+
+    window.location.href = "login.html";
 
 }
