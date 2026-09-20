@@ -1,6 +1,6 @@
-// ===============================
+// =====================================================
 // VENDOR DIRECTORY
-// ===============================
+// =====================================================
 
 const vendorDirectory =
     document.getElementById(
@@ -26,19 +26,23 @@ const districtFilter =
     );
 
 
-// ===============================
+
+// =====================================================
 // LOAD VERIFIED VENDORS
-// ===============================
+// =====================================================
 
 async function loadDirectory() {
 
     try {
 
-        const response = await fetch(
-            "http://localhost:5000/api/vendors"
-        );
+        const response =
+            await fetch(
+                "http://localhost:5000/api/vendors"
+            );
 
-        const vendors = await response.json();
+
+        const vendors =
+            await response.json();
 
 
         if (!response.ok) {
@@ -50,16 +54,22 @@ async function loadDirectory() {
         }
 
 
-        // Only show verified vendors
-
         const verifiedVendors =
             vendors.filter(
-                vendor =>
-                    vendor.status === "Verified"
+                function (vendor) {
+
+                    return (
+                        vendor.status ===
+                        "Verified"
+                    );
+
+                }
             );
 
 
-        if (verifiedVendors.length === 0) {
+        if (
+            verifiedVendors.length === 0
+        ) {
 
             showNoVendors();
 
@@ -72,7 +82,6 @@ async function loadDirectory() {
             verifiedVendors
         );
 
-
     } catch (error) {
 
         console.error(
@@ -83,20 +92,74 @@ async function loadDirectory() {
         showNoVendors();
 
     }
-
 }
 
-// ===============================
+
+
+// =====================================================
+// GET VENDOR RATING
+// =====================================================
+
+async function getVendorRating(
+    vendorId
+) {
+
+    try {
+
+        const response =
+            await fetch(
+                `http://localhost:5000/api/reviews/vendor/${vendorId}`
+            );
+
+
+        if (!response.ok) {
+
+            return {
+                averageRating: 0,
+                reviewCount: 0
+            };
+
+        }
+
+
+        const data =
+            await response.json();
+
+
+        return data;
+
+    } catch (error) {
+
+        console.error(
+            "Error loading rating:",
+            error
+        );
+
+        return {
+            averageRating: 0,
+            reviewCount: 0
+        };
+
+    }
+}
+
+
+
+// =====================================================
 // DISPLAY VENDORS
-// ===============================
+// =====================================================
 
-function displayVendors(vendors) {
+async function displayVendors(
+    vendors
+) {
+
+    vendorDirectory.innerHTML =
+        "";
 
 
-    vendorDirectory.innerHTML = "";
-
-
-    if (vendors.length === 0) {
+    if (
+        vendors.length === 0
+    ) {
 
         showNoVendors();
 
@@ -105,15 +168,34 @@ function displayVendors(vendors) {
     }
 
 
-    vendors.forEach(function(vendor) {
-
+    for (
+        const vendor of vendors
+    ) {
 
         const card =
-            document.createElement("div");
+            document.createElement(
+                "div"
+            );
 
 
         card.className =
             "vendor-card";
+
+
+        const rating =
+            await getVendorRating(
+                vendor.id
+            );
+
+
+        const averageRating =
+            Number(
+                rating.averageRating || 0
+            ).toFixed(1);
+
+
+        const reviewCount =
+            rating.reviewCount || 0;
 
 
         card.innerHTML = `
@@ -156,26 +238,146 @@ function displayVendors(vendors) {
 
 
             <p>
-                ${vendor.description}
+                ${vendor.description || ""}
             </p>
 
+
+            <!-- RATING -->
+
+            <div class="vendor-rating">
+
+                <span class="rating-stars">
+                    ⭐ ${averageRating}
+                </span>
+
+                <span class="review-count">
+                    (${reviewCount} Reviews)
+                </span>
+
+            </div>
+
+
+            <!-- VIEW REVIEWS -->
+
+            <button
+                class="view-reviews-btn"
+                onclick="viewReviews(
+                    '${vendor.id}'
+                )"
+            >
+                View Reviews
+            </button>
+
+
+            <!-- RATE & REVIEW -->
+
+            <button
+                class="rate-review-btn"
+                onclick="openReviewModal(
+                    '${vendor.id}',
+                    '${vendor.businessName}'
+                )"
+            >
+                ⭐ Rate & Review
+            </button>
 
         `;
 
 
-        vendorDirectory.appendChild(card);
-
-    });
-
+        vendorDirectory.appendChild(
+            card
+        );
+    }
 }
 
 
-// ===============================
+
+// =====================================================
+// VIEW REVIEWS
+// =====================================================
+
+async function viewReviews(
+    vendorId
+) {
+
+    try {
+
+        const response =
+            await fetch(
+                `http://localhost:5000/api/reviews/vendor/${vendorId}`
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            alert(
+                "Unable to load reviews."
+            );
+
+            return;
+
+        }
+
+
+        let reviewText =
+            `Average Rating: ${
+                Number(
+                    data.averageRating || 0
+                ).toFixed(1)
+            } ⭐\n\n`;
+
+
+        if (
+            !data.reviews ||
+            data.reviews.length === 0
+        ) {
+
+            reviewText +=
+                "No reviews yet.";
+
+        } else {
+
+            data.reviews.forEach(
+                function (review) {
+
+                    reviewText +=
+                        `⭐ ${review.rating}/5 - ${review.review}\n\n`;
+
+                }
+            );
+
+        }
+
+
+        alert(
+            reviewText
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Error loading reviews:",
+            error
+        );
+
+        alert(
+            "Unable to load reviews."
+        );
+
+    }
+}
+
+
+
+// =====================================================
 // NO VENDORS
-// ===============================
+// =====================================================
 
 function showNoVendors() {
-
 
     vendorDirectory.innerHTML = `
 
@@ -193,12 +395,13 @@ function showNoVendors() {
         </div>
 
     `;
-
 }
 
-// ===============================
-// FILTER
-// ===============================
+
+
+// =====================================================
+// FILTER VENDORS
+// =====================================================
 
 async function filterVendors() {
 
@@ -207,8 +410,10 @@ async function filterVendors() {
             .toLowerCase()
             .trim();
 
+
     const category =
         categoryFilter.value;
+
 
     const district =
         districtFilter.value
@@ -218,11 +423,10 @@ async function filterVendors() {
 
     try {
 
-        // Get vendors from MongoDB through backend
-
-        const response = await fetch(
-            "http://localhost:5000/api/vendors"
-        );
+        const response =
+            await fetch(
+                "http://localhost:5000/api/vendors"
+            );
 
 
         const vendors =
@@ -238,30 +442,32 @@ async function filterVendors() {
         }
 
 
-        // Only verified vendors
-
         const verifiedVendors =
             vendors.filter(
-                vendor =>
-                    vendor.status === "Verified"
+                function (vendor) {
+
+                    return (
+                        vendor.status ===
+                        "Verified"
+                    );
+
+                }
             );
 
 
-        // Apply filters
-
         const filteredVendors =
             verifiedVendors.filter(
-                vendor => {
+                function (vendor) {
 
                     const matchesSearch =
 
-                        vendor.name
+                        (vendor.name || "")
                             .toLowerCase()
                             .includes(search)
 
                         ||
 
-                        vendor.businessName
+                        (vendor.businessName || "")
                             .toLowerCase()
                             .includes(search);
 
@@ -269,24 +475,24 @@ async function filterVendors() {
                     const matchesCategory =
 
                         category === "" ||
-                        vendor.category === category;
+
+                        vendor.category ===
+                        category;
 
 
                     const matchesDistrict =
 
                         district === "" ||
 
-                        vendor.district
+                        (vendor.district || "")
                             .toLowerCase()
                             .includes(district);
 
 
                     return (
-
                         matchesSearch &&
                         matchesCategory &&
                         matchesDistrict
-
                     );
 
                 }
@@ -296,7 +502,6 @@ async function filterVendors() {
         displayVendors(
             filteredVendors
         );
-
 
     } catch (error) {
 
@@ -308,12 +513,13 @@ async function filterVendors() {
         showNoVendors();
 
     }
-
 }
 
-// ===============================
+
+
+// =====================================================
 // FILTER EVENTS
-// ===============================
+// =====================================================
 
 if (searchInput) {
 
@@ -345,9 +551,365 @@ if (districtFilter) {
 }
 
 
-// ===============================
+
+// =====================================================
+// RATING & REVIEW
+// =====================================================
+
+let selectedRating = 0;
+
+
+
+// =====================================================
+// OPEN REVIEW MODAL
+// =====================================================
+
+function openReviewModal(
+    vendorId,
+    vendorName
+) {
+
+    // IMPORTANT:
+    // Customer login stores token as customerToken
+
+    const token =
+        localStorage.getItem(
+            "customerToken"
+        );
+
+
+    const role =
+        localStorage.getItem(
+            "customerRole"
+        );
+
+
+    // Check customer login
+
+    if (
+        !token ||
+        role !== "customer"
+    ) {
+
+        alert(
+            "Please login as a customer to submit a review."
+        );
+
+
+        window.location.href =
+            "../customer/login.html";
+
+
+        return;
+
+    }
+
+
+    document.getElementById(
+        "reviewModal"
+    ).style.display =
+        "block";
+
+
+    document.getElementById(
+        "reviewVendorId"
+    ).value =
+        vendorId;
+
+
+    document.getElementById(
+        "reviewVendorName"
+    ).textContent =
+        "Vendor: " +
+        vendorName;
+
+
+    selectedRating = 0;
+
+
+    document.getElementById(
+        "selectedRating"
+    ).textContent =
+        "Select your rating";
+
+
+    document.getElementById(
+        "reviewText"
+    ).value =
+        "";
+
+
+    updateStars();
+
+}
+
+
+
+// =====================================================
+// CLOSE REVIEW MODAL
+// =====================================================
+
+function closeReviewModal() {
+
+    document.getElementById(
+        "reviewModal"
+    ).style.display =
+        "none";
+
+}
+
+
+
+// =====================================================
+// SELECT RATING
+// =====================================================
+
+function selectRating(
+    rating
+) {
+
+    selectedRating =
+        rating;
+
+
+    document.getElementById(
+        "selectedRating"
+    ).textContent =
+        "You selected " +
+        rating +
+        " out of 5";
+
+
+    updateStars();
+
+}
+
+
+
+// =====================================================
+// UPDATE STARS
+// =====================================================
+
+function updateStars() {
+
+    const stars =
+        document.querySelectorAll(
+            ".star-rating span"
+        );
+
+
+    stars.forEach(
+        function (
+            star,
+            index
+        ) {
+
+            if (
+                index <
+                selectedRating
+            ) {
+
+                star.classList.add(
+                    "selected"
+                );
+
+            } else {
+
+                star.classList.remove(
+                    "selected"
+                );
+
+            }
+
+        }
+    );
+
+}
+
+
+
+// =====================================================
+// SUBMIT REVIEW
+// =====================================================
+
+const reviewForm =
+    document.getElementById(
+        "reviewForm"
+    );
+
+
+if (reviewForm) {
+
+    reviewForm.addEventListener(
+        "submit",
+        async function (event) {
+
+            event.preventDefault();
+
+
+            // Check rating
+
+            if (
+                selectedRating === 0
+            ) {
+
+                alert(
+                    "Please select a rating."
+                );
+
+                return;
+
+            }
+
+
+            const vendorId =
+                document.getElementById(
+                    "reviewVendorId"
+                ).value;
+
+
+            const review =
+                document.getElementById(
+                    "reviewText"
+                ).value
+                    .trim();
+
+
+            // Check review text
+
+            if (!review) {
+
+                alert(
+                    "Please write a review."
+                );
+
+                return;
+
+            }
+
+
+            // =========================================
+            // GET CUSTOMER TOKEN
+            // =========================================
+
+            const token =
+                localStorage.getItem(
+                    "customerToken"
+                );
+
+
+            const role =
+                localStorage.getItem(
+                    "customerRole"
+                );
+
+
+            if (
+                !token ||
+                role !== "customer"
+            ) {
+
+                alert(
+                    "Please login as a customer first."
+                );
+
+                window.location.href =
+                    "../customer/login.html";
+
+                return;
+
+            }
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        "http://localhost:5000/api/reviews",
+                        {
+
+                            method: "POST",
+
+                            headers: {
+
+                                "Content-Type":
+                                    "application/json",
+
+                                "Authorization":
+                                    "Bearer " +
+                                    token
+
+                            },
+
+                            body:
+                                JSON.stringify({
+
+                                    vendorId:
+                                        vendorId,
+
+                                    rating:
+                                        selectedRating,
+
+                                    review:
+                                        review
+
+                                })
+
+                        }
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (!response.ok) {
+
+                    alert(
+                        data.message ||
+                        "Failed to submit review."
+                    );
+
+                    return;
+
+                }
+
+
+                alert(
+                    "Rating and review submitted successfully!"
+                );
+
+
+                closeReviewModal();
+
+
+                // Reload ratings
+
+                loadDirectory();
+
+            } catch (error) {
+
+                console.error(
+                    "Review submission error:",
+                    error
+                );
+
+                alert(
+                    "Unable to submit review."
+                );
+
+            }
+
+        }
+    );
+
+}
+
+
+
+// =====================================================
 // LOAD DIRECTORY
-// ===============================
+// =====================================================
 
 if (vendorDirectory) {
 

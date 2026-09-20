@@ -157,7 +157,114 @@
 
     </main>
 
+<!-- =====================================================
+     CUSTOMER RATING & REVIEW MODAL
+===================================================== -->
 
+<div
+    id="customerReviewModal"
+    class="review-modal"
+>
+
+    <div class="review-modal-content">
+
+        <span
+            class="close-review-modal"
+            onclick="closeCustomerReviewModal()"
+        >
+            &times;
+        </span>
+
+
+        <h2>
+            Rate & Review Vendor
+        </h2>
+
+
+        <p id="customerReviewVendorName"></p>
+
+
+        <form id="customerReviewForm">
+
+            <input
+                type="hidden"
+                id="customerReviewVendorId"
+            >
+
+
+            <label>
+                Rating
+            </label>
+
+
+            <div
+                id="customerStarRating"
+                class="star-rating"
+            >
+
+                <span
+                    onclick="selectCustomerRating(1)"
+                >
+                    ★
+                </span>
+
+                <span
+                    onclick="selectCustomerRating(2)"
+                >
+                    ★
+                </span>
+
+                <span
+                    onclick="selectCustomerRating(3)"
+                >
+                    ★
+                </span>
+
+                <span
+                    onclick="selectCustomerRating(4)"
+                >
+                    ★
+                </span>
+
+                <span
+                    onclick="selectCustomerRating(5)"
+                >
+                    ★
+                </span>
+
+            </div>
+
+
+            <p id="customerSelectedRating">
+                Select your rating
+            </p>
+
+
+            <label for="customerReviewText">
+                Your Review
+            </label>
+
+
+            <textarea
+                id="customerReviewText"
+                placeholder="Write your review..."
+                rows="5"
+                required
+            ></textarea>
+
+
+            <button
+                type="submit"
+                class="submit-review-btn"
+            >
+                Submit Review
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
     <footer>
 
         <p>
