@@ -1,275 +1,299 @@
 // =====================================================
+// STREET VENDOR MANAGEMENT SYSTEM - CUSTOMER MODULE
+// =====================================================
+
+const API_BASE_URL = "http://localhost:5000/api";
+
+// Utility: HTML Escaping for XSS prevention
+function escapeHtml(str) {
+    if (str === null || str === undefined) return "";
+    return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+// Utility: Debounce for performance optimization on search input
+function debounce(func, delay = 250) {
+    let timeoutId;
+    return function (...args) {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+            func.apply(this, args);
+        }, delay);
+    };
+}
+
+// Utility: Safely parse JSON response
+async function parseJsonResponse(response) {
+    try {
+        const text = await response.text();
+        return text ? JSON.parse(text) : {};
+    } catch (err) {
+        console.warn("Failed to parse JSON response:", err);
+        return null;
+    }
+}
+
+
+// =====================================================
 // CUSTOMER REGISTRATION
 // =====================================================
 
-const customerRegisterForm =
-    document.getElementById("customerRegisterForm");
+const customerRegisterForm = document.getElementById("customerRegisterForm");
 
 if (customerRegisterForm) {
+    customerRegisterForm.addEventListener("submit", async function (event) {
+        event.preventDefault();
 
-    customerRegisterForm.addEventListener(
-        "submit",
-        async function (event) {
+        const nameInput = document.getElementById("customerName");
+        const mobileInput = document.getElementById("customerMobile");
+        const emailInput = document.getElementById("customerEmail");
+        const passwordInput = document.getElementById("customerPassword");
+        const confirmPasswordInput = document.getElementById("confirmPassword");
+        const message = document.getElementById("customerRegisterMessage");
+        const submitBtn = customerRegisterForm.querySelector("button[type='submit']");
 
-            event.preventDefault();
+        const name = nameInput ? nameInput.value.trim() : "";
+        const mobile = mobileInput ? mobileInput.value.trim() : "";
+        const email = emailInput ? emailInput.value.trim() : "";
+        const password = passwordInput ? passwordInput.value : "";
+        const confirmPassword = confirmPasswordInput ? confirmPasswordInput.value : "";
 
-            const name =
-                document.getElementById("customerName").value.trim();
+        // Reset message
+        if (message) {
+            message.textContent = "";
+            message.style.color = "";
+        }
 
-            const mobile =
-                document.getElementById("customerMobile").value.trim();
-
-            const email =
-                document.getElementById("customerEmail").value.trim();
-
-            const password =
-                document.getElementById("customerPassword").value;
-
-            const confirmPassword =
-                document.getElementById("confirmPassword").value;
-
-            const message =
-                document.getElementById("customerRegisterMessage");
-
-
-            // Check password
-
-            if (password !== confirmPassword) {
-
-                message.textContent =
-                    "Passwords do not match.";
-
+        // Validate passwords match
+        if (password !== confirmPassword) {
+            if (message) {
+                message.textContent = "Passwords do not match.";
                 message.style.color = "red";
-
-                return;
             }
+            return;
+        }
 
+        // Loading state
+        const originalBtnText = submitBtn ? submitBtn.textContent : "Register";
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Registering...";
+        }
 
-            try {
+        try {
+            const response = await fetch(`${API_BASE_URL}/customers`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    name: name,
+                    mobile: mobile,
+                    email: email,
+                    password: password
+                })
+            });
 
-                const response = await fetch(
-                    "http://localhost:5000/api/customers",
-                    {
-                        method: "POST",
+            const data = await parseJsonResponse(response);
 
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
-
-                        body: JSON.stringify({
-                            name: name,
-                            mobile: mobile,
-                            email: email,
-                            password: password
-                        })
-                    }
-                );
-
-
-                const data = await response.json();
-
-
-                if (response.ok) {
-
-                    message.textContent =
-                        "Registration successful! Customer ID: "
-                        + data.customer.id;
-
+            if (response.ok && data && data.customer) {
+                if (message) {
+                    message.textContent = `Registration successful! Customer ID: ${data.customer.id}`;
                     message.style.color = "green";
-
-                    customerRegisterForm.reset();
-
-
-                    setTimeout(function () {
-
-                        window.location.href = "login.html";
-
-                    }, 2000);
-
-                } else {
-
-                    message.textContent =
-                        data.message ||
-                        "Registration failed.";
-
-                    message.style.color = "red";
-
                 }
 
-            } catch (error) {
+                customerRegisterForm.reset();
 
-                console.error(error);
+                setTimeout(() => {
+                    window.location.href = "login.html";
+                }, 2000);
+            } else {
+                let errorMsg = (data && data.message) ? data.message : "";
+                if (!errorMsg) {
+                    if (response.status === 409) {
+                        errorMsg = "A customer with this email or mobile already exists.";
+                    } else if (response.status === 400) {
+                        errorMsg = "Please fill in all required fields properly.";
+                    } else if (response.status >= 500) {
+                        errorMsg = "Server error occurred during registration. Please try again later.";
+                    } else {
+                        errorMsg = "Registration failed. Please check your details.";
+                    }
+                }
 
-                message.textContent =
-                    "Cannot connect to backend server.";
+                if (message) {
+                    message.textContent = errorMsg;
+                    message.style.color = "red";
+                }
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalBtnText;
+                }
+            }
+        } catch (error) {
+            console.error("Customer registration error:", error);
 
+            if (message) {
+                if (!navigator.onLine) {
+                    message.textContent = "You appear to be offline. Please check your internet connection.";
+                } else {
+                    message.textContent = "Cannot connect to backend server. Please verify the server is running.";
+                }
                 message.style.color = "red";
-
             }
 
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalBtnText;
+            }
         }
-    );
+    });
 }
-
 
 
 // =====================================================
 // CUSTOMER LOGIN
 // =====================================================
 
-const customerLoginForm =
-    document.getElementById("customerLoginForm");
+const customerLoginForm = document.getElementById("customerLoginForm");
 
 if (customerLoginForm) {
+    customerLoginForm.addEventListener("submit", async function (event) {
+        event.preventDefault();
 
-    customerLoginForm.addEventListener(
-        "submit",
-        async function (event) {
+        const loginIdInput = document.getElementById("customerLoginId");
+        const passwordInput = document.getElementById("customerLoginPassword");
+        const message = document.getElementById("customerLoginMessage");
+        const submitBtn = customerLoginForm.querySelector("button[type='submit']");
 
-            event.preventDefault();
+        const loginId = loginIdInput ? loginIdInput.value.trim() : "";
+        const password = passwordInput ? passwordInput.value : "";
 
+        // Reset message
+        if (message) {
+            message.textContent = "";
+            message.style.color = "";
+        }
 
-            const loginId =
-                document
-                    .getElementById("customerLoginId")
-                    .value
-                    .trim();
+        // Quick client-side check
+        if (!loginId || !password) {
+            if (message) {
+                message.textContent = "Please enter both email/mobile and password.";
+                message.style.color = "red";
+            }
+            return;
+        }
 
-            const password =
-                document
-                    .getElementById("customerLoginPassword")
-                    .value;
+        // Prevent duplicate submits & set loading state
+        const originalBtnText = submitBtn ? submitBtn.textContent : "Login";
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Logging in...";
+        }
 
+        try {
+            const response = await fetch(`${API_BASE_URL}/customers/login`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    loginId: loginId,
+                    password: password
+                })
+            });
 
-            const message =
-                document.getElementById(
-                    "customerLoginMessage"
-                );
+            const data = await parseJsonResponse(response);
 
+            console.log("Customer login response:", data);
 
-            try {
+            if (response.ok && data && data.token && data.customer) {
+                // Save customer session information
+                localStorage.setItem("customerToken", data.token);
+                localStorage.setItem("customerRole", "customer");
+                localStorage.setItem("customerId", data.customer.id);
+                localStorage.setItem("customerName", data.customer.name || "Customer");
 
-                const response = await fetch(
-                    "http://localhost:5000/api/customers/login",
-                    {
-                        method: "POST",
-
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
-
-                        body: JSON.stringify({
-                            loginId: loginId,
-                            password: password
-                        })
-                    }
-                );
-
-
-                const data = await response.json();
-
-
-                console.log(
-                    "Customer login response:",
-                    data
-                );
-
-
-                if (response.ok) {
-
-                    // Save customer information
-
-                    localStorage.setItem(
-                        "customerToken",
-                        data.token
-                    );
-
-                    localStorage.setItem(
-                        "customerRole",
-                        "customer"
-                    );
-
-                    localStorage.setItem(
-                        "customerId",
-                        data.customer.id
-                    );
-
-                    localStorage.setItem(
-                        "customerName",
-                        data.customer.name
-                    );
-
-
-                    message.textContent =
-                        "Login successful!";
-
+                if (message) {
+                    message.textContent = "Login successful! Redirecting...";
                     message.style.color = "green";
-
-
-                    // Redirect to customer dashboard
-
-                    setTimeout(function () {
-
-                        window.location.href =
-                            "dashboard.html";
-
-                    }, 500);
-
-                } else {
-
-                    message.textContent =
-                        data.message ||
-                        "Invalid email/mobile or password.";
-
-                    message.style.color = "red";
-
                 }
 
-            } catch (error) {
+                // Redirect to customer dashboard
+                setTimeout(() => {
+                    window.location.href = "dashboard.html";
+                }, 500);
 
-                console.error(error);
+            } else {
+                // Extract error message or build standard HTTP message
+                let errorMsg = (data && data.message) ? data.message : "";
+                if (!errorMsg) {
+                    if (response.status === 400) {
+                        errorMsg = "Email/mobile and password are required.";
+                    } else if (response.status === 401) {
+                        errorMsg = "Invalid email/mobile or password.";
+                    } else if (response.status === 404) {
+                        errorMsg = "Customer login service not found.";
+                    } else if (response.status >= 500) {
+                        errorMsg = "Internal server error. Please try again later.";
+                    } else {
+                        errorMsg = `Login failed (${response.status}). Please try again.`;
+                    }
+                }
 
-                message.textContent =
-                    "Cannot connect to backend server.";
+                if (message) {
+                    message.textContent = errorMsg;
+                    message.style.color = "red";
+                }
 
-                message.style.color = "red";
-
+                // Re-enable button on failure
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalBtnText;
+                }
             }
 
-        }
-    );
-}
+        } catch (error) {
+            console.error("Customer login error:", error);
 
+            if (message) {
+                if (!navigator.onLine) {
+                    message.textContent = "You appear to be offline. Please check your internet connection.";
+                } else {
+                    message.textContent = "Cannot connect to backend server. Please ensure the backend is running.";
+                }
+                message.style.color = "red";
+            }
+
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalBtnText;
+            }
+        }
+    });
+}
 
 
 // =====================================================
 // CUSTOMER DASHBOARD
 // =====================================================
 
-const customerDashboard =
-    document.querySelector(".customer-dashboard");
+const customerDashboard = document.querySelector(".customer-dashboard");
 
 if (customerDashboard) {
-
-    const token =
-        localStorage.getItem("customerToken");
-
-    const role =
-        localStorage.getItem("customerRole");
-
-    const customerId =
-        localStorage.getItem("customerId");
-
+    const token = localStorage.getItem("customerToken");
+    const role = localStorage.getItem("customerRole");
+    const customerId = localStorage.getItem("customerId");
 
     // Check customer login
     if (!token || role !== "customer" || !customerId) {
-
         alert("Please login as a customer first.");
-
         window.location.href = "login.html";
-
     } else {
-
         // Load customer profile
         loadCustomerProfile(customerId, token);
 
@@ -284,81 +308,49 @@ if (customerDashboard) {
 // =====================================================
 
 async function loadCustomerProfile(customerId, token) {
+    const idElement = document.getElementById("customerId");
+    const profileName = document.getElementById("profileName");
+    const welcomeName = document.getElementById("customerName");
+    const profileEmail = document.getElementById("profileEmail");
 
     try {
-
-        const response = await fetch(
-            `http://localhost:5000/api/customers/${customerId}`,
-            {
-                method: "GET",
-
-                headers: {
-                    "Authorization": `Bearer ${token}`
-                }
+        const response = await fetch(`${API_BASE_URL}/customers/${encodeURIComponent(customerId)}`, {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${token}`
             }
-        );
+        });
 
-
-        const data = await response.json();
-
-
-        if (!response.ok) {
-
-            console.error(
-                "Customer profile error:",
-                data
-            );
-
+        if (response.status === 401 || response.status === 403) {
+            alert("Your session has expired or is unauthorized. Please log in again.");
+            clearCustomerSession();
+            window.location.href = "login.html";
             return;
         }
 
+        const data = await parseJsonResponse(response);
 
-        // Customer ID
-        const idElement =
-            document.getElementById("customerId");
-
-        if (idElement) {
-            idElement.textContent =
-                data.id || "-";
+        if (!response.ok || !data) {
+            console.error("Customer profile server error:", data);
+            if (idElement) idElement.textContent = "-";
+            if (profileName) profileName.textContent = "Error loading name";
+            if (welcomeName) welcomeName.textContent = localStorage.getItem("customerName") || "Customer";
+            if (profileEmail) profileEmail.textContent = "Error loading email";
+            return;
         }
 
-
-        // Profile name
-        const profileName =
-            document.getElementById("profileName");
-
-        if (profileName) {
-            profileName.textContent =
-                data.name || "-";
-        }
-
-
-        // Welcome name
-        const welcomeName =
-            document.getElementById("customerName");
-
-        if (welcomeName) {
-            welcomeName.textContent =
-                data.name || "Customer";
-        }
-
-
-        // Email
-        const profileEmail =
-            document.getElementById("profileEmail");
-
-        if (profileEmail) {
-            profileEmail.textContent =
-                data.email || "-";
-        }
+        // Populate profile details
+        if (idElement) idElement.textContent = data.id || "-";
+        if (profileName) profileName.textContent = data.name || "-";
+        if (welcomeName) welcomeName.textContent = data.name || "Customer";
+        if (profileEmail) profileEmail.textContent = data.email || "-";
 
     } catch (error) {
-
-        console.error(
-            "Error loading customer profile:",
-            error
-        );
-
+        console.error("Error loading customer profile:", error);
+        if (idElement) idElement.textContent = "-";
+        if (profileName) profileName.textContent = "Unable to connect";
+        if (welcomeName) welcomeName.textContent = localStorage.getItem("customerName") || "Customer";
+        if (profileEmail) profileEmail.textContent = "Unable to connect";
     }
 }
 
@@ -369,160 +361,102 @@ async function loadCustomerProfile(customerId, token) {
 
 let allVerifiedVendors = [];
 
+// Cache DOM elements for filters and vendor list
+let vendorSearchInput = null;
+let vendorCategoryFilter = null;
+let vendorDistrictFilter = null;
+let vendorListContainer = null;
 
 async function loadVerifiedVendors() {
+    vendorListContainer = document.getElementById("vendorList");
 
-    const vendorList =
-        document.getElementById("vendorList");
-
-
-    if (!vendorList) {
+    if (!vendorListContainer) {
         return;
     }
 
-
     try {
+        const response = await fetch(`${API_BASE_URL}/public/vendors`);
+        const vendors = await parseJsonResponse(response);
 
-        const response = await fetch(
-            "http://localhost:5000/api/public/vendors"
-        );
-
-
-        const vendors =
-            await response.json();
-
-
-        if (!response.ok) {
-
-            vendorList.innerHTML =
-                "<p>Unable to load vendors.</p>";
-
+        if (!response.ok || !Array.isArray(vendors)) {
+            vendorListContainer.innerHTML = "<p>Unable to load verified vendors from server. Please try again later.</p>";
             return;
         }
-
 
         // Store vendors for filtering
         allVerifiedVendors = vendors;
 
-
         // Populate district filter
         populateDistrictFilter(vendors);
 
-
         // Display all vendors
         displayVendors(vendors);
-
 
         // Activate filters
         setupVendorFilters();
 
     } catch (error) {
-
-        console.error(
-            "Error loading vendors:",
-            error
-        );
-
-        vendorList.innerHTML =
-            "<p>Unable to load vendors.</p>";
+        console.error("Error loading vendors:", error);
+        vendorListContainer.innerHTML = "<p>Unable to connect to backend server. Please verify the server is running.</p>";
     }
 }
 
 
 // =====================================================
-// POPULATE DISTRICT FILTER
+// POPULATE DISTRICT FILTER (Optimized with DocumentFragment)
 // =====================================================
 
 function populateDistrictFilter(vendors) {
-
-    const districtFilter =
-        document.getElementById("districtFilter");
-
+    const districtFilter = document.getElementById("districtFilter");
 
     if (!districtFilter) {
         return;
     }
 
+    const districts = [...new Set(
+        vendors
+            .map(vendor => vendor.district)
+            .filter(district => typeof district === "string" && district.trim().length > 0)
+    )].sort();
 
-    // Remove old district options
-    districtFilter.innerHTML =
-        '<option value="">All Districts</option>';
+    const fragment = document.createDocumentFragment();
 
+    const defaultOption = document.createElement("option");
+    defaultOption.value = "";
+    defaultOption.textContent = "All Districts";
+    fragment.appendChild(defaultOption);
 
-    const districts =
-        [...new Set(
-            vendors
-                .map(function(vendor) {
-                    return vendor.district;
-                })
-                .filter(function(district) {
-                    return district;
-                })
-        )];
-
-
-    districts.sort();
-
-
-    districts.forEach(function(district) {
-
-        const option =
-            document.createElement("option");
-
+    districts.forEach(district => {
+        const option = document.createElement("option");
         option.value = district;
-
         option.textContent = district;
-
-        districtFilter.appendChild(option);
-
+        fragment.appendChild(option);
     });
+
+    districtFilter.innerHTML = "";
+    districtFilter.appendChild(fragment);
 }
 
 
 // =====================================================
-// VENDOR FILTERS
+// VENDOR FILTERS (Debounced & Cached Elements)
 // =====================================================
 
 function setupVendorFilters() {
+    vendorSearchInput = document.getElementById("vendorSearch");
+    vendorCategoryFilter = document.getElementById("categoryFilter");
+    vendorDistrictFilter = document.getElementById("districtFilter");
 
-    const searchInput =
-        document.getElementById("vendorSearch");
-
-    const categoryFilter =
-        document.getElementById("categoryFilter");
-
-    const districtFilter =
-        document.getElementById("districtFilter");
-
-
-    if (
-        !searchInput ||
-        !categoryFilter ||
-        !districtFilter
-    ) {
+    if (!vendorSearchInput || !vendorCategoryFilter || !vendorDistrictFilter) {
         return;
     }
 
+    // Debounce search input to prevent DOM thrashing on rapid typing
+    vendorSearchInput.addEventListener("input", debounce(applyVendorFilters, 200));
 
-    // Search vendor by name
-    searchInput.addEventListener(
-        "input",
-        applyVendorFilters
-    );
-
-
-    // Filter by category
-    categoryFilter.addEventListener(
-        "change",
-        applyVendorFilters
-    );
-
-
-    // Filter by district
-    districtFilter.addEventListener(
-        "change",
-        applyVendorFilters
-    );
+    // Immediate change for dropdown filters
+    vendorCategoryFilter.addEventListener("change", applyVendorFilters);
+    vendorDistrictFilter.addEventListener("change", applyVendorFilters);
 }
 
 
@@ -531,203 +465,92 @@ function setupVendorFilters() {
 // =====================================================
 
 function applyVendorFilters() {
+    if (!vendorSearchInput || !vendorCategoryFilter || !vendorDistrictFilter) {
+        vendorSearchInput = document.getElementById("vendorSearch");
+        vendorCategoryFilter = document.getElementById("categoryFilter");
+        vendorDistrictFilter = document.getElementById("districtFilter");
+    }
 
-    const searchInput =
-        document.getElementById("vendorSearch");
+    const searchText = vendorSearchInput ? vendorSearchInput.value.trim().toLowerCase() : "";
+    const selectedCategory = vendorCategoryFilter ? vendorCategoryFilter.value.trim().toLowerCase() : "";
+    const selectedDistrict = vendorDistrictFilter ? vendorDistrictFilter.value.trim().toLowerCase() : "";
 
-    const categoryFilter =
-        document.getElementById("categoryFilter");
+    const filteredVendors = allVerifiedVendors.filter(vendor => {
+        const vendorName = (vendor.name || "").toLowerCase();
+        const businessName = (vendor.businessName || "").toLowerCase();
+        const vendorCategory = (vendor.category || "").toLowerCase();
+        const vendorDistrict = (vendor.district || "").toLowerCase();
 
-    const districtFilter =
-        document.getElementById("districtFilter");
+        const matchesSearch = !searchText || vendorName.includes(searchText) || businessName.includes(searchText);
+        const matchesCategory = !selectedCategory || vendorCategory === selectedCategory;
+        const matchesDistrict = !selectedDistrict || vendorDistrict === selectedDistrict;
 
-
-    const searchText =
-        searchInput.value
-            .trim()
-            .toLowerCase();
-
-
-    const selectedCategory =
-        categoryFilter.value
-            .trim()
-            .toLowerCase();
-
-
-    const selectedDistrict =
-        districtFilter.value
-            .trim()
-            .toLowerCase();
-
-
-    const filteredVendors =
-        allVerifiedVendors.filter(
-            function(vendor) {
-
-                const vendorName =
-                    (vendor.name || "")
-                        .toLowerCase();
-
-
-                const vendorCategory =
-                    (vendor.category || "")
-                        .toLowerCase();
-
-
-                const vendorDistrict =
-                    (vendor.district || "")
-                        .toLowerCase();
-
-
-                const matchesSearch =
-                    vendorName.includes(
-                        searchText
-                    );
-
-
-                const matchesCategory =
-                    !selectedCategory ||
-                    vendorCategory ===
-                    selectedCategory;
-
-
-                const matchesDistrict =
-                    !selectedDistrict ||
-                    vendorDistrict ===
-                    selectedDistrict;
-
-
-                return (
-                    matchesSearch &&
-                    matchesCategory &&
-                    matchesDistrict
-                );
-
-            }
-        );
-
+        return matchesSearch && matchesCategory && matchesDistrict;
+    });
 
     displayVendors(filteredVendors);
 }
 
 
 // =====================================================
-// DISPLAY VENDORS
+// DISPLAY VENDORS (Optimized with DocumentFragment & XSS Protection)
 // =====================================================
 
 function displayVendors(vendors) {
+    if (!vendorListContainer) {
+        vendorListContainer = document.getElementById("vendorList");
+    }
 
-    const vendorList =
-        document.getElementById("vendorList");
-
-
-    if (!vendorList) {
+    if (!vendorListContainer) {
         return;
     }
 
-
-    vendorList.innerHTML = "";
-
-
-    if (
-        !vendors ||
-        vendors.length === 0
-    ) {
-
-        vendorList.innerHTML =
-            "<p>No vendors found matching your filters.</p>";
-
+    if (!vendors || vendors.length === 0) {
+        vendorListContainer.innerHTML = "<p>No vendors found matching your filters.</p>";
         return;
     }
 
+    const fragment = document.createDocumentFragment();
 
-    vendors.forEach(function(vendor) {
-
-        const card =
-            document.createElement("div");
-
-
-        card.className =
-            "vendor-card";
-
+    vendors.forEach(vendor => {
+        const card = document.createElement("div");
+        card.className = "vendor-card";
 
         card.innerHTML = `
-
-            <span class="verified-badge">
-                ✓ Verified Vendor
-            </span>
-
-            <h3>
-                ${vendor.businessName || "Business"}
-            </h3>
-
-            <p>
-                <strong>Owner:</strong>
-                ${vendor.name || "N/A"}
-            </p>
-
-            <p>
-                <strong>Category:</strong>
-                ${vendor.category || "N/A"}
-            </p>
-
-            <p>
-                <strong>Mobile:</strong>
-                ${vendor.mobile || "N/A"}
-            </p>
-
-            <p>
-                <strong>District:</strong>
-                ${vendor.district || "N/A"}
-            </p>
-
-            <p>
-                <strong>Address:</strong>
-                ${vendor.address || "N/A"}
-            </p>
-
+            <span class="verified-badge">✓ Verified Vendor</span>
+            <h3>${escapeHtml(vendor.businessName || "Business")}</h3>
+            <p><strong>Owner:</strong> ${escapeHtml(vendor.name || "N/A")}</p>
+            <p><strong>Category:</strong> ${escapeHtml(vendor.category || "N/A")}</p>
+            <p><strong>Mobile:</strong> ${escapeHtml(vendor.mobile || "N/A")}</p>
+            <p><strong>District:</strong> ${escapeHtml(vendor.district || "N/A")}</p>
+            <p><strong>Address:</strong> ${escapeHtml(vendor.address || "N/A")}</p>
         `;
 
-
-        vendorList.appendChild(card);
-
+        fragment.appendChild(card);
     });
+
+    vendorListContainer.innerHTML = "";
+    vendorListContainer.appendChild(fragment);
 }
 
+
 // =====================================================
-// CUSTOMER LOGOUT
+// CUSTOMER LOGOUT & SESSION MANAGEMENT
 // =====================================================
 
-const customerLogout =
-    document.getElementById("customerLogout");
+function clearCustomerSession() {
+    localStorage.removeItem("customerToken");
+    localStorage.removeItem("customerRole");
+    localStorage.removeItem("customerId");
+    localStorage.removeItem("customerName");
+}
+
+const customerLogout = document.getElementById("customerLogout");
 
 if (customerLogout) {
-
-    customerLogout.addEventListener(
-        "click",
-        function () {
-
-            localStorage.removeItem(
-                "customerToken"
-            );
-
-            localStorage.removeItem(
-                "customerRole"
-            );
-
-            localStorage.removeItem(
-                "customerId"
-            );
-
-            localStorage.removeItem(
-                "customerName"
-            );
-
-
-            window.location.href =
-                "../index.html";
-
-        }
-    );
-
+    customerLogout.addEventListener("click", function (event) {
+        event.preventDefault();
+        clearCustomerSession();
+        window.location.href = "../index.html";
+    });
 }

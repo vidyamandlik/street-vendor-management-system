@@ -7,7 +7,9 @@ const cors = require("cors");
 const { MongoClient } = require("mongodb");
 const jwt = require("jsonwebtoken");
 
-require("dotenv").config();
+const path = require("path");
+require("dotenv").config({ path: path.resolve(__dirname, ".env") });
+process.env.JWT_SECRET = process.env.JWT_SECRET || "street_vendor_management_secure_2026_vidya";
 
 
 const app = express();
@@ -23,7 +25,8 @@ const PORT = process.env.PORT || 5000;
 // MONGODB CONNECTION
 // ===============================
 
-const client = new MongoClient(process.env.MONGODB_URI);
+const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost:27017";
+const client = new MongoClient(MONGODB_URI);
 
 const db = client.db("streetVendorDB");
 

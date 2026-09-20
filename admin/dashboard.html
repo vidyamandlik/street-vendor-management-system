@@ -118,8 +118,36 @@
 
     <section class="vendor-management">
 
-        <h2>Vendor Applications</h2>
+        <div class="section-header">
+            <h2>Vendor Applications</h2>
+            <button id="refreshVendorsBtn" class="refresh-btn" type="button" title="Refresh Vendor List">
+                ↻ Refresh
+            </button>
+        </div>
 
+        <!-- Notification Banner -->
+        <div id="adminNotification" class="admin-notification" style="display: none;"></div>
+
+        <!-- Filters & Search Toolbar -->
+        <div class="admin-toolbar">
+            <div class="search-wrapper">
+                <input
+                    type="text"
+                    id="adminVendorSearch"
+                    placeholder="Search by ID, Name, Business, Category, District..."
+                    class="admin-search-input"
+                >
+            </div>
+            <div class="filter-wrapper">
+                <label for="adminStatusFilter">Status:</label>
+                <select id="adminStatusFilter" class="admin-filter-select">
+                    <option value="">All Statuses</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Verified">Verified</option>
+                    <option value="Rejected">Rejected</option>
+                </select>
+            </div>
+        </div>
 
         <div class="table-container">
 
@@ -155,6 +183,11 @@
             </table>
 
         </div>
+<div id="adminPagination" class="admin-pagination" style="margin-top:15px; text-align:center;">
+    <button id="prevPageBtn" class="btn" disabled>Previous</button>
+    <span id="pageInfo" style="margin:0 10px;">Page 1 of 1</span>
+    <button id="nextPageBtn" class="btn">Next</button>
+</div>
 
     </section>
 
