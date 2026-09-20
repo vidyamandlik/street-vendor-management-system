@@ -6,16 +6,72 @@ const express = require("express");
 const cors = require("cors");
 const { MongoClient } = require("mongodb");
 const jwt = require("jsonwebtoken");
+const { randomUUID, randomBytes, scrypt, timingSafeEqual } = require("crypto");
+const { promisify } = require("util");
 
 const path = require("path");
 require("dotenv").config({ path: path.resolve(__dirname, ".env") });
-process.env.JWT_SECRET = process.env.JWT_SECRET || "street_vendor_management_secure_2026_vidya";
+
+if (!process.env.JWT_SECRET) {
+    throw new Error("JWT_SECRET must be configured in backend/.env.");
+}
+
+const scryptAsync = promisify(scrypt);
+const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || "http://localhost:5500,http://127.0.0.1:5500")
+    .split(",")
+    .map(origin => origin.trim())
+    .filter(Boolean);
+
+async function hashPassword(password) {
+    const salt = randomBytes(16).toString("hex");
+    const derivedKey = await scryptAsync(password, salt, 64);
+    return `${salt}:${derivedKey.toString("hex")}`;
+}
+
+async function verifyPassword(password, storedPassword) {
+    if (typeof storedPassword !== "string" || !storedPassword.includes(":")) {
+        return false;
+    }
+
+    const [salt, storedHash] = storedPassword.split(":");
+    const derivedKey = await scryptAsync(password, salt, 64);
+    const storedKey = Buffer.from(storedHash, "hex");
+    return storedKey.length === derivedKey.length && timingSafeEqual(storedKey, derivedKey);
+}
 
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+    origin(origin, callback) {
+        if (!origin || ALLOWED_ORIGINS.includes(origin)) {
+            return callback(null, true);
+        }
+        return callback(new Error("Origin is not allowed by CORS."));
+    }
+}));
 app.use(express.json());
+
+const loginAttempts = new Map();
+function limitLoginAttempts(req, res, next) {
+    const key = `${req.ip}:${req.path}`;
+    const now = Date.now();
+    const windowMs = 15 * 60 * 1000;
+    const maxAttempts = 10;
+    const attempts = (loginAttempts.get(key) || []).filter(time => now - time < windowMs);
+
+    if (attempts.length >= maxAttempts) {
+        return res.status(429).json({ message: "Too many login attempts. Please try again later." });
+    }
+
+    res.on("finish", () => {
+        if (res.statusCode >= 400 && res.statusCode < 500) {
+            attempts.push(now);
+            loginAttempts.set(key, attempts);
+        }
+    });
+    next();
+}
 
 
 const PORT = process.env.PORT || 5000;
@@ -136,6 +192,16 @@ async function startServer() {
 
         await client.connect();
 
+        await Promise.all([
+            vendorsCollection.createIndex({ id: 1 }, { unique: true }),
+            vendorsCollection.createIndex({ email: 1 }, { unique: true }),
+            vendorsCollection.createIndex({ mobile: 1 }, { unique: true }),
+            customersCollection.createIndex({ id: 1 }, { unique: true }),
+            customersCollection.createIndex({ email: 1 }, { unique: true }),
+            customersCollection.createIndex({ mobile: 1 }, { unique: true }),
+            reviewsCollection.createIndex({ vendorId: 1, createdAt: -1 })
+        ]);
+
 
         console.log(
             "MongoDB connected successfully!"
@@ -161,6 +227,7 @@ async function startServer() {
 
         app.post(
             "/api/admin/login",
+            limitLoginAttempts,
             async (req, res) => {
 
                 try {
@@ -171,11 +238,13 @@ async function startServer() {
                     } = req.body;
 
 
-                    // Temporary admin credentials
+                    if (!process.env.ADMIN_USERNAME || !process.env.ADMIN_PASSWORD_HASH) {
+                        return res.status(503).json({ message: "Admin login is not configured." });
+                    }
 
                     if (
-                        username === "admin" &&
-                        password === "admin123"
+                        username === process.env.ADMIN_USERNAME &&
+                        await verifyPassword(password, process.env.ADMIN_PASSWORD_HASH)
                     ) {
 
                         const token =
@@ -242,13 +311,22 @@ async function startServer() {
         // GET ALL VENDORS
         // ADMIN ONLY
         // =====================================================
-// GET ALL VENDORS
-// PUBLIC - FOR DIRECTORY
+// PUBLIC VERIFIED VENDORS - FOR DIRECTORY
 app.get("/api/vendors", async (req, res) => {
     try {
         const vendors = await db
             .collection("vendors")
-            .find({})
+            .find({ status: "Verified" })
+            .project({
+                _id: 0,
+                id: 1,
+                name: 1,
+                businessName: 1,
+                category: 1,
+                district: 1,
+                years: 1,
+                description: 1
+            })
             .toArray();
 
         res.json(vendors);
@@ -262,6 +340,27 @@ app.get("/api/vendors", async (req, res) => {
     }
 });
 
+// GET ALL VENDORS
+// ADMIN ONLY
+app.get(
+    "/api/admin/vendors",
+    authenticateToken,
+    authorizeRole("admin"),
+    async (req, res) => {
+        try {
+            const vendors = await vendorsCollection
+                .find({})
+                .project({ password: 0 })
+                .toArray();
+
+            res.json(vendors);
+        } catch (error) {
+            console.error("Error fetching admin vendor data:", error);
+            res.status(500).json({ message: "Failed to fetch vendors" });
+        }
+    }
+);
+
         // =====================================================
         // VENDOR REGISTRATION
         // =====================================================
@@ -272,7 +371,49 @@ app.get("/api/vendors", async (req, res) => {
 
                 try {
 
-                    const vendor = req.body;
+                    const {
+                        name,
+                        mobile,
+                        email,
+                        businessName,
+                        category,
+                        district,
+                        address,
+                        years,
+                        description,
+                        password
+                    } = req.body;
+
+                    if (!name || !mobile || !email || !businessName || !category || !district || !address || !password) {
+                        return res.status(400).json({
+                            message: "All required vendor details must be provided."
+                        });
+                    }
+
+                    // Assign identity and approval state on the server so clients cannot forge them.
+                    const existingVendor = await vendorsCollection.findOne({
+                        $or: [{ email }, { mobile }]
+                    });
+
+                    if (existingVendor) {
+                        return res.status(409).json({ message: "A vendor with this email or mobile already exists." });
+                    }
+
+                    const vendor = {
+                        id: `VND-${randomUUID()}`,
+                        name,
+                        mobile,
+                        email,
+                        businessName,
+                        category,
+                        district,
+                        address,
+                        years,
+                        description,
+                        password: await hashPassword(password),
+                        status: "Pending",
+                        createdAt: new Date()
+                    };
 
 
                     const result =
@@ -285,8 +426,7 @@ app.get("/api/vendors", async (req, res) => {
                         message:
                             "Vendor registered successfully",
 
-                        vendorId:
-                            result.insertedId
+                        vendorId: vendor.id
 
                     });
 
@@ -415,8 +555,29 @@ app.get("/api/vendors", async (req, res) => {
              });
 
            }
-                    const updatedVendor =
-                        req.body;
+                    const editableFields = [
+                        "name",
+                        "mobile",
+                        "email",
+                        "businessName",
+                        "category",
+                        "district",
+                        "address",
+                        "years",
+                        "description"
+                    ];
+
+                    const updatedVendor = Object.fromEntries(
+                        editableFields
+                            .filter(field => Object.prototype.hasOwnProperty.call(req.body, field))
+                            .map(field => [field, req.body[field]])
+                    );
+
+                    if (Object.keys(updatedVendor).length === 0) {
+                        return res.status(400).json({
+                            message: "No editable vendor details were provided."
+                        });
+                    }
 
 
                     const result =
@@ -551,13 +712,14 @@ app.put(
 
         app.post(
             "/api/vendors/login",
+            limitLoginAttempts,
             async (req, res) => {
 
                 try {
 
                     const {
                         id,
-                        mobile
+                        password
                     } = req.body;
 
 
@@ -565,19 +727,17 @@ app.put(
                         await vendorsCollection
                             .findOne({
 
-                                id: id,
-
-                                mobile: mobile
+                                id: id
 
                             });
 
 
-                    if (!vendor) {
+                    if (!vendor || !await verifyPassword(password, vendor.password)) {
 
                         return res.status(401).json({
 
                             message:
-                                "Invalid Vendor ID or mobile number."
+                                "Invalid Vendor ID or password."
 
                         });
 
@@ -668,9 +828,14 @@ app.put(
 
                             })
                             .project({
-
-                                password: 0
-
+                                _id: 0,
+                                id: 1,
+                                name: 1,
+                                businessName: 1,
+                                category: 1,
+                                district: 1,
+                                years: 1,
+                                description: 1
                             })
                             .toArray();
 
@@ -770,12 +935,7 @@ app.put(
 
                     // Generate Customer ID
 
-                    const customerId =
-                        "CUS-" +
-                        Math.floor(
-                            1000 +
-                            Math.random() * 9000
-                        );
+                    const customerId = `CUS-${randomUUID()}`;
 
 
                     // Customer object
@@ -790,7 +950,7 @@ app.put(
 
                         email: email,
 
-                        password: password,
+                        password: await hashPassword(password),
 
                         createdAt: new Date()
 
@@ -848,6 +1008,7 @@ app.put(
 
         app.post(
             "/api/customers/login",
+            limitLoginAttempts,
             async (req, res) => {
 
                 try {
@@ -911,9 +1072,18 @@ app.put(
 
                     // Check password
 
-                    if (
-                        customer.password !== password
-                    ) {
+                    let passwordIsValid = await verifyPassword(password, customer.password);
+
+                    // Upgrade legacy plaintext records on their next successful login.
+                    if (!passwordIsValid && customer.password === password) {
+                        passwordIsValid = true;
+                        await customersCollection.updateOne(
+                            { _id: customer._id },
+                            { $set: { password: await hashPassword(password) } }
+                        );
+                    }
+
+                    if (!passwordIsValid) {
 
                         return res.status(401).json({
 
@@ -1247,31 +1417,41 @@ app.get(
             const vendorId =
                 req.params.vendorId;
 
+            const requestedPage = Number.parseInt(req.query.page, 10) || 1;
+            const requestedLimit = Number.parseInt(req.query.limit, 10) || 20;
+            const page = Math.max(1, requestedPage);
+            const limit = Math.min(50, Math.max(1, requestedLimit));
+
 
             // Get all reviews for this vendor
 
-            const reviews =
-                await reviewsCollection
-                    .find({
-                        vendorId: vendorId
-                    })
-                    .sort({
-                        createdAt: -1
-                    })
-                    .toArray();
+            const [reviews, summary] = await Promise.all([
+                reviewsCollection
+                    .find({ vendorId: vendorId })
+                    .project({ customerId: 0 })
+                    .sort({ createdAt: -1 })
+                    .skip((page - 1) * limit)
+                    .limit(limit)
+                    .toArray(),
+                reviewsCollection.aggregate([
+                    { $match: { vendorId: vendorId } },
+                    { $group: { _id: null, averageRating: { $avg: "$rating" }, reviewCount: { $sum: 1 } } }
+                ]).toArray()
+            ]);
 
 
             // No reviews
 
-            if (reviews.length === 0) {
+            if (summary.length === 0) {
 
                 return res.json({
 
                     averageRating: 0,
 
                     reviewCount: 0,
-
-                    reviews: []
+                    reviews: [],
+                    page,
+                    limit
 
                 });
 
@@ -1280,19 +1460,7 @@ app.get(
 
             // Calculate total rating
 
-            const totalRating =
-                reviews.reduce(
-                    (sum, review) =>
-                        sum + review.rating,
-                    0
-                );
-
-
-            // Calculate average
-
-            const averageRating =
-                totalRating /
-                reviews.length;
+            const { averageRating, reviewCount } = summary[0];
 
 
             res.json({
@@ -1302,11 +1470,13 @@ app.get(
                         averageRating.toFixed(1)
                     ),
 
-                reviewCount:
-                    reviews.length,
+                reviewCount: reviewCount,
 
                 reviews:
-                    reviews
+                    reviews,
+
+                page,
+                limit
 
             });
 

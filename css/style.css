@@ -2581,12 +2581,21 @@ footer {
     font-size: 35px;
 }
 
-.star-rating span {
+.star-rating span,
+.star-rating button {
     cursor: pointer;
     color: #ccc;
 }
 
-.star-rating span.selected {
+.star-rating button {
+    border: 0;
+    background: transparent;
+    padding: 0;
+    font: inherit;
+}
+
+.star-rating span.selected,
+.star-rating button.selected {
     color:  #126b42;
 }
 

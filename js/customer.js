@@ -111,10 +111,8 @@ if (customerRegisterForm) {
                         + data.customer.id;
 
                     message.style.color = "green";
-                }
 
                     customerRegisterForm.reset();
-
 
                     setTimeout(function () {
 
@@ -273,8 +271,10 @@ if (customerLoginForm) {
             }
 
         }
-    });
+    );
 }
+
+
 
 
 // =====================================================
@@ -413,7 +413,7 @@ async function loadVerifiedVendors() {
         document.getElementById("vendorList");
 
 
-    if (!vendorListContainer) {
+    if (!vendorList) {
         return;
     }
 
@@ -447,15 +447,14 @@ async function loadVerifiedVendors() {
 
 
         // Display all vendors
-        displayVendors(vendors);
-
-
-        // Activate filters
         setupVendorFilters();
+        applyVendorFilters();
 
     } catch (error) {
         console.error("Error loading vendors:", error);
-        vendorListContainer.innerHTML = "<p>Unable to connect to backend server. Please verify the server is running.</p>";
+        if (vendorList) {
+            vendorList.innerHTML = "<p>Unable to connect to backend server. Please verify the server is running.</p>";
+        }
     }
 }
 
@@ -536,11 +535,17 @@ function setupVendorFilters() {
         return;
     }
 
+    if (searchInput.dataset.filtersInitialized === "true") {
+        return;
+    }
+
+    searchInput.dataset.filtersInitialized = "true";
+
 
     // Search vendor by name
     searchInput.addEventListener(
         "input",
-        applyVendorFilters
+        debounce(applyVendorFilters, 200)
     );
 
 
@@ -575,6 +580,10 @@ function applyVendorFilters() {
     const districtFilter =
         document.getElementById("districtFilter");
 
+    if (!searchInput || !categoryFilter || !districtFilter) {
+        return;
+    }
+
 
     const searchText =
         searchInput.value
@@ -599,17 +608,17 @@ function applyVendorFilters() {
             function(vendor) {
 
                 const vendorName =
-                    (vendor.name || "")
+                    String(vendor.name || "")
                         .toLowerCase();
 
 
                 const vendorCategory =
-                    (vendor.category || "")
+                    String(vendor.category || "")
                         .toLowerCase();
 
 
                 const vendorDistrict =
-                    (vendor.district || "")
+                    String(vendor.district || "")
                         .toLowerCase();
 
 
@@ -704,7 +713,7 @@ function displayVendors(vendors) {
         document.getElementById("vendorList");
 
 
-    if (!vendorListContainer) {
+    if (!vendorList) {
         return;
     }
 
@@ -724,56 +733,166 @@ function displayVendors(vendors) {
     }
 
 
+    const fragment = document.createDocumentFragment();
+
     vendors.forEach(function(vendor) {
+        const card = document.createElement("div");
+        const badge = document.createElement("span");
+        const heading = document.createElement("h3");
+        const rating = document.createElement("p");
+        const reviewButton = document.createElement("button");
 
-        const card =
-            document.createElement("div");
+        card.className = "vendor-card";
+        badge.className = "verified-badge";
+        badge.textContent = "✓ Verified Vendor";
+        heading.textContent = vendor.businessName || "Business";
+        rating.textContent = "Loading rating...";
+        rating.className = "vendor-rating";
 
+        addVendorDetail(card, "Owner", vendor.name);
+        addVendorDetail(card, "Category", vendor.category);
+        addVendorDetail(card, "Mobile", vendor.mobile);
+        addVendorDetail(card, "District", vendor.district);
+        addVendorDetail(card, "Address", vendor.address);
 
-        card.className =
-            "vendor-card";
+        reviewButton.type = "button";
+        reviewButton.className = "submit-review-btn";
+        reviewButton.textContent = "Rate & Review";
+        reviewButton.addEventListener("click", function () {
+            openCustomerReviewModal(vendor.id, vendor.businessName || vendor.name || "Vendor");
+        });
 
+        card.prepend(badge, heading);
+        card.append(rating, reviewButton);
+        fragment.appendChild(card);
 
-        card.innerHTML = `
+        if (vendor.id) {
+            getVendorRating(vendor.id).then(function (ratingData) {
+                rating.textContent = ratingData.reviewCount > 0
+                    ? `Rating: ${ratingData.averageRating}/5 (${ratingData.reviewCount} review${ratingData.reviewCount === 1 ? "" : "s"})`
+                    : "No ratings yet";
+            });
+        } else {
+            rating.textContent = "No ratings yet";
+            reviewButton.disabled = true;
+        }
+    });
 
-            <span class="verified-badge">
-                ✓ Verified Vendor
-            </span>
+    vendorList.appendChild(fragment);
+}
 
-            <h3>
-                ${vendor.businessName || "Business"}
-            </h3>
+function addVendorDetail(card, label, value) {
+    const detail = document.createElement("p");
+    const labelElement = document.createElement("strong");
 
-            <p>
-                <strong>Owner:</strong>
-                ${vendor.name || "N/A"}
-            </p>
+    labelElement.textContent = `${label}: `;
+    detail.append(labelElement, document.createTextNode(value || "N/A"));
+    card.appendChild(detail);
+}
 
-            <p>
-                <strong>Category:</strong>
-                ${vendor.category || "N/A"}
-            </p>
+// =====================================================
+// CUSTOMER REVIEW MODAL
+// =====================================================
 
-            <p>
-                <strong>Mobile:</strong>
-                ${vendor.mobile || "N/A"}
-            </p>
+let selectedCustomerRating = 0;
 
-            <p>
-                <strong>District:</strong>
-                ${vendor.district || "N/A"}
-            </p>
+function openCustomerReviewModal(vendorId, vendorName) {
+    const modal = document.getElementById("customerReviewModal");
+    const vendorIdInput = document.getElementById("customerReviewVendorId");
+    const vendorNameElement = document.getElementById("customerReviewVendorName");
+    const reviewText = document.getElementById("customerReviewText");
 
-            <p>
-                <strong>Address:</strong>
-                ${vendor.address || "N/A"}
-            </p>
+    if (!modal || !vendorIdInput || !vendorNameElement || !reviewText || !vendorId) {
+        return;
+    }
 
-        `;
+    vendorIdInput.value = vendorId;
+    vendorNameElement.textContent = `Rate ${vendorName}`;
+    reviewText.value = "";
+    selectCustomerRating(0);
+    modal.style.display = "block";
+}
 
+function closeCustomerReviewModal() {
+    const modal = document.getElementById("customerReviewModal");
+    if (modal) {
+        modal.style.display = "none";
+    }
+}
 
-        vendorList.appendChild(card);
+function selectCustomerRating(rating) {
+    selectedCustomerRating = rating;
+    const stars = document.querySelectorAll("#customerStarRating button");
+    const selectedRatingText = document.getElementById("customerSelectedRating");
 
+    stars.forEach(function (star, index) {
+        star.classList.toggle("selected", index < rating);
+    });
+
+    if (selectedRatingText) {
+        selectedRatingText.textContent = rating
+            ? `Selected rating: ${rating} of 5`
+            : "Select your rating";
+    }
+}
+
+window.openCustomerReviewModal = openCustomerReviewModal;
+window.closeCustomerReviewModal = closeCustomerReviewModal;
+window.selectCustomerRating = selectCustomerRating;
+
+const customerReviewForm = document.getElementById("customerReviewForm");
+
+if (customerReviewForm) {
+    customerReviewForm.addEventListener("submit", async function (event) {
+        event.preventDefault();
+
+        const token = localStorage.getItem("customerToken");
+        const vendorId = document.getElementById("customerReviewVendorId").value;
+        const review = document.getElementById("customerReviewText").value.trim();
+        const submitButton = customerReviewForm.querySelector("button[type='submit']");
+
+        if (!token) {
+            alert("Your session has expired. Please log in again.");
+            window.location.href = "login.html";
+            return;
+        }
+
+        if (!selectedCustomerRating) {
+            alert("Please select a rating.");
+            return;
+        }
+
+        if (!review) {
+            alert("Please enter a review.");
+            return;
+        }
+
+        if (submitButton) submitButton.disabled = true;
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/reviews`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({ vendorId, rating: selectedCustomerRating, review })
+            });
+            const result = await parseJsonResponse(response);
+
+            if (!response.ok) {
+                throw new Error((result && result.message) || "Unable to submit your review.");
+            }
+
+            closeCustomerReviewModal();
+            alert("Thank you for your review.");
+            loadVerifiedVendors();
+        } catch (error) {
+            console.error("Review submission error:", error);
+            alert(error.message || "Unable to submit your review.");
+        } finally {
+            if (submitButton) submitButton.disabled = false;
+        }
     });
 }
 
@@ -788,7 +907,9 @@ if (customerLogout) {
 
     customerLogout.addEventListener(
         "click",
-        function () {
+        function (event) {
+
+            event.preventDefault();
 
             localStorage.removeItem(
                 "customerToken"

@@ -2,6 +2,10 @@
 // VENDOR REGISTRATION
 // ===============================
 
+const VENDOR_TOKEN_KEY = "vendorToken";
+const VENDOR_ROLE_KEY = "vendorRole";
+const VENDOR_ID_KEY = "loggedInVendorId";
+
 const vendorForm = document.getElementById("vendorForm");
 
 if (vendorForm) {
@@ -10,18 +14,9 @@ if (vendorForm) {
 
         event.preventDefault();
 
-// Generate Vendor ID
-
-        const vendorId =
-            "VND-" +
-            Math.floor(1000 + Math.random() * 9000);
-
-
         // Collect vendor information
 
         const vendor = {
-
-            id: vendorId,
 
             name:
                 document.getElementById("vendorName").value,
@@ -31,6 +26,9 @@ if (vendorForm) {
 
             email:
                 document.getElementById("email").value,
+
+            password:
+                document.getElementById("vendorPassword").value,
 
             businessName:
                 document.getElementById("businessName").value,
@@ -48,9 +46,7 @@ if (vendorForm) {
                 document.getElementById("years").value,
 
             description:
-                document.getElementById("description").value,
-
-            status: "Pending"
+                document.getElementById("description").value
 
         };
 
@@ -99,7 +95,7 @@ if (vendorForm) {
 
             document.getElementById(
                 "vendorId"
-            ).textContent = vendorId;
+            ).textContent = result.vendorId;
 
 
         } catch (error) {
@@ -138,10 +134,10 @@ if (vendorLoginForm) {
                     "vendorIdLogin"
                 ).value.trim();
 
-            const enteredMobile =
+            const enteredPassword =
                 document.getElementById(
-                    "vendorMobileLogin"
-                ).value.trim();
+                    "vendorPasswordLogin"
+                ).value;
 
             try {
 
@@ -156,7 +152,7 @@ if (vendorLoginForm) {
 
                         body: JSON.stringify({
                             id: enteredId,
-                            mobile: enteredMobile
+                            password: enteredPassword
                         })
                     }
                 );
@@ -175,33 +171,33 @@ if (vendorLoginForm) {
                         "vendorLoginError"
                     ).textContent =
                         result.message ||
-                        "Invalid Vendor ID or mobile number.";
+                        "Invalid Vendor ID or password.";
 
                     return;
                 }
 
                 // Save JWT token
                 localStorage.setItem(
-                    "token",
+                    VENDOR_TOKEN_KEY,
                     result.token
                 );
 
                 // Save user role
                 localStorage.setItem(
-                    "userRole",
+                    VENDOR_ROLE_KEY,
                     result.role
                 );
 
                 // Save logged-in vendor ID
                 localStorage.setItem(
-                    "loggedInVendorId",
+                    VENDOR_ID_KEY,
                     result.vendor.id
                 );
 
                 console.log(
                     "Saved Vendor ID:",
                     localStorage.getItem(
-                        "loggedInVendorId"
+                        VENDOR_ID_KEY
                     )
                 );
 
@@ -241,10 +237,10 @@ if (vendorDashboard) {
     // Get authentication information
 
     const token =
-        localStorage.getItem("token");
+        localStorage.getItem(VENDOR_TOKEN_KEY);
 
     const userRole =
-        localStorage.getItem("userRole");
+        localStorage.getItem(VENDOR_ROLE_KEY);
 
 
     // Check vendor authentication
@@ -274,7 +270,7 @@ async function loadVendorDashboard() {
 
     const loggedInVendorId =
         localStorage.getItem(
-            "loggedInVendorId"
+            VENDOR_ID_KEY
         );
 
 
@@ -293,7 +289,7 @@ async function loadVendorDashboard() {
         // Get JWT token
 
             const token =
-             localStorage.getItem("token");
+             localStorage.getItem(VENDOR_TOKEN_KEY);
 
 
           if (!token) {
@@ -306,7 +302,7 @@ async function loadVendorDashboard() {
                }
                 //GET VENDOR INFOMATION FROM BACKEND
               const response = await fetch(
-               `http://localhost:5000/api/vendors/${loggedInVendorId}`,
+               `http://localhost:5000/api/vendors/${encodeURIComponent(loggedInVendorId)}`,
          {
                  headers: {
                     Authorization:
@@ -319,6 +315,11 @@ async function loadVendorDashboard() {
         const vendor =
             await response.json();
 
+
+        if (response.status === 401 || response.status === 403) {
+            handleVendorSessionExpired();
+            return;
+        }
 
         if (!response.ok) {
 
@@ -466,7 +467,7 @@ async function showEditProfile() {
 
     const loggedInVendorId =
         localStorage.getItem(
-            "loggedInVendorId"
+            VENDOR_ID_KEY
         );
 
 
@@ -484,7 +485,7 @@ async function showEditProfile() {
 
         // Get current vendor information from MongoDB
 
-     const token = localStorage.getItem("token");
+     const token = localStorage.getItem(VENDOR_TOKEN_KEY);
 
 if (!token) {
     alert("Vendor session expired. Please login again.");
@@ -493,7 +494,7 @@ if (!token) {
 }
 
        const response = await fetch(
-             `http://localhost:5000/api/vendors/${loggedInVendorId}`,
+             `http://localhost:5000/api/vendors/${encodeURIComponent(loggedInVendorId)}`,
          {
                headers: {
                "Authorization": `Bearer ${token}`
@@ -505,6 +506,11 @@ if (!token) {
         const vendor =
             await response.json();
 
+
+        if (response.status === 401 || response.status === 403) {
+            handleVendorSessionExpired();
+            return;
+        }
 
         if (!response.ok) {
 
@@ -614,7 +620,7 @@ if (editProfileForm) {
 
             const loggedInVendorId =
                 localStorage.getItem(
-                    "loggedInVendorId"
+                    VENDOR_ID_KEY
                 );
 
 
@@ -684,7 +690,7 @@ if (editProfileForm) {
 
             try {
 
-                 const token = localStorage.getItem("token");
+                 const token = localStorage.getItem(VENDOR_TOKEN_KEY);
 
            if (!token) {
                    alert("Vendor session expired. Please login again.");
@@ -693,7 +699,7 @@ if (editProfileForm) {
                  }
 
                    const response = await fetch(
-                  `http://localhost:5000/api/vendors/${loggedInVendorId}`,
+                  `http://localhost:5000/api/vendors/${encodeURIComponent(loggedInVendorId)}`,
             {
                        method: "PUT",
 
@@ -711,6 +717,11 @@ if (editProfileForm) {
 
                    console.log("Update response:", result);
 
+
+                if (response.status === 401 || response.status === 403) {
+                    handleVendorSessionExpired();
+                    return;
+                }
 
                 if (!response.ok) {
 
@@ -759,15 +770,22 @@ function cancelEdit() {
 // VENDOR LOGOUT
 // ===============================
 
+function clearVendorSession() {
+    localStorage.removeItem(VENDOR_TOKEN_KEY);
+    localStorage.removeItem(VENDOR_ROLE_KEY);
+    localStorage.removeItem(VENDOR_ID_KEY);
+    localStorage.removeItem("vendorLoggedIn");
+}
+
+function handleVendorSessionExpired() {
+    clearVendorSession();
+    alert("Your vendor session has expired. Please log in again.");
+    window.location.href = "login.html";
+}
+
 function vendorLogout() {
 
-    localStorage.removeItem("token");
-
-    localStorage.removeItem("userRole");
-
-    localStorage.removeItem("loggedInVendorId");
-
-    localStorage.removeItem("vendorLoggedIn");
+    clearVendorSession();
 
     window.location.href = "login.html";
 

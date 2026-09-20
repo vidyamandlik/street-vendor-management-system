@@ -62,6 +62,7 @@
                     type="text"
                     id="customerLoginId"
                     placeholder="Enter email or mobile"
+                    autocomplete="username"
                     required
                 >
 
@@ -75,6 +76,7 @@
                     type="password"
                     id="customerLoginPassword"
                     placeholder="Enter password"
+                    autocomplete="current-password"
                     required
                 >
 
@@ -87,7 +89,7 @@
 
 
             <!-- Message -->
-            <p id="customerLoginMessage"></p>
+            <p id="customerLoginMessage" aria-live="polite"></p>
 
 
             <!-- Register -->

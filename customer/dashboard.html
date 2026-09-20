@@ -30,7 +30,7 @@
                 Vendor Directory
             </a>
 
-            <a href="#" id="customerLogout">
+            <a href="../index.html" id="customerLogout">
                 Logout
             </a>
 
@@ -115,12 +115,16 @@
                         Clothing
                     </option>
 
-                    <option value="Fruit">
-                        Fruit
+                    <option value="Fruits and Vegetables">
+                        Fruits and Vegetables
                     </option>
 
-                    <option value="Vegetables">
-                        Vegetables
+                    <option value="Accessories">
+                        Accessories
+                    </option>
+
+                    <option value="Grocery">
+                        Grocery
                     </option>
 
                     <option value="Other">
@@ -168,12 +172,14 @@
 
     <div class="review-modal-content">
 
-        <span
+        <button
+            type="button"
             class="close-review-modal"
             onclick="closeCustomerReviewModal()"
+            aria-label="Close review dialog"
         >
             &times;
-        </span>
+        </button>
 
 
         <h2>
@@ -202,35 +208,15 @@
                 class="star-rating"
             >
 
-                <span
-                    onclick="selectCustomerRating(1)"
-                >
-                    ★
-                </span>
+                <button type="button" onclick="selectCustomerRating(1)" aria-label="Rate 1 out of 5">★</button>
 
-                <span
-                    onclick="selectCustomerRating(2)"
-                >
-                    ★
-                </span>
+                <button type="button" onclick="selectCustomerRating(2)" aria-label="Rate 2 out of 5">★</button>
 
-                <span
-                    onclick="selectCustomerRating(3)"
-                >
-                    ★
-                </span>
+                <button type="button" onclick="selectCustomerRating(3)" aria-label="Rate 3 out of 5">★</button>
 
-                <span
-                    onclick="selectCustomerRating(4)"
-                >
-                    ★
-                </span>
+                <button type="button" onclick="selectCustomerRating(4)" aria-label="Rate 4 out of 5">★</button>
 
-                <span
-                    onclick="selectCustomerRating(5)"
-                >
-                    ★
-                </span>
+                <button type="button" onclick="selectCustomerRating(5)" aria-label="Rate 5 out of 5">★</button>
 
             </div>
 

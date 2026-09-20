@@ -226,6 +226,9 @@ function initAdminDashboard() {
 
     // Initial data fetch
     loadVendorData();
+
+    // Wire up pagination buttons
+    setupPaginationListeners();
 }
 
 
@@ -254,7 +257,7 @@ async function loadVendorData(isManualRefresh = false) {
     }
 
     try {
-        const response = await fetch(`${API_BASE_URL}/vendors`, {
+        const response = await fetch(`${API_BASE_URL}/admin/vendors`, {
             headers: {
                 "Authorization": `Bearer ${token}`
             }
@@ -320,12 +323,12 @@ function applyVendorFilters() {
     const selectedStatus = statusFilter ? statusFilter.value.trim().toLowerCase() : "";
 
     const filteredVendors = allVendors.filter(vendor => {
-        const id = (vendor.id || "").toLowerCase();
-        const name = (vendor.name || "").toLowerCase();
-        const businessName = (vendor.businessName || "").toLowerCase();
-        const category = (vendor.category || "").toLowerCase();
-        const district = (vendor.district || "").toLowerCase();
-        const status = (vendor.status || "pending").toLowerCase();
+        const id = String(vendor.id || "").toLowerCase();
+        const name = String(vendor.name || "").toLowerCase();
+        const businessName = String(vendor.businessName || "").toLowerCase();
+        const category = String(vendor.category || "").toLowerCase();
+        const district = String(vendor.district || "").toLowerCase();
+        const status = String(vendor.status || "pending").toLowerCase();
 
         const matchesSearch = !searchText ||
             id.includes(searchText) ||
@@ -384,34 +387,7 @@ function setupPaginationListeners() {
     }
 }
 
-    const searchInput = document.getElementById("adminVendorSearch");
-    const statusFilter = document.getElementById("adminStatusFilter");
 
-    const searchText = searchInput ? searchInput.value.trim().toLowerCase() : "";
-    const selectedStatus = statusFilter ? statusFilter.value.trim().toLowerCase() : "";
-
-    const filteredVendors = allVendors.filter(vendor => {
-        const id = (vendor.id || "").toLowerCase();
-        const name = (vendor.name || "").toLowerCase();
-        const businessName = (vendor.businessName || "").toLowerCase();
-        const category = (vendor.category || "").toLowerCase();
-        const district = (vendor.district || "").toLowerCase();
-        const status = (vendor.status || "pending").toLowerCase();
-
-        const matchesSearch = !searchText ||
-            id.includes(searchText) ||
-            name.includes(searchText) ||
-            businessName.includes(searchText) ||
-            category.includes(searchText) ||
-            district.includes(searchText);
-
-        const matchesStatus = !selectedStatus || status === selectedStatus;
-
-        return matchesSearch && matchesStatus;
-    });
-
-    renderVendorTable(filteredVendors);
-}
 
 
 // =====================================================
@@ -436,17 +412,17 @@ function renderVendorTable(vendors) {
 
     vendors.forEach(vendor => {
         const row = document.createElement("tr");
-        const status = vendor.status || "Pending";
+        const status = String(vendor.status || "Pending");
         const normalizedStatus = status.toLowerCase();
 
         // Status badge pill
         let badgeHtml = "";
         if (normalizedStatus === "verified") {
-            badgeHtml = `<span class="status-pill status-verified">✓ Verified</span>`;
+            badgeHtml = `<span class="status-pill status-verified">&#10003; Verified</span>`;
         } else if (normalizedStatus === "rejected") {
-            badgeHtml = `<span class="status-pill status-rejected">✕ Rejected</span>`;
+            badgeHtml = `<span class="status-pill status-rejected">&#10005; Rejected</span>`;
         } else {
-            badgeHtml = `<span class="status-pill status-pending">⏳ Pending</span>`;
+            badgeHtml = `<span class="status-pill status-pending">&#8987; Pending</span>`;
         }
 
         // Action buttons tailored to current status
@@ -516,7 +492,7 @@ function updateStatistics(vendors) {
     let rejected = 0;
 
     vendors.forEach(v => {
-        const s = (v.status || "").toLowerCase();
+        const s = String(v.status || "").toLowerCase();
         if (s === "verified") verified++;
         else if (s === "rejected") rejected++;
         else pending++;

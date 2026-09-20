@@ -25,6 +25,17 @@ const districtFilter =
         "districtFilter"
     );
 
+let allVerifiedVendors = [];
+let directoryRenderVersion = 0;
+
+function debounce(func, delay = 250) {
+    let timeoutId;
+    return function (...args) {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => func.apply(this, args), delay);
+    };
+}
+
 
 
 // =====================================================
@@ -54,17 +65,11 @@ async function loadDirectory() {
         }
 
 
-        const verifiedVendors =
-            vendors.filter(
-                function (vendor) {
+        const verifiedVendors = vendors.filter(function (vendor) {
+            return String(vendor.status || "").toLowerCase() === "verified";
+        });
 
-                    return (
-                        vendor.status ===
-                        "Verified"
-                    );
-
-                }
-            );
+        allVerifiedVendors = verifiedVendors;
 
 
         if (
@@ -78,9 +83,7 @@ async function loadDirectory() {
         }
 
 
-        displayVendors(
-            verifiedVendors
-        );
+        filterVendors();
 
     } catch (error) {
 
@@ -108,7 +111,7 @@ async function getVendorRating(
 
         const response =
             await fetch(
-                `http://localhost:5000/api/reviews/vendor/${vendorId}`
+                `http://localhost:5000/api/reviews/vendor/${encodeURIComponent(vendorId)}`
             );
 
 
@@ -153,6 +156,12 @@ async function displayVendors(
     vendors
 ) {
 
+    if (!vendorDirectory) {
+        return;
+    }
+
+    const renderVersion = ++directoryRenderVersion;
+
     vendorDirectory.innerHTML =
         "";
 
@@ -168,126 +177,91 @@ async function displayVendors(
     }
 
 
-    for (
-        const vendor of vendors
-    ) {
+    const ratings = await Promise.all(
+        vendors.map(function (vendor) {
+            return vendor.id ? getVendorRating(vendor.id) : Promise.resolve({ averageRating: 0, reviewCount: 0 });
+        })
+    );
 
-        const card =
-            document.createElement(
-                "div"
-            );
-
-
-        card.className =
-            "vendor-card";
-
-
-        const rating =
-            await getVendorRating(
-                vendor.id
-            );
-
-
-        const averageRating =
-            Number(
-                rating.averageRating || 0
-            ).toFixed(1);
-
-
-        const reviewCount =
-            rating.reviewCount || 0;
-
-
-        card.innerHTML = `
-
-            <div class="vendor-card-header">
-
-                <h2>
-                    ${vendor.businessName}
-                </h2>
-
-                <span class="verified-badge">
-                    ✓ Verified
-                </span>
-
-            </div>
-
-
-            <p>
-                <strong>Owner:</strong>
-                ${vendor.name}
-            </p>
-
-
-            <p>
-                <strong>Category:</strong>
-                ${vendor.category}
-            </p>
-
-
-            <p>
-                <strong>District:</strong>
-                ${vendor.district}
-            </p>
-
-
-            <p>
-                <strong>Business Experience:</strong>
-                ${vendor.years} years
-            </p>
-
-
-            <p>
-                ${vendor.description || ""}
-            </p>
-
-
-            <!-- RATING -->
-
-            <div class="vendor-rating">
-
-                <span class="rating-stars">
-                    ⭐ ${averageRating}
-                </span>
-
-                <span class="review-count">
-                    (${reviewCount} Reviews)
-                </span>
-
-            </div>
-
-
-            <!-- VIEW REVIEWS -->
-
-            <button
-                class="view-reviews-btn"
-                onclick="viewReviews(
-                    '${vendor.id}'
-                )"
-            >
-                View Reviews
-            </button>
-
-
-            <!-- RATE & REVIEW -->
-
-            <button
-                class="rate-review-btn"
-                onclick="openReviewModal(
-                    '${vendor.id}',
-                    '${vendor.businessName}'
-                )"
-            >
-                ⭐ Rate & Review
-            </button>
-
-        `;
-
-
-        vendorDirectory.appendChild(
-            card
-        );
+    // Ignore an older asynchronous render if a newer filter was applied.
+    if (renderVersion !== directoryRenderVersion) {
+        return;
     }
+
+    const fragment = document.createDocumentFragment();
+
+    vendors.forEach(function (vendor, index) {
+        const card = document.createElement("div");
+        const header = document.createElement("div");
+        const heading = document.createElement("h2");
+        const badge = document.createElement("span");
+        const ratingContainer = document.createElement("div");
+        const ratingStars = document.createElement("span");
+        const reviewCount = document.createElement("span");
+        const viewButton = document.createElement("button");
+        const rateButton = document.createElement("button");
+        const rating = ratings[index];
+        const averageRating = Number(rating.averageRating || 0).toFixed(1);
+
+        card.className = "vendor-card";
+        header.className = "vendor-card-header";
+        heading.textContent = vendor.businessName || "Business";
+        badge.className = "verified-badge";
+        badge.textContent = "✓ Verified";
+        header.append(heading, badge);
+
+        addVendorDetail(card, "Owner", vendor.name);
+        addVendorDetail(card, "Category", vendor.category);
+        addVendorDetail(card, "District", vendor.district);
+        addVendorDetail(card, "Business Experience", `${vendor.years || 0} years`);
+
+        if (vendor.description) {
+            const description = document.createElement("p");
+            description.textContent = vendor.description;
+            card.appendChild(description);
+        }
+
+        ratingContainer.className = "vendor-rating";
+        ratingStars.className = "rating-stars";
+        ratingStars.textContent = `⭐ ${averageRating}`;
+        reviewCount.className = "review-count";
+        reviewCount.textContent = `(${rating.reviewCount || 0} Reviews)`;
+        ratingContainer.append(ratingStars, reviewCount);
+
+        viewButton.type = "button";
+        viewButton.className = "view-reviews-btn";
+        viewButton.textContent = "View Reviews";
+        viewButton.addEventListener("click", function () {
+            viewReviews(vendor.id);
+        });
+
+        rateButton.type = "button";
+        rateButton.className = "rate-review-btn";
+        rateButton.textContent = "⭐ Rate & Review";
+        rateButton.addEventListener("click", function () {
+            openReviewModal(vendor.id, vendor.businessName || "Business");
+        });
+
+        if (!vendor.id) {
+            viewButton.disabled = true;
+            rateButton.disabled = true;
+        }
+
+        card.prepend(header);
+        card.append(ratingContainer, viewButton, rateButton);
+        fragment.appendChild(card);
+    });
+
+    vendorDirectory.appendChild(fragment);
+}
+
+function addVendorDetail(card, label, value) {
+    const detail = document.createElement("p");
+    const labelElement = document.createElement("strong");
+
+    labelElement.textContent = `${label}: `;
+    detail.append(labelElement, document.createTextNode(value || "N/A"));
+    card.appendChild(detail);
 }
 
 
@@ -304,7 +278,7 @@ async function viewReviews(
 
         const response =
             await fetch(
-                `http://localhost:5000/api/reviews/vendor/${vendorId}`
+                `http://localhost:5000/api/reviews/vendor/${encodeURIComponent(vendorId)}`
             );
 
 
@@ -403,7 +377,11 @@ function showNoVendors() {
 // FILTER VENDORS
 // =====================================================
 
-async function filterVendors() {
+function filterVendors() {
+
+    if (!searchInput || !categoryFilter || !districtFilter) {
+        return;
+    }
 
     const search =
         searchInput.value
@@ -421,53 +399,19 @@ async function filterVendors() {
             .trim();
 
 
-    try {
-
-        const response =
-            await fetch(
-                "http://localhost:5000/api/vendors"
-            );
-
-
-        const vendors =
-            await response.json();
-
-
-        if (!response.ok) {
-
-            throw new Error(
-                "Failed to load vendors"
-            );
-
-        }
-
-
-        const verifiedVendors =
-            vendors.filter(
-                function (vendor) {
-
-                    return (
-                        vendor.status ===
-                        "Verified"
-                    );
-
-                }
-            );
-
-
         const filteredVendors =
-            verifiedVendors.filter(
+            allVerifiedVendors.filter(
                 function (vendor) {
 
                     const matchesSearch =
 
-                        (vendor.name || "")
+                        String(vendor.name || "")
                             .toLowerCase()
                             .includes(search)
 
                         ||
 
-                        (vendor.businessName || "")
+                        String(vendor.businessName || "")
                             .toLowerCase()
                             .includes(search);
 
@@ -484,7 +428,7 @@ async function filterVendors() {
 
                         district === "" ||
 
-                        (vendor.district || "")
+                        String(vendor.district || "")
                             .toLowerCase()
                             .includes(district);
 
@@ -499,20 +443,7 @@ async function filterVendors() {
             );
 
 
-        displayVendors(
-            filteredVendors
-        );
-
-    } catch (error) {
-
-        console.error(
-            "Error filtering vendors:",
-            error
-        );
-
-        showNoVendors();
-
-    }
+        displayVendors(filteredVendors);
 }
 
 
@@ -525,7 +456,7 @@ if (searchInput) {
 
     searchInput.addEventListener(
         "input",
-        filterVendors
+        debounce(filterVendors, 200)
     );
 
 }
@@ -544,7 +475,7 @@ if (categoryFilter) {
 if (districtFilter) {
 
     districtFilter.addEventListener(
-        "input",
+        "change",
         filterVendors
     );
 
