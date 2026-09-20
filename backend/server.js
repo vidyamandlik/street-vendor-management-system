@@ -41,6 +41,9 @@ const vendorsCollection =
 const customersCollection =
     db.collection("customers");
 
+const reviewsCollection =
+    db.collection("reviews");
+
 
 // ===============================
 // AUTHENTICATION MIDDLEWARE
@@ -1077,7 +1080,256 @@ app.put(
             }
         );
 
+        // =====================================================
+// ADD RATING & REVIEW
+// CUSTOMER ONLY
+// =====================================================
 
+app.post(
+    "/api/reviews",
+    authenticateToken,
+    authorizeRole("customer"),
+    async (req, res) => {
+
+        try {
+
+            const {
+                vendorId,
+                rating,
+                review
+            } = req.body;
+
+
+            // Check required fields
+
+            if (
+                !vendorId ||
+                !rating ||
+                !review
+            ) {
+
+                return res.status(400).json({
+
+                    message:
+                        "Vendor ID, rating and review are required"
+
+                });
+
+            }
+
+
+            // Check rating
+
+            if (
+                rating < 1 ||
+                rating > 5
+            ) {
+
+                return res.status(400).json({
+
+                    message:
+                        "Rating must be between 1 and 5"
+
+                });
+
+            }
+
+
+            // Check vendor exists
+
+            const vendor =
+                await vendorsCollection.findOne({
+
+                    id: vendorId,
+
+                    status: "Verified"
+
+                });
+
+
+            if (!vendor) {
+
+                return res.status(404).json({
+
+                    message:
+                        "Verified vendor not found"
+
+                });
+
+            }
+
+
+            // Create review
+
+            const newReview = {
+
+                customerId: req.user.id,
+
+                vendorId: vendorId,
+
+                rating: Number(rating),
+
+                review: review.trim(),
+
+                createdAt: new Date()
+
+            };
+
+
+            // Save review
+
+            const result =
+                await reviewsCollection.insertOne(
+                    newReview
+                );
+
+
+            res.status(201).json({
+
+                message:
+                    "Rating and review submitted successfully",
+
+                review: {
+
+                    _id: result.insertedId,
+
+                    customerId:
+                        newReview.customerId,
+
+                    vendorId:
+                        newReview.vendorId,
+
+                    rating:
+                        newReview.rating,
+
+                    review:
+                        newReview.review,
+
+                    createdAt:
+                        newReview.createdAt
+
+                }
+
+            });
+
+
+        } catch (error) {
+
+            console.error(
+                "Review submission error:",
+                error
+            );
+
+
+            res.status(500).json({
+
+                message:
+                    "Failed to submit rating and review"
+
+            });
+
+        }
+
+    }
+);
+
+// =====================================================
+// GET VENDOR REVIEWS
+// PUBLIC
+// =====================================================
+
+app.get(
+    "/api/reviews/vendor/:vendorId",
+    async (req, res) => {
+
+        try {
+
+            const vendorId =
+                req.params.vendorId;
+
+
+            // Get all reviews for this vendor
+
+            const reviews =
+                await reviewsCollection
+                    .find({
+                        vendorId: vendorId
+                    })
+                    .sort({
+                        createdAt: -1
+                    })
+                    .toArray();
+
+
+            // No reviews
+
+            if (reviews.length === 0) {
+
+                return res.json({
+
+                    averageRating: 0,
+
+                    reviewCount: 0,
+
+                    reviews: []
+
+                });
+
+            }
+
+
+            // Calculate total rating
+
+            const totalRating =
+                reviews.reduce(
+                    (sum, review) =>
+                        sum + review.rating,
+                    0
+                );
+
+
+            // Calculate average
+
+            const averageRating =
+                totalRating /
+                reviews.length;
+
+
+            res.json({
+
+                averageRating:
+                    Number(
+                        averageRating.toFixed(1)
+                    ),
+
+                reviewCount:
+                    reviews.length,
+
+                reviews:
+                    reviews
+
+            });
+
+
+        } catch (error) {
+
+            console.error(
+                "Error fetching vendor reviews:",
+                error
+            );
+
+
+            res.status(500).json({
+
+                message:
+                    "Failed to load vendor reviews"
+
+            });
+
+        }
+
+    }
+);
         // =====================================================
         // START EXPRESS SERVER
         // =====================================================

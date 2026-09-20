@@ -48,94 +48,93 @@ if (customerRegisterForm) {
     customerRegisterForm.addEventListener("submit", async function (event) {
         event.preventDefault();
 
-        const nameInput = document.getElementById("customerName");
-        const mobileInput = document.getElementById("customerMobile");
-        const emailInput = document.getElementById("customerEmail");
-        const passwordInput = document.getElementById("customerPassword");
-        const confirmPasswordInput = document.getElementById("confirmPassword");
-        const message = document.getElementById("customerRegisterMessage");
-        const submitBtn = customerRegisterForm.querySelector("button[type='submit']");
+            const name =
+                document.getElementById("customerName").value.trim();
 
-        const name = nameInput ? nameInput.value.trim() : "";
-        const mobile = mobileInput ? mobileInput.value.trim() : "";
-        const email = emailInput ? emailInput.value.trim() : "";
-        const password = passwordInput ? passwordInput.value : "";
-        const confirmPassword = confirmPasswordInput ? confirmPasswordInput.value : "";
+            const mobile =
+                document.getElementById("customerMobile").value.trim();
 
-        // Reset message
-        if (message) {
-            message.textContent = "";
-            message.style.color = "";
-        }
+            const email =
+                document.getElementById("customerEmail").value.trim();
 
-        // Validate passwords match
-        if (password !== confirmPassword) {
-            if (message) {
-                message.textContent = "Passwords do not match.";
+            const password =
+                document.getElementById("customerPassword").value;
+
+            const confirmPassword =
+                document.getElementById("confirmPassword").value;
+
+            const message =
+                document.getElementById("customerRegisterMessage");
+
+
+            // Check password
+
+            if (password !== confirmPassword) {
+
+                message.textContent =
+                    "Passwords do not match.";
+
                 message.style.color = "red";
+
+                return;
             }
-            return;
-        }
 
-        // Loading state
-        const originalBtnText = submitBtn ? submitBtn.textContent : "Register";
-        if (submitBtn) {
-            submitBtn.disabled = true;
-            submitBtn.textContent = "Registering...";
-        }
 
-        try {
-            const response = await fetch(`${API_BASE_URL}/customers`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    name: name,
-                    mobile: mobile,
-                    email: email,
-                    password: password
-                })
-            });
+            try {
 
-            const data = await parseJsonResponse(response);
+                const response = await fetch(
+                    "http://localhost:5000/api/customers",
+                    {
+                        method: "POST",
 
-            if (response.ok && data && data.customer) {
-                if (message) {
-                    message.textContent = `Registration successful! Customer ID: ${data.customer.id}`;
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            name: name,
+                            mobile: mobile,
+                            email: email,
+                            password: password
+                        })
+                    }
+                );
+
+
+                const data = await response.json();
+
+
+                if (response.ok) {
+
+                    message.textContent =
+                        "Registration successful! Customer ID: "
+                        + data.customer.id;
+
                     message.style.color = "green";
                 }
 
-                customerRegisterForm.reset();
+                    customerRegisterForm.reset();
 
-                setTimeout(() => {
-                    window.location.href = "login.html";
-                }, 2000);
-            } else {
-                let errorMsg = (data && data.message) ? data.message : "";
-                if (!errorMsg) {
-                    if (response.status === 409) {
-                        errorMsg = "A customer with this email or mobile already exists.";
-                    } else if (response.status === 400) {
-                        errorMsg = "Please fill in all required fields properly.";
-                    } else if (response.status >= 500) {
-                        errorMsg = "Server error occurred during registration. Please try again later.";
-                    } else {
-                        errorMsg = "Registration failed. Please check your details.";
-                    }
-                }
 
-                if (message) {
-                    message.textContent = errorMsg;
+                    setTimeout(function () {
+
+                        window.location.href = "login.html";
+
+                    }, 2000);
+
+                } else {
+
+                    message.textContent =
+                        data.message ||
+                        "Registration failed.";
+
                     message.style.color = "red";
+
                 }
-                if (submitBtn) {
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = originalBtnText;
-                }
-            }
-        } catch (error) {
-            console.error("Customer registration error:", error);
+
+            } catch (error) {
+
+                console.error(error);
 
             if (message) {
                 if (!navigator.onLine) {
@@ -146,10 +145,6 @@ if (customerRegisterForm) {
                 message.style.color = "red";
             }
 
-            if (submitBtn) {
-                submitBtn.disabled = false;
-                submitBtn.textContent = originalBtnText;
-            }
         }
     });
 }
@@ -162,117 +157,121 @@ if (customerRegisterForm) {
 const customerLoginForm = document.getElementById("customerLoginForm");
 
 if (customerLoginForm) {
-    customerLoginForm.addEventListener("submit", async function (event) {
-        event.preventDefault();
 
-        const loginIdInput = document.getElementById("customerLoginId");
-        const passwordInput = document.getElementById("customerLoginPassword");
-        const message = document.getElementById("customerLoginMessage");
-        const submitBtn = customerLoginForm.querySelector("button[type='submit']");
+    customerLoginForm.addEventListener(
+        "submit",
+        async function (event) {
 
-        const loginId = loginIdInput ? loginIdInput.value.trim() : "";
-        const password = passwordInput ? passwordInput.value : "";
+            event.preventDefault();
 
-        // Reset message
-        if (message) {
-            message.textContent = "";
-            message.style.color = "";
-        }
 
-        // Quick client-side check
-        if (!loginId || !password) {
-            if (message) {
-                message.textContent = "Please enter both email/mobile and password.";
-                message.style.color = "red";
-            }
-            return;
-        }
+            const loginId =
+                document
+                    .getElementById("customerLoginId")
+                    .value
+                    .trim();
 
-        // Prevent duplicate submits & set loading state
-        const originalBtnText = submitBtn ? submitBtn.textContent : "Login";
-        if (submitBtn) {
-            submitBtn.disabled = true;
-            submitBtn.textContent = "Logging in...";
-        }
+            const password =
+                document
+                    .getElementById("customerLoginPassword")
+                    .value;
 
-        try {
-            const response = await fetch(`${API_BASE_URL}/customers/login`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    loginId: loginId,
-                    password: password
-                })
-            });
 
-            const data = await parseJsonResponse(response);
+            const message =
+                document.getElementById(
+                    "customerLoginMessage"
+                );
 
-            console.log("Customer login response:", data);
 
-            if (response.ok && data && data.token && data.customer) {
-                // Save customer session information
-                localStorage.setItem("customerToken", data.token);
-                localStorage.setItem("customerRole", "customer");
-                localStorage.setItem("customerId", data.customer.id);
-                localStorage.setItem("customerName", data.customer.name || "Customer");
+            try {
 
-                if (message) {
-                    message.textContent = "Login successful! Redirecting...";
-                    message.style.color = "green";
-                }
+                const response = await fetch(
+                    "http://localhost:5000/api/customers/login",
+                    {
+                        method: "POST",
 
-                // Redirect to customer dashboard
-                setTimeout(() => {
-                    window.location.href = "dashboard.html";
-                }, 500);
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
 
-            } else {
-                // Extract error message or build standard HTTP message
-                let errorMsg = (data && data.message) ? data.message : "";
-                if (!errorMsg) {
-                    if (response.status === 400) {
-                        errorMsg = "Email/mobile and password are required.";
-                    } else if (response.status === 401) {
-                        errorMsg = "Invalid email/mobile or password.";
-                    } else if (response.status === 404) {
-                        errorMsg = "Customer login service not found.";
-                    } else if (response.status >= 500) {
-                        errorMsg = "Internal server error. Please try again later.";
-                    } else {
-                        errorMsg = `Login failed (${response.status}). Please try again.`;
+                        body: JSON.stringify({
+                            loginId: loginId,
+                            password: password
+                        })
                     }
-                }
+                );
 
-                if (message) {
-                    message.textContent = errorMsg;
-                    message.style.color = "red";
-                }
 
-                // Re-enable button on failure
-                if (submitBtn) {
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = originalBtnText;
-                }
-            }
+                const data = await response.json();
 
-        } catch (error) {
-            console.error("Customer login error:", error);
 
-            if (message) {
-                if (!navigator.onLine) {
-                    message.textContent = "You appear to be offline. Please check your internet connection.";
+                console.log(
+                    "Customer login response:",
+                    data
+                );
+
+
+                if (response.ok) {
+
+                    // Save customer information
+
+                    localStorage.setItem(
+                        "customerToken",
+                        data.token
+                    );
+
+                    localStorage.setItem(
+                        "customerRole",
+                        "customer"
+                    );
+
+                    localStorage.setItem(
+                        "customerId",
+                        data.customer.id
+                    );
+
+                    localStorage.setItem(
+                        "customerName",
+                        data.customer.name
+                    );
+
+
+                    message.textContent =
+                        "Login successful!";
+
+                    message.style.color = "green";
+
+
+                    // Redirect to customer dashboard
+
+                    setTimeout(function () {
+
+                        window.location.href =
+                            "dashboard.html";
+
+                    }, 500);
+
                 } else {
-                    message.textContent = "Cannot connect to backend server. Please ensure the backend is running.";
+
+                    message.textContent =
+                        data.message ||
+                        "Invalid email/mobile or password.";
+
+                    message.style.color = "red";
+
                 }
+
+            } catch (error) {
+
+                console.error(error);
+
+                message.textContent =
+                    "Cannot connect to backend server.";
+
                 message.style.color = "red";
+
             }
 
-            if (submitBtn) {
-                submitBtn.disabled = false;
-                submitBtn.textContent = originalBtnText;
-            }
         }
     });
 }
@@ -282,18 +281,30 @@ if (customerLoginForm) {
 // CUSTOMER DASHBOARD
 // =====================================================
 
-const customerDashboard = document.querySelector(".customer-dashboard");
+const customerDashboard =
+    document.querySelector(".customer-dashboard");
 
 if (customerDashboard) {
-    const token = localStorage.getItem("customerToken");
-    const role = localStorage.getItem("customerRole");
-    const customerId = localStorage.getItem("customerId");
+
+    const token =
+        localStorage.getItem("customerToken");
+
+    const role =
+        localStorage.getItem("customerRole");
+
+    const customerId =
+        localStorage.getItem("customerId");
+
 
     // Check customer login
     if (!token || role !== "customer" || !customerId) {
+
         alert("Please login as a customer first.");
+
         window.location.href = "login.html";
+
     } else {
+
         // Load customer profile
         loadCustomerProfile(customerId, token);
 
@@ -303,56 +314,90 @@ if (customerDashboard) {
 }
 
 
+
 // =====================================================
 // LOAD CUSTOMER PROFILE
 // =====================================================
 
 async function loadCustomerProfile(customerId, token) {
-    const idElement = document.getElementById("customerId");
-    const profileName = document.getElementById("profileName");
-    const welcomeName = document.getElementById("customerName");
-    const profileEmail = document.getElementById("profileEmail");
 
     try {
-        const response = await fetch(`${API_BASE_URL}/customers/${encodeURIComponent(customerId)}`, {
-            method: "GET",
-            headers: {
-                "Authorization": `Bearer ${token}`
+
+        const response = await fetch(
+            `http://localhost:5000/api/customers/${customerId}`,
+            {
+                method: "GET",
+
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
             }
-        });
+        );
 
-        if (response.status === 401 || response.status === 403) {
-            alert("Your session has expired or is unauthorized. Please log in again.");
-            clearCustomerSession();
-            window.location.href = "login.html";
+
+        const data = await response.json();
+
+
+        if (!response.ok) {
+
+            console.error(
+                "Customer profile error:",
+                data
+            );
+
             return;
         }
 
-        const data = await parseJsonResponse(response);
 
-        if (!response.ok || !data) {
-            console.error("Customer profile server error:", data);
-            if (idElement) idElement.textContent = "-";
-            if (profileName) profileName.textContent = "Error loading name";
-            if (welcomeName) welcomeName.textContent = localStorage.getItem("customerName") || "Customer";
-            if (profileEmail) profileEmail.textContent = "Error loading email";
-            return;
+        // Customer ID
+        const idElement =
+            document.getElementById("customerId");
+
+        if (idElement) {
+            idElement.textContent =
+                data.id || "-";
         }
 
-        // Populate profile details
-        if (idElement) idElement.textContent = data.id || "-";
-        if (profileName) profileName.textContent = data.name || "-";
-        if (welcomeName) welcomeName.textContent = data.name || "Customer";
-        if (profileEmail) profileEmail.textContent = data.email || "-";
+
+        // Profile name
+        const profileName =
+            document.getElementById("profileName");
+
+        if (profileName) {
+            profileName.textContent =
+                data.name || "-";
+        }
+
+
+        // Welcome name
+        const welcomeName =
+            document.getElementById("customerName");
+
+        if (welcomeName) {
+            welcomeName.textContent =
+                data.name || "Customer";
+        }
+
+
+        // Email
+        const profileEmail =
+            document.getElementById("profileEmail");
+
+        if (profileEmail) {
+            profileEmail.textContent =
+                data.email || "-";
+        }
 
     } catch (error) {
-        console.error("Error loading customer profile:", error);
-        if (idElement) idElement.textContent = "-";
-        if (profileName) profileName.textContent = "Unable to connect";
-        if (welcomeName) welcomeName.textContent = localStorage.getItem("customerName") || "Customer";
-        if (profileEmail) profileEmail.textContent = "Unable to connect";
+
+        console.error(
+            "Error loading customer profile:",
+            error
+        );
+
     }
 }
+
 
 
 // =====================================================
@@ -361,36 +406,49 @@ async function loadCustomerProfile(customerId, token) {
 
 let allVerifiedVendors = [];
 
-// Cache DOM elements for filters and vendor list
-let vendorSearchInput = null;
-let vendorCategoryFilter = null;
-let vendorDistrictFilter = null;
-let vendorListContainer = null;
 
 async function loadVerifiedVendors() {
-    vendorListContainer = document.getElementById("vendorList");
+
+    const vendorList =
+        document.getElementById("vendorList");
+
 
     if (!vendorListContainer) {
         return;
     }
 
-    try {
-        const response = await fetch(`${API_BASE_URL}/public/vendors`);
-        const vendors = await parseJsonResponse(response);
 
-        if (!response.ok || !Array.isArray(vendors)) {
-            vendorListContainer.innerHTML = "<p>Unable to load verified vendors from server. Please try again later.</p>";
+    try {
+
+        const response = await fetch(
+            "http://localhost:5000/api/public/vendors"
+        );
+
+
+        const vendors =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            vendorList.innerHTML =
+                "<p>Unable to load vendors.</p>";
+
             return;
         }
+
 
         // Store vendors for filtering
         allVerifiedVendors = vendors;
 
+
         // Populate district filter
         populateDistrictFilter(vendors);
 
+
         // Display all vendors
         displayVendors(vendors);
+
 
         // Activate filters
         setupVendorFilters();
@@ -402,40 +460,56 @@ async function loadVerifiedVendors() {
 }
 
 
+
 // =====================================================
 // POPULATE DISTRICT FILTER (Optimized with DocumentFragment)
 // =====================================================
 
 function populateDistrictFilter(vendors) {
-    const districtFilter = document.getElementById("districtFilter");
+
+    const districtFilter =
+        document.getElementById("districtFilter");
+
 
     if (!districtFilter) {
         return;
     }
 
-    const districts = [...new Set(
-        vendors
-            .map(vendor => vendor.district)
-            .filter(district => typeof district === "string" && district.trim().length > 0)
-    )].sort();
 
-    const fragment = document.createDocumentFragment();
+    // Remove old district options
+    districtFilter.innerHTML =
+        '<option value="">All Districts</option>';
 
-    const defaultOption = document.createElement("option");
-    defaultOption.value = "";
-    defaultOption.textContent = "All Districts";
-    fragment.appendChild(defaultOption);
 
-    districts.forEach(district => {
-        const option = document.createElement("option");
+    const districts =
+        [...new Set(
+            vendors
+                .map(function(vendor) {
+                    return vendor.district;
+                })
+                .filter(function(district) {
+                    return district;
+                })
+        )];
+
+
+    districts.sort();
+
+
+    districts.forEach(function(district) {
+
+        const option =
+            document.createElement("option");
+
         option.value = district;
-        option.textContent = district;
-        fragment.appendChild(option);
-    });
 
-    districtFilter.innerHTML = "";
-    districtFilter.appendChild(fragment);
+        option.textContent = district;
+
+        districtFilter.appendChild(option);
+
+    });
 }
+
 
 
 // =====================================================
@@ -443,21 +517,47 @@ function populateDistrictFilter(vendors) {
 // =====================================================
 
 function setupVendorFilters() {
-    vendorSearchInput = document.getElementById("vendorSearch");
-    vendorCategoryFilter = document.getElementById("categoryFilter");
-    vendorDistrictFilter = document.getElementById("districtFilter");
 
-    if (!vendorSearchInput || !vendorCategoryFilter || !vendorDistrictFilter) {
+    const searchInput =
+        document.getElementById("vendorSearch");
+
+    const categoryFilter =
+        document.getElementById("categoryFilter");
+
+    const districtFilter =
+        document.getElementById("districtFilter");
+
+
+    if (
+        !searchInput ||
+        !categoryFilter ||
+        !districtFilter
+    ) {
         return;
     }
 
-    // Debounce search input to prevent DOM thrashing on rapid typing
-    vendorSearchInput.addEventListener("input", debounce(applyVendorFilters, 200));
 
-    // Immediate change for dropdown filters
-    vendorCategoryFilter.addEventListener("change", applyVendorFilters);
-    vendorDistrictFilter.addEventListener("change", applyVendorFilters);
+    // Search vendor by name
+    searchInput.addEventListener(
+        "input",
+        applyVendorFilters
+    );
+
+
+    // Filter by category
+    categoryFilter.addEventListener(
+        "change",
+        applyVendorFilters
+    );
+
+
+    // Filter by district
+    districtFilter.addEventListener(
+        "change",
+        applyVendorFilters
+    );
 }
+
 
 
 // =====================================================
@@ -465,31 +565,133 @@ function setupVendorFilters() {
 // =====================================================
 
 function applyVendorFilters() {
-    if (!vendorSearchInput || !vendorCategoryFilter || !vendorDistrictFilter) {
-        vendorSearchInput = document.getElementById("vendorSearch");
-        vendorCategoryFilter = document.getElementById("categoryFilter");
-        vendorDistrictFilter = document.getElementById("districtFilter");
-    }
 
-    const searchText = vendorSearchInput ? vendorSearchInput.value.trim().toLowerCase() : "";
-    const selectedCategory = vendorCategoryFilter ? vendorCategoryFilter.value.trim().toLowerCase() : "";
-    const selectedDistrict = vendorDistrictFilter ? vendorDistrictFilter.value.trim().toLowerCase() : "";
+    const searchInput =
+        document.getElementById("vendorSearch");
 
-    const filteredVendors = allVerifiedVendors.filter(vendor => {
-        const vendorName = (vendor.name || "").toLowerCase();
-        const businessName = (vendor.businessName || "").toLowerCase();
-        const vendorCategory = (vendor.category || "").toLowerCase();
-        const vendorDistrict = (vendor.district || "").toLowerCase();
+    const categoryFilter =
+        document.getElementById("categoryFilter");
 
-        const matchesSearch = !searchText || vendorName.includes(searchText) || businessName.includes(searchText);
-        const matchesCategory = !selectedCategory || vendorCategory === selectedCategory;
-        const matchesDistrict = !selectedDistrict || vendorDistrict === selectedDistrict;
+    const districtFilter =
+        document.getElementById("districtFilter");
 
-        return matchesSearch && matchesCategory && matchesDistrict;
-    });
 
-    displayVendors(filteredVendors);
+    const searchText =
+        searchInput.value
+            .trim()
+            .toLowerCase();
+
+
+    const selectedCategory =
+        categoryFilter.value
+            .trim()
+            .toLowerCase();
+
+
+    const selectedDistrict =
+        districtFilter.value
+            .trim()
+            .toLowerCase();
+
+
+    const filteredVendors =
+        allVerifiedVendors.filter(
+            function(vendor) {
+
+                const vendorName =
+                    (vendor.name || "")
+                        .toLowerCase();
+
+
+                const vendorCategory =
+                    (vendor.category || "")
+                        .toLowerCase();
+
+
+                const vendorDistrict =
+                    (vendor.district || "")
+                        .toLowerCase();
+
+
+                const matchesSearch =
+                    vendorName.includes(
+                        searchText
+                    );
+
+
+                const matchesCategory =
+                    !selectedCategory ||
+                    vendorCategory ===
+                    selectedCategory;
+
+
+                const matchesDistrict =
+                    !selectedDistrict ||
+                    vendorDistrict ===
+                    selectedDistrict;
+
+
+                return (
+                    matchesSearch &&
+                    matchesCategory &&
+                    matchesDistrict
+                );
+
+            }
+        );
+
+
+    displayVendors(
+        filteredVendors
+    );
 }
+
+
+
+// =====================================================
+// GET VENDOR RATING
+// =====================================================
+
+async function getVendorRating(
+    vendorId
+) {
+
+    try {
+
+        const response =
+            await fetch(
+                `http://localhost:5000/api/reviews/vendor/${vendorId}`
+            );
+
+        if (!response.ok) {
+
+            return {
+                averageRating: 0,
+                reviewCount: 0,
+                reviews: []
+            };
+        }
+
+        const data =
+            await response.json();
+
+        return data;
+
+    } catch (error) {
+
+        console.error(
+            "Error loading vendor rating:",
+            error
+        );
+
+        return {
+            averageRating: 0,
+            reviewCount: 0,
+            reviews: []
+        };
+    }
+}
+
 
 
 // =====================================================
@@ -497,60 +699,118 @@ function applyVendorFilters() {
 // =====================================================
 
 function displayVendors(vendors) {
-    if (!vendorListContainer) {
-        vendorListContainer = document.getElementById("vendorList");
-    }
+
+    const vendorList =
+        document.getElementById("vendorList");
+
 
     if (!vendorListContainer) {
         return;
     }
 
-    if (!vendors || vendors.length === 0) {
-        vendorListContainer.innerHTML = "<p>No vendors found matching your filters.</p>";
+
+    vendorList.innerHTML = "";
+
+
+    if (
+        !vendors ||
+        vendors.length === 0
+    ) {
+
+        vendorList.innerHTML =
+            "<p>No vendors found matching your filters.</p>";
+
         return;
     }
 
-    const fragment = document.createDocumentFragment();
 
-    vendors.forEach(vendor => {
-        const card = document.createElement("div");
-        card.className = "vendor-card";
+    vendors.forEach(function(vendor) {
+
+        const card =
+            document.createElement("div");
+
+
+        card.className =
+            "vendor-card";
+
 
         card.innerHTML = `
-            <span class="verified-badge">✓ Verified Vendor</span>
-            <h3>${escapeHtml(vendor.businessName || "Business")}</h3>
-            <p><strong>Owner:</strong> ${escapeHtml(vendor.name || "N/A")}</p>
-            <p><strong>Category:</strong> ${escapeHtml(vendor.category || "N/A")}</p>
-            <p><strong>Mobile:</strong> ${escapeHtml(vendor.mobile || "N/A")}</p>
-            <p><strong>District:</strong> ${escapeHtml(vendor.district || "N/A")}</p>
-            <p><strong>Address:</strong> ${escapeHtml(vendor.address || "N/A")}</p>
+
+            <span class="verified-badge">
+                ✓ Verified Vendor
+            </span>
+
+            <h3>
+                ${vendor.businessName || "Business"}
+            </h3>
+
+            <p>
+                <strong>Owner:</strong>
+                ${vendor.name || "N/A"}
+            </p>
+
+            <p>
+                <strong>Category:</strong>
+                ${vendor.category || "N/A"}
+            </p>
+
+            <p>
+                <strong>Mobile:</strong>
+                ${vendor.mobile || "N/A"}
+            </p>
+
+            <p>
+                <strong>District:</strong>
+                ${vendor.district || "N/A"}
+            </p>
+
+            <p>
+                <strong>Address:</strong>
+                ${vendor.address || "N/A"}
+            </p>
+
         `;
 
-        fragment.appendChild(card);
+
+        vendorList.appendChild(card);
+
     });
-
-    vendorListContainer.innerHTML = "";
-    vendorListContainer.appendChild(fragment);
 }
-
 
 // =====================================================
 // CUSTOMER LOGOUT & SESSION MANAGEMENT
 // =====================================================
 
-function clearCustomerSession() {
-    localStorage.removeItem("customerToken");
-    localStorage.removeItem("customerRole");
-    localStorage.removeItem("customerId");
-    localStorage.removeItem("customerName");
-}
-
-const customerLogout = document.getElementById("customerLogout");
+const customerLogout =
+    document.getElementById("customerLogout");
 
 if (customerLogout) {
-    customerLogout.addEventListener("click", function (event) {
-        event.preventDefault();
-        clearCustomerSession();
-        window.location.href = "../index.html";
-    });
+
+    customerLogout.addEventListener(
+        "click",
+        function () {
+
+            localStorage.removeItem(
+                "customerToken"
+            );
+
+            localStorage.removeItem(
+                "customerRole"
+            );
+
+            localStorage.removeItem(
+                "customerId"
+            );
+
+            localStorage.removeItem(
+                "customerName"
+            );
+
+
+            window.location.href =
+                "../index.html";
+
+        }
+    );
+
 }

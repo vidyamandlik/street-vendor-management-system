@@ -149,6 +149,71 @@
 
 </main>
 
+<!-- =====================================================
+     RATING & REVIEW MODAL
+===================================================== -->
+
+<div id="reviewModal" class="review-modal">
+
+    <div class="review-modal-content">
+
+        <span
+            class="close-review-modal"
+            onclick="closeReviewModal()"
+        >
+            &times;
+        </span>
+
+        <h2>Rate & Review Vendor</h2>
+
+        <p id="reviewVendorName"></p>
+
+        <form id="reviewForm">
+
+            <input
+                type="hidden"
+                id="reviewVendorId"
+            >
+
+            <label>Rating</label>
+
+            <div class="star-rating">
+                <span onclick="selectRating(1)">★</span>
+                <span onclick="selectRating(2)">★</span>
+                <span onclick="selectRating(3)">★</span>
+                <span onclick="selectRating(4)">★</span>
+                <span onclick="selectRating(5)">★</span>
+            </div>
+
+            <p id="selectedRating">
+                Select your rating
+            </p>
+
+            <label for="reviewText">
+                Your Review
+            </label>
+
+            <textarea
+                id="reviewText"
+                placeholder="Write your review..."
+                rows="5"
+                required
+            ></textarea>
+
+            <button
+                type="submit"
+                class="submit-review-btn"
+            >
+                Submit Review
+            </button>
+
+        </form>
+
+        <p id="reviewMessage"></p>
+
+    </div>
+
+</div>
 
 <footer>
 
