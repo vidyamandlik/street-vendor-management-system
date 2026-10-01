@@ -364,7 +364,19 @@ app.get(
         // =====================================================
         // VENDOR REGISTRATION
         // =====================================================
+        async function generateVendorId() {
+    let vendorId;
+    let exists = true;
 
+    while (exists) {
+        const number = Math.floor(1000 + Math.random() * 9000);
+        vendorId = `VND-${number}`;
+
+        exists = await vendorsCollection.findOne({ id: vendorId });
+    }
+
+    return vendorId;
+}
         app.post(
             "/api/vendors",
             async (req, res) => {
@@ -400,7 +412,7 @@ app.get(
                     }
 
                     const vendor = {
-                        id: `VND-${randomUUID()}`,
+                       id: await generateVendorId(),
                         name,
                         mobile,
                         email,
