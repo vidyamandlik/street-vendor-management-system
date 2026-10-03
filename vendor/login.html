@@ -1,3 +1,4 @@
+html
 <!DOCTYPE html>
 <html lang="en">
 
@@ -17,170 +18,172 @@
 
 <body>
 
+    <!-- ===============================
+         NAVIGATION BAR
+    ================================ -->
 
-<!-- ===============================
-     NAVIGATION BAR
-================================ -->
+    <header>
 
-<header>
-
-    <nav>
+        <nav>
 
             <div class="logo">
-    <a href="../index.html">
-        <img src="../img/logo.png" alt="Street Vendor Management System">
-    </a>
-</div>
 
-
-        <ul class="nav-links">
-
-            <li>
                 <a href="../index.html">
-                    Home
-                </a>
-            </li>
 
-            <li>
-                <a href="../directory/vendors.html">
-                    Vendor Directory
-                </a>
-            </li>
+                    <img
+                        src="../img/logo.png"
+                        alt="Street Vendor Management System"
+                    >
 
-            <li>
-                <a href="register.html">
-                    Vendor Register
                 </a>
-            </li>
 
-            <li>
-                <a href="login.html">
+            </div>
+
+
+            <ul class="nav-links">
+
+                <li>
+                    <a href="../index.html">
+                        Home
+                    </a>
+                </li>
+
+                <li>
+                    <a href="register.html">
+                        Vendor Register
+                    </a>
+                </li>
+
+                <li>
+                    <a href="login.html">
+                        Vendor Login
+                    </a>
+                </li>
+
+                <li>
+                    <a href="../admin/login.html">
+                        Admin Login
+                    </a>
+                </li>
+
+            </ul>
+
+        </nav>
+
+    </header>
+
+
+    <!-- ===============================
+         VENDOR LOGIN
+    ================================ -->
+
+    <main>
+
+        <section class="form-section vendor-login-section">
+
+            <div class="form-container vendor-login-container">
+
+                <h2>
                     Vendor Login
-                </a>
-            </li>
+                </h2>
 
-            <li>
-                <a href="../admin/login.html">
-                    Admin Login
-                </a>
-            </li>
-
-        </ul>
-
-    </nav>
-
-</header>
+                <p>
+                    Login using your Vendor ID and password.
+                </p>
 
 
-<!-- ===============================
-     VENDOR LOGIN
-================================ -->
+                <!-- ===============================
+                     LOGIN FORM
+                ================================ -->
 
-<main>
+                <form id="vendorLoginForm">
 
-    <section class="form-section vendor-login-section">
+                    <!-- Vendor ID -->
 
-        <div class="form-container vendor-login-container">
+                    <label for="vendorIdLogin">
+                        Vendor ID
+                    </label>
 
-            <h2>
-                Vendor Login
-            </h2>
-
-            <p>
-                Login using your Vendor ID and
-                registered mobile number.
-            </p>
-
-
-            <!-- ===============================
-                 LOGIN FORM
-            ================================ -->
-
-            <form id="vendorLoginForm">
+                    <input
+                        type="text"
+                        id="vendorIdLogin"
+                        placeholder="Example: VND-1234"
+                        required
+                    >
 
 
-                <!-- Vendor ID -->
+                    <!-- Password -->
 
-                <label for="vendorIdLogin">
-                    Vendor ID
-                </label>
+                    <label for="vendorPasswordLogin">
+                        Password
+                    </label>
 
-                <input
-                    type="text"
-                    id="vendorIdLogin"
-                    placeholder="Example: VND-1234"
-                    required
-                >
-
-
-                <!-- Password -->
-
-                <label for="vendorPasswordLogin">
-                    Password
-                </label>
-
-                <input
-                    type="password"
-                    id="vendorPasswordLogin"
-                    placeholder="Enter your password"
-                    required
-                >
+                    <input
+                        type="password"
+                        id="vendorPasswordLogin"
+                        placeholder="Enter your password"
+                        required
+                    >
 
 
-                <!-- Login Button -->
+                    <!-- Login Button -->
 
-                <button type="submit">
-                    Login as Vendor
-                </button>
-
-
-                <!-- Login Error -->
-
-                <p
-                    id="vendorLoginError"
-                    style="color: red;"
-                ></p>
+                    <button type="submit">
+                        Login as Vendor
+                    </button>
 
 
-            </form>
+                    <!-- Login Error -->
+
+                    <p
+                        id="vendorLoginError"
+                        style="color: red;"
+                    ></p>
+
+                </form>
 
 
-            <!-- ===============================
-                 REGISTER LINK
-            ================================ -->
+                <!-- ===============================
+                     REGISTER LINK
+                ================================ -->
 
-            <p style="margin-top: 20px;">
+                <p style="margin-top: 20px;">
 
-                Don't have a vendor account?
+                    Don't have a vendor account?
 
-                <a href="register.html">
-                    Register as Vendor
-                </a>
+                    <a href="register.html">
+                        Register as Vendor
+                    </a>
 
-            </p>
+                </p>
 
+            </div>
 
-        </div>
+        </section>
 
-    </section>
-
-</main>
-
-
-<!-- ===============================
-     FOOTER
-================================ -->
-
-<footer>
-
-    <p>
-        © 2026 Street Vendor Management System
-    </p>
-</footer>
+    </main>
 
 
-<!-- ===============================
-     JAVASCRIPT
-================================ -->
+    <!-- ===============================
+         FOOTER
+    ================================ -->
 
-<script src="../js/vendor.js"></script> </body> </html>
+    <footer>
+
+        <p>
+            © 2026 Street Vendor Management System
+        </p>
+
+    </footer>
+
+
+    <!-- ===============================
+         JAVASCRIPT
+    ================================ -->
+
+    <script src="../js/vendor.js"></script>
+
+</body>
+
+</html>
+

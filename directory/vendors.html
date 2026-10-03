@@ -21,11 +21,16 @@
 
     <nav>
 
-            <div class="logo">
-    <a href="index.html">
-        <img src="../img/logo.png" alt="Street Vendor Management System">
-    </a>
-</div>
+        <div class="logo">
+
+            <a href="../index.html">
+
+                <img src="../img/logo.png"
+                     alt="Street Vendor Management System">
+
+            </a>
+
+        </div>
 
         <ul class="nav-links">
 
@@ -35,10 +40,13 @@
                 </a>
             </li>
 
-            <li>
+            <li id="customerVendorDirectory"
+                style="display: none;">
+
                 <a href="vendors.html">
                     Vendor Directory
                 </a>
+
             </li>
 
             <li>
@@ -66,105 +74,36 @@
 </header>
 
 
-<main class="directory-page">
+<main id="mainContent"
+      class="vendor-profile-page">
 
-    <section class="directory-header">
-
-        <h1>Street Vendor Directory</h1>
-
-        <p>
-            Discover verified street vendors
-            in your area.
-        </p>
-
-    </section>
-
-
-    <!-- Search and Filters -->
-
-    <section class="directory-filters">
-
-        <input
-            type="text"
-            id="searchVendor"
-            placeholder="Search vendor or business..."
-        >
-
-
-        <select id="categoryFilter">
-
-            <option value="">
-                All Categories
-            </option>
-
-            <option value="Food & Beverages">
-                Food & Beverages
-            </option>
-
-            <option value="Fruits & Vegetables">
-                Fruits & Vegetables
-            </option>
-
-            <option value="Clothing">
-                Clothing
-            </option>
-
-            <option value="Handicrafts">
-                Handicrafts
-            </option>
-
-            <option value="Groceries">
-                Groceries
-            </option>
-
-            <option value="Other">
-                Other
-            </option>
-
-        </select>
-
-
-        <input
-            type="text"
-            id="districtFilter"
-            placeholder="Enter district"
-        >
-
-    </section>
-
-
-    <!-- Vendor Cards -->
-
-    <section>
-
-        <div
-            id="vendorDirectory"
-            class="vendor-grid"
-        >
-
-        </div>
-
-    </section>
-
+    <!-- Vendor Directory / Vendor Profile
+         will be loaded using vendor.js -->
 
 </main>
+
 
 <!-- =====================================================
      RATING & REVIEW MODAL
 ===================================================== -->
 
-<div id="reviewModal" class="review-modal">
+<div id="reviewModal"
+     class="review-modal">
 
     <div class="review-modal-content">
 
-        <span
-            class="close-review-modal"
-            onclick="closeReviewModal()"
-        >
-            &times;
-        </span>
+        <button type="button"
+                id="closeReviewModal"
+                class="close-review-modal"
+                aria-label="Close">
 
-        <h2>Rate & Review Vendor</h2>
+            &times;
+
+        </button>
+
+        <h2>
+            Rate & Review Vendor
+        </h2>
 
         <p id="reviewVendorName"></p>
 
@@ -175,14 +114,57 @@
                 id="reviewVendorId"
             >
 
-            <label>Rating</label>
+            <label>
+                Rating
+            </label>
 
             <div class="star-rating">
-                <span onclick="selectRating(1)">★</span>
-                <span onclick="selectRating(2)">★</span>
-                <span onclick="selectRating(3)">★</span>
-                <span onclick="selectRating(4)">★</span>
-                <span onclick="selectRating(5)">★</span>
+
+                <button
+                    type="button"
+                    class="rating-star"
+                    data-rating="1">
+
+                    ★
+
+                </button>
+
+                <button
+                    type="button"
+                    class="rating-star"
+                    data-rating="2">
+
+                    ★
+
+                </button>
+
+                <button
+                    type="button"
+                    class="rating-star"
+                    data-rating="3">
+
+                    ★
+
+                </button>
+
+                <button
+                    type="button"
+                    class="rating-star"
+                    data-rating="4">
+
+                    ★
+
+                </button>
+
+                <button
+                    type="button"
+                    class="rating-star"
+                    data-rating="5">
+
+                    ★
+
+                </button>
+
             </div>
 
             <p id="selectedRating">
@@ -197,14 +179,14 @@
                 id="reviewText"
                 placeholder="Write your review..."
                 rows="5"
-                required
-            ></textarea>
+                required></textarea>
 
             <button
                 type="submit"
-                class="submit-review-btn"
-            >
+                class="submit-review-btn">
+
                 Submit Review
+
             </button>
 
         </form>
@@ -215,6 +197,7 @@
 
 </div>
 
+
 <footer>
 
     <p>
@@ -224,7 +207,7 @@
 </footer>
 
 
-<script src="../js/directory.js"></script>
+<script src="../js/vendor.js"></script>
 
 </body>
 

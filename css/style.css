@@ -2634,3 +2634,1769 @@ footer {
     border-radius: 6px;
     cursor: pointer;
 }
+/* =====================================================
+   VENDOR PRODUCTS
+   ===================================================== */
+
+.vendor-products-section {
+    margin-top: 30px;
+    padding: 28px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+}
+
+.vendor-products-section .section-header {
+    margin-bottom: 22px;
+}
+
+.vendor-products-section .section-label {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+}
+
+.vendor-products-section h2 {
+    margin: 0;
+    font-size: 24px;
+}
+
+.vendor-products-section p {
+    margin: 6px 0 0;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 16px;
+}
+
+.product-card {
+    padding: 18px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #f9fafb;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.product-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+.product-card h3 {
+    margin: 0 0 8px;
+    font-size: 16px;
+}
+
+.product-price {
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.product-description {
+    margin-top: 6px;
+    color: #6b7280;
+    font-size: 13px;
+}
+
+.no-products {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 25px;
+    color: #6b7280;
+    background: #f9fafb;
+    border-radius: 10px;
+}
+/* =====================================================
+   VENDOR SHOP DETAILS
+   Matches Existing Vendor Dashboard Design
+===================================================== */
+
+.vendor-shop-details {
+    background: #ffffff;
+    padding: 30px;
+    margin-top: 25px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.vendor-shop-details h2 {
+    margin: 0 0 8px;
+    color: #123b2a;
+    font-size: 26px;
+}
+
+.vendor-shop-details > p {
+    margin-bottom: 25px;
+    color: #666;
+    line-height: 1.6;
+}
+
+
+/* =====================================================
+   SHOP DETAILS FORM
+===================================================== */
+
+#shopDetailsForm {
+    display: flex;
+    flex-direction: column;
+}
+
+#shopDetailsForm label {
+    display: block;
+    margin-bottom: 7px;
+    color: #333;
+    font-weight: 600;
+}
+
+#shopDetailsForm input,
+#shopDetailsForm textarea,
+#shopDetailsForm select {
+    width: 100%;
+    padding: 12px 14px;
+    margin-bottom: 18px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 15px;
+    font-family: inherit;
+    box-sizing: border-box;
+    background: #ffffff;
+}
+
+#shopDetailsForm input:focus,
+#shopDetailsForm textarea:focus,
+#shopDetailsForm select:focus {
+    outline: none;
+    border-color: #16804f;
+    box-shadow: 0 0 0 3px rgba(22, 128, 79, 0.10);
+}
+
+#shopDetailsForm textarea {
+    resize: vertical;
+    min-height: 90px;
+}
+
+
+/* =====================================================
+   TIME FIELDS
+===================================================== */
+
+.shop-time-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+
+/* =====================================================
+   AVAILABLE DAYS
+===================================================== */
+
+.available-days {
+    margin-bottom: 20px;
+}
+
+.available-days > label {
+    margin-bottom: 12px !important;
+}
+
+.days-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.day-option {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 14px;
+    background: #f8f9fa;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.day-option:hover {
+    border-color: #16804f;
+    background: #f0f9f4;
+}
+
+.day-option input {
+    width: auto !important;
+    margin: 0 !important;
+    cursor: pointer;
+}
+
+.day-option span {
+    font-size: 14px;
+    color: #333;
+}
+
+
+/* =====================================================
+   PRODUCTS
+===================================================== */
+
+.shop-products-section {
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
+
+.shop-products-section > label {
+    margin-bottom: 12px !important;
+}
+
+.product-input-row {
+    display: grid;
+    grid-template-columns: 1fr 150px auto;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.product-input-row input {
+    margin-bottom: 0 !important;
+}
+
+.product-remove-btn {
+    padding: 11px 14px;
+    background: #dc3545;
+    color: #ffffff;
+    border: none;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.product-remove-btn:hover {
+    background: #bb2d3b;
+}
+
+
+/* =====================================================
+   ADD PRODUCT BUTTON
+===================================================== */
+
+.add-product-btn {
+    display: inline-block;
+    width: fit-content;
+    padding: 10px 16px;
+    margin-bottom: 20px;
+    background: #f8f9fa;
+    color: #16804f;
+    border: 1px solid #16804f;
+    border-radius: 7px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.add-product-btn:hover {
+    background: #16804f;
+    color: #ffffff;
+}
+
+
+/* =====================================================
+   SAVE SHOP DETAILS BUTTON
+===================================================== */
+
+#shopDetailsForm button[type="submit"] {
+    margin-top: 8px;
+    padding: 13px 20px;
+    background: #16804f;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease,
+                transform 0.2s ease;
+}
+
+#shopDetailsForm button[type="submit"]:hover {
+    background: #126b42;
+    transform: translateY(-1px);
+}
+
+
+/* =====================================================
+   SHOP DETAILS MESSAGE
+===================================================== */
+
+#shopDetailsMessage {
+    margin-top: 15px;
+    padding: 12px 15px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+
+/* =====================================================
+   SHOP DETAILS DISPLAY
+   For customer/vendor profile pages
+===================================================== */
+
+.shop-details-card {
+    background: #ffffff;
+    padding: 30px;
+    margin-top: 25px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.shop-details-card h2 {
+    color: #123b2a;
+    margin-bottom: 20px;
+}
+
+.shop-detail-item {
+    padding: 15px;
+    margin-bottom: 12px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.shop-detail-item strong {
+    display: block;
+    margin-bottom: 5px;
+    color: #555;
+}
+
+.shop-detail-item span,
+.shop-detail-item p {
+    color: #333;
+    line-height: 1.5;
+}
+
+
+/* =====================================================
+   SHOP PRODUCT DISPLAY
+===================================================== */
+
+.shop-product-list {
+    display: grid;
+    grid-template-columns: repeat(
+        auto-fit,
+        minmax(200px, 1fr)
+    );
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.shop-product-card {
+    background: #f8f9fa;
+    border: 1px solid #e5e7eb;
+    padding: 18px;
+    border-radius: 10px;
+}
+
+.shop-product-card h3 {
+    margin: 0 0 8px;
+    font-size: 17px;
+    color: #123b2a;
+}
+
+.shop-product-card .price {
+    color: #16804f;
+    font-weight: 700;
+    font-size: 15px;
+}
+
+
+/* =====================================================
+   CUSTOMER VIEW PROFILE BUTTONS
+===================================================== */
+
+.view-profile-btn {
+    display: inline-block;
+    padding: 9px 15px;
+    margin-top: 10px;
+    background: #16804f;
+    color: #ffffff;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.view-profile-btn:hover {
+    background: #126b42;
+}
+
+
+/* =====================================================
+   MOBILE RESPONSIVE
+===================================================== */
+
+@media (max-width: 700px) {
+
+    .vendor-shop-details {
+        padding: 22px 18px;
+    }
+
+    .vendor-shop-details h2 {
+        font-size: 23px;
+    }
+
+    .shop-time-grid {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+    .product-input-row {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .product-input-row input {
+        margin-bottom: 0 !important;
+    }
+
+    .product-remove-btn {
+        width: fit-content;
+    }
+
+    .days-container {
+        gap: 8px;
+    }
+
+    .day-option {
+        padding: 8px 11px;
+    }
+
+    .shop-product-list {
+        grid-template-columns: 1fr;
+    }
+}
+/* =====================================================
+   PUBLIC VENDOR PROFILE
+   ===================================================== */
+
+#vendorBusinessName {
+    color: #123b2a;
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+#vendorName {
+    color: #555;
+    font-size: 17px;
+    margin-bottom: 20px;
+}
+
+#vendorRating {
+    color: #16804f;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+#vendorCategory,
+#vendorLocation,
+#vendorDistrict,
+#vendorMobile {
+    color: #444;
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+/* Products */
+
+#vendorProducts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 16px;
+    margin-top: 15px;
+}
+
+#vendorProducts > * {
+    background: #f8f9fa;
+    border: 1px solid #e5e7eb;
+    padding: 18px;
+    border-radius: 10px;
+}
+
+/* Reviews */
+
+#vendorReviews {
+    margin-top: 20px;
+}
+
+#vendorReviews > * {
+    background: #f8f9fa;
+    border: 1px solid #e5e7eb;
+    padding: 18px;
+    margin-bottom: 12px;
+    border-radius: 10px;
+}
+
+/* Rate & Review button */
+
+#rateReviewButton {
+    background: #16804f;
+    color: white;
+    border: none;
+    padding: 11px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    margin-top: 15px;
+}
+
+#rateReviewButton:hover {
+    background: #126b42;
+}
+
+/* Review Modal */
+
+#reviewModal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+}
+
+#reviewModal .review-modal-content {
+    background: white;
+    width: 90%;
+    max-width: 500px;
+    margin: 8% auto;
+    padding: 30px;
+    border-radius: 12px;
+    position: relative;
+}
+
+#reviewVendorName {
+    color: #123b2a;
+    margin-bottom: 15px;
+}
+
+#reviewText {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    resize: vertical;
+}
+
+#reviewForm button {
+    background: #126b42;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 15px;
+}
+
+#reviewForm button:hover {
+    background: #16804f;
+}
+/* =====================================================
+   PUBLIC VENDOR PROFILE PAGE
+   ===================================================== */
+
+.public-vendor-page {
+    background: #f8f9fa;
+    min-height: 70vh;
+    padding: 45px 8%;
+}
+
+/* Back button */
+.public-vendor-page a[href*="vendors.html"] {
+    display: inline-block;
+    color: #126b42;
+    text-decoration: none;
+    font-weight: 600;
+    margin-bottom: 25px;
+}
+
+.public-vendor-page a[href*="vendors.html"]:hover {
+    color: #16804f;
+}
+
+/* Main vendor profile card */
+.vendor-profile-card {
+    background: #ffffff;
+    border-radius: 15px;
+    padding: 35px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e5e7eb;
+    max-width: 1000px;
+    margin: 0 auto 30px;
+}
+
+/* Verified label */
+.vendor-profile-card .verified-badge {
+    display: inline-block;
+    background: #eaf7f0;
+    color: #16804f;
+    padding: 7px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 15px;
+    letter-spacing: 0.5px;
+}
+
+/* Vendor name */
+#vendorBusinessName {
+    font-size: 34px;
+    color: #123b2a;
+    margin: 0 0 8px;
+    font-weight: 700;
+}
+
+/* Owner name */
+#vendorName {
+    font-size: 17px;
+    color: #666;
+    margin-bottom: 18px;
+}
+
+/* Rating */
+#vendorRating {
+    display: inline-block;
+    background: #fff8df;
+    color: #8a6d00;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 25px;
+}
+
+/* Vendor information */
+.vendor-info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.vendor-info-item {
+    background: #f8f9fa;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 16px;
+}
+
+.vendor-info-item strong {
+    display: block;
+    color: #555;
+    font-size: 13px;
+    margin-bottom: 5px;
+}
+
+.vendor-info-item span {
+    color: #222;
+    font-size: 15px;
+}
+
+/* Category */
+#vendorCategory,
+#vendorLocation,
+#vendorDistrict,
+#vendorMobile {
+    color: #333;
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+/* Rate button */
+#rateReviewButton {
+    background: #16804f;
+    color: #ffffff;
+    border: none;
+    padding: 12px 22px;
+    border-radius: 7px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 25px;
+    transition: 0.2s;
+}
+
+#rateReviewButton:hover {
+    background: #126b42;
+    transform: translateY(-1px);
+}
+
+
+/* =====================================================
+   PRODUCTS SECTION
+   ===================================================== */
+
+.vendor-products-section {
+    max-width: 1000px;
+    margin: 0 auto 30px;
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 15px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+}
+
+.vendor-products-section h2 {
+    color: #123b2a;
+    font-size: 24px;
+    margin-bottom: 8px;
+}
+
+.vendor-products-section > p {
+    color: #666;
+    margin-bottom: 20px;
+}
+
+#vendorProducts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+}
+
+#vendorProducts > * {
+    background: #f8f9fa;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 18px;
+}
+
+
+/* =====================================================
+   CUSTOMER REVIEWS
+   ===================================================== */
+
+.vendor-reviews-section {
+    max-width: 1000px;
+    margin: 0 auto 30px;
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 15px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+}
+
+.vendor-reviews-section h2 {
+    color: #123b2a;
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+#vendorReviews {
+    margin-top: 15px;
+}
+
+#vendorReviews > * {
+    background: #f8f9fa;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 18px;
+    margin-bottom: 12px;
+}
+
+
+/* =====================================================
+   REVIEW MODAL
+   ===================================================== */
+
+#reviewModal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    overflow-y: auto;
+}
+
+#reviewModal .review-modal-content {
+    background: #ffffff;
+    width: 90%;
+    max-width: 500px;
+    margin: 8% auto;
+    padding: 30px;
+    border-radius: 15px;
+    position: relative;
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.2);
+}
+
+#reviewModal h2,
+#reviewModal h3 {
+    color: #123b2a;
+    margin-bottom: 15px;
+}
+
+#reviewVendorName {
+    color: #16804f;
+}
+
+#reviewText {
+    width: 100%;
+    min-height: 120px;
+    padding: 12px;
+    margin-top: 8px;
+    border: 1px solid #d5d5d5;
+    border-radius: 8px;
+    resize: vertical;
+    font-family: Arial, sans-serif;
+}
+
+#reviewText:focus {
+    outline: none;
+    border-color: #16804f;
+}
+
+#reviewForm button {
+    background: #126b42;
+    color: white;
+    border: none;
+    padding: 11px 20px;
+    border-radius: 7px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+#reviewForm button:hover {
+    background: #16804f;
+}
+
+
+/* =====================================================
+   MOBILE RESPONSIVE
+   ===================================================== */
+
+@media (max-width: 768px) {
+
+    .public-vendor-page {
+        padding: 30px 5%;
+    }
+
+    .vendor-profile-card,
+    .vendor-products-section,
+    .vendor-reviews-section {
+        padding: 22px;
+    }
+
+    #vendorBusinessName {
+        font-size: 27px;
+    }
+
+    .vendor-info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    #vendorProducts {
+        grid-template-columns: 1fr;
+    }
+}
+/* =====================================================
+   VENDOR PROFILE PAGE
+   ===================================================== */
+
+.vendor-profile-page {
+    background: #f8f9fa;
+    min-height: 70vh;
+    padding: 45px 8%;
+}
+
+
+/* =====================================================
+   BACK TO DIRECTORY
+   ===================================================== */
+
+.profile-back {
+    max-width: 1050px;
+    margin: 0 auto 25px;
+}
+
+.profile-back a {
+    color: #126b42;
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.profile-back a:hover {
+    color: #16804f;
+}
+
+
+/* =====================================================
+   MAIN VENDOR PROFILE CARD
+   ===================================================== */
+
+.vendor-profile-card {
+    max-width: 1050px;
+    margin: 0 auto 30px;
+    padding: 35px;
+    background: #ffffff;
+    border-radius: 15px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+}
+
+
+/* Header */
+
+.vendor-profile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 30px;
+    padding-bottom: 25px;
+    border-bottom: 1px solid #eeeeee;
+}
+
+
+/* Verified label */
+
+.section-label {
+    display: inline-block;
+    color: #16804f;
+    background: #eaf7f0;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    margin-bottom: 12px;
+}
+
+
+/* Vendor business name */
+
+#vendorBusinessName {
+    color: #123b2a;
+    font-size: 34px;
+    font-weight: 700;
+    margin: 0 0 8px;
+}
+
+
+/* Vendor owner */
+
+#vendorName {
+    color: #666;
+    font-size: 17px;
+    margin: 0;
+}
+
+
+/* Rating */
+
+.vendor-profile-rating {
+    background: #fff8df;
+    color: #8a6d00;
+    padding: 10px 16px;
+    border-radius: 9px;
+    font-size: 15px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+
+/* =====================================================
+   VENDOR DETAILS
+   ===================================================== */
+
+.vendor-profile-details {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-top: 25px;
+}
+
+.profile-detail {
+    background: #f8f9fa;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 17px 18px;
+}
+
+.detail-label {
+    display: block;
+    color: #777;
+    font-size: 13px;
+    margin-bottom: 6px;
+}
+
+.profile-detail strong {
+    color: #222;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+
+/* =====================================================
+   RATE & REVIEW BUTTON
+   ===================================================== */
+
+.profile-actions {
+    margin-top: 25px;
+}
+
+#rateReviewButton {
+    background: #16804f;
+    color: #ffffff;
+    border: none;
+    padding: 11px 20px;
+    border-radius: 7px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+#rateReviewButton:hover {
+    background: #126b42;
+    transform: translateY(-1px);
+}
+
+
+/* =====================================================
+   PRODUCTS
+   ===================================================== */
+
+.vendor-products-section {
+    max-width: 1050px;
+    margin: 0 auto 30px;
+    padding: 30px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+}
+
+.section-header {
+    margin-bottom: 22px;
+}
+
+.section-header h2 {
+    color: #123b2a;
+    font-size: 24px;
+    margin: 0 0 7px;
+}
+
+.section-header p {
+    color: #666;
+    margin: 0;
+    font-size: 14px;
+}
+
+
+/* Products grid */
+
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+}
+
+
+/* Product cards */
+
+.product-card {
+    background: #f8f9fa;
+    border: 1px solid #e5e7eb;
+    padding: 18px;
+    border-radius: 10px;
+    transition: 0.2s;
+}
+
+.product-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+
+
+/* No products */
+
+.no-products {
+    color: #777;
+    background: #f8f9fa;
+    border: 1px dashed #d5d5d5;
+    padding: 18px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+
+/* =====================================================
+   CUSTOMER REVIEWS
+   ===================================================== */
+
+.vendor-reviews-section {
+    max-width: 1050px;
+    margin: 0 auto 30px;
+    padding: 30px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+}
+
+
+/* Review cards */
+
+#vendorReviews > div {
+    background: #f8f9fa;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 18px;
+    margin-bottom: 12px;
+}
+
+#vendorReviews strong {
+    color: #123b2a;
+}
+
+#vendorReviews p {
+    color: #555;
+    line-height: 1.5;
+}
+
+
+/* =====================================================
+   REVIEW MODAL
+   ===================================================== */
+
+.review-modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    overflow-y: auto;
+}
+
+.review-modal-content {
+    background: #ffffff;
+    width: 90%;
+    max-width: 500px;
+    margin: 7% auto;
+    padding: 30px;
+    border-radius: 15px;
+    position: relative;
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.2);
+}
+
+.close-review-modal {
+    position: absolute;
+    right: 20px;
+    top: 12px;
+    font-size: 30px;
+    color: #777;
+    cursor: pointer;
+}
+
+.close-review-modal:hover {
+    color: #123b2a;
+}
+
+.review-modal-content h2 {
+    color: #123b2a;
+    margin-bottom: 10px;
+}
+
+#reviewVendorName {
+    color: #16804f;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+
+/* Stars */
+
+.star-rating {
+    margin: 12px 0;
+    font-size: 34px;
+    display: flex;
+    gap: 5px;
+}
+
+.star-rating span {
+    color: #d5d5d5;
+    cursor: pointer;
+    transition: 0.15s;
+}
+
+.star-rating span:hover,
+.star-rating span.selected {
+    color: #16804f;
+}
+
+#selectedRating {
+    color: #777;
+    font-size: 14px;
+    margin-bottom: 18px;
+}
+
+
+/* Review textarea */
+
+#reviewText {
+    width: 100%;
+    padding: 12px;
+    margin-top: 7px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    resize: vertical;
+    font-family: Arial, sans-serif;
+}
+
+#reviewText:focus {
+    outline: none;
+    border-color: #16804f;
+}
+
+
+/* Submit */
+
+#reviewForm .submit-review-btn {
+    background: #126b42;
+    color: #ffffff;
+    border: none;
+    padding: 11px 20px;
+    border-radius: 7px;
+    cursor: pointer;
+    font-weight: 600;
+    margin-top: 15px;
+}
+
+#reviewForm .submit-review-btn:hover {
+    background: #16804f;
+}
+
+
+/* =====================================================
+   FOOTER
+   ===================================================== */
+
+.vendor-profile-page + .review-modal + footer {
+    margin-top: 0;
+}
+
+
+/* =====================================================
+   RESPONSIVE
+   ===================================================== */
+
+@media (max-width: 768px) {
+
+    .vendor-profile-page {
+        padding: 30px 5%;
+    }
+
+    .vendor-profile-card,
+    .vendor-products-section,
+    .vendor-reviews-section {
+        padding: 22px;
+    }
+
+    .vendor-profile-header {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    #vendorBusinessName {
+        font-size: 27px;
+    }
+
+    .vendor-profile-details {
+        grid-template-columns: 1fr;
+    }
+
+    .products-grid {
+        grid-template-columns: 1fr;
+    }
+}
+/* =====================================================
+   VENDOR DASHBOARD - SHOP DETAILS
+===================================================== */
+
+.vendor-dashboard .vendor-shop-details {
+    margin-top: 30px;
+}
+
+
+/* =====================================================
+   SHOP DAYS
+===================================================== */
+
+.vendor-dashboard .shop-days {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(120px, 1fr));
+    gap: 12px;
+    margin-top: 10px;
+}
+
+
+.vendor-dashboard .shop-days label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fff;
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.2s ease;
+}
+
+
+.vendor-dashboard .shop-days label:hover {
+    border-color: #3498db;
+}
+
+
+.vendor-dashboard .shop-days input[type="checkbox"] {
+    width: 17px;
+    height: 17px;
+    margin: 0;
+    cursor: pointer;
+}
+
+
+.vendor-dashboard .shop-days label:has(input:checked) {
+    background: #f0f7ff;
+    border-color: #3498db;
+}
+
+
+/* =====================================================
+   PRODUCTS
+===================================================== */
+
+.vendor-dashboard #productsContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 15px;
+}
+
+
+.vendor-dashboard .product-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 10px;
+    align-items: center;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fff;
+}
+
+
+.vendor-dashboard .product-row input {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+
+.vendor-dashboard .remove-product-btn {
+    border: none;
+    background: #e74c3c;
+    color: white;
+    padding: 9px 13px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+
+.vendor-dashboard .remove-product-btn:hover {
+    background: #c0392b;
+}
+
+
+/* =====================================================
+   SHOP DETAILS MESSAGE
+===================================================== */
+
+.vendor-dashboard #shopDetailsMessage {
+    margin-top: 12px;
+    font-weight: 600;
+}
+
+
+/* =====================================================
+   VENDOR INFORMATION
+===================================================== */
+
+.vendor-dashboard .info-item span {
+    display: block;
+    margin-top: 5px;
+    min-height: 20px;
+}
+
+
+.vendor-dashboard #vendorStatus {
+    font-weight: 600;
+}
+
+
+/* =====================================================
+   SHOP DETAILS INPUTS
+===================================================== */
+
+.vendor-dashboard #shopDetailsForm input,
+.vendor-dashboard #shopDetailsForm textarea,
+.vendor-dashboard #shopDetailsForm select {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width: 700px) {
+
+    .vendor-dashboard .shop-days {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+
+    .vendor-dashboard .product-row {
+        grid-template-columns: 1fr;
+    }
+
+
+    .vendor-dashboard .remove-product-btn {
+        width: 100%;
+    }
+
+}
+/* =====================================================
+   VENDOR PROFILE PAGE
+===================================================== */
+
+.vendor-profile-page {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+
+/* =====================================================
+   VENDOR PROFILE CONTAINER
+===================================================== */
+
+.vendor-profile-container {
+    width: 100%;
+}
+
+
+/* =====================================================
+   VENDOR BASIC PROFILE CARD
+===================================================== */
+
+.vendor-profile-card {
+    background: #ffffff;
+    border-radius: 15px;
+    padding: 30px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.vendor-profile-card h1 {
+    margin: 0 0 8px;
+    font-size: 30px;
+}
+
+.vendor-category {
+    margin: 0 0 25px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+
+/* =====================================================
+   VENDOR PROFILE DETAILS
+===================================================== */
+
+.vendor-profile-details {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+}
+
+.profile-detail {
+    padding: 15px;
+    border-radius: 10px;
+    background: #f7f7f7;
+}
+
+.profile-detail strong {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 14px;
+}
+
+.profile-detail span {
+    display: block;
+    font-size: 15px;
+    word-break: break-word;
+}
+
+
+/* =====================================================
+   BUSINESS DESCRIPTION
+===================================================== */
+
+.vendor-description {
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid #ddd;
+}
+
+.vendor-description h3 {
+    margin-bottom: 10px;
+}
+
+.vendor-description p {
+    line-height: 1.7;
+    margin: 0;
+}
+
+
+/* =====================================================
+   SHOP DETAILS
+===================================================== */
+
+.shop-details-profile-card {
+    background: #ffffff;
+    border-radius: 15px;
+    padding: 30px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.shop-details-profile-card > h2 {
+    margin-top: 0;
+    margin-bottom: 25px;
+}
+
+
+/* =====================================================
+   SHOP PROFILE SECTION
+===================================================== */
+
+.shop-profile-section {
+    padding: 20px 0;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.shop-profile-section:last-child {
+    border-bottom: none;
+}
+
+.shop-profile-section h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+
+/* =====================================================
+   OPENING DAYS
+===================================================== */
+
+.opening-days-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.day-badge {
+    display: inline-block;
+    padding: 8px 14px;
+    border-radius: 20px;
+    background: #f0f0f0;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+
+/* =====================================================
+   SHOP TIMINGS
+===================================================== */
+
+.shop-timing-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.shop-time-box {
+    padding: 18px;
+    border-radius: 10px;
+    background: #f7f7f7;
+}
+
+.shop-time-box strong {
+    display: block;
+    margin-bottom: 8px;
+}
+
+.shop-time-box span {
+    font-size: 16px;
+}
+
+
+/* =====================================================
+   PRODUCTS
+===================================================== */
+
+.profile-products {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.profile-product-item {
+    padding: 18px;
+    border: 1px solid #e2e2e2;
+    border-radius: 10px;
+    background: #fafafa;
+}
+
+.profile-product-item h4 {
+    margin: 0 0 8px;
+    font-size: 17px;
+}
+
+.profile-product-item p {
+    margin: 0 0 10px;
+    line-height: 1.5;
+}
+
+.profile-product-item strong {
+    display: block;
+    margin-top: 8px;
+}
+
+
+/* =====================================================
+   NO DATA
+===================================================== */
+
+.no-shop-data {
+    margin: 0;
+    font-size: 14px;
+}
+
+
+/* =====================================================
+   RATING
+===================================================== */
+
+.vendor-rating-card {
+    background: #ffffff;
+    border-radius: 15px;
+    padding: 30px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.vendor-rating-card h2 {
+    margin-top: 0;
+}
+
+.rating-summary {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.average-rating {
+    font-size: 22px;
+    font-weight: 700;
+}
+
+
+/* =====================================================
+   REVIEWS
+===================================================== */
+
+.vendor-reviews-section {
+    background: #ffffff;
+    border-radius: 15px;
+    padding: 30px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.vendor-reviews-section h2 {
+    margin-top: 0;
+}
+
+
+/* =====================================================
+   BUTTONS
+===================================================== */
+
+.rate-review-btn,
+.back-to-directory-btn {
+    border: none;
+    border-radius: 8px;
+    padding: 11px 18px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.profile-back-container {
+    text-align: center;
+    margin-top: 20px;
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width: 700px) {
+
+    .vendor-profile-page {
+        padding: 25px 15px;
+    }
+
+    .vendor-profile-card,
+    .shop-details-profile-card,
+    .vendor-rating-card,
+    .vendor-reviews-section {
+        padding: 20px;
+    }
+
+    .vendor-profile-details {
+        grid-template-columns: 1fr;
+    }
+
+    .shop-timing-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-products {
+        grid-template-columns: 1fr;
+    }
+
+}

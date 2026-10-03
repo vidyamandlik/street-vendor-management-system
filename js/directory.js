@@ -3,39 +3,31 @@
 // =====================================================
 
 const vendorDirectory =
-    document.getElementById(
-        "vendorDirectory"
-    );
-
+    document.getElementById("vendorDirectory");
 
 const searchInput =
-    document.getElementById(
-        "searchVendor"
-    );
-
+    document.getElementById("searchVendor");
 
 const categoryFilter =
-    document.getElementById(
-        "categoryFilter"
-    );
-
+    document.getElementById("categoryFilter");
 
 const districtFilter =
-    document.getElementById(
-        "districtFilter"
-    );
+    document.getElementById("districtFilter");
 
 let allVerifiedVendors = [];
 let directoryRenderVersion = 0;
 
 function debounce(func, delay = 250) {
     let timeoutId;
+
     return function (...args) {
         clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => func.apply(this, args), delay);
+
+        timeoutId = setTimeout(() => {
+            func.apply(this, args);
+        }, delay);
     };
 }
-
 
 
 // =====================================================
@@ -51,10 +43,8 @@ async function loadDirectory() {
                 "http://localhost:5000/api/vendors"
             );
 
-
         const vendors =
             await response.json();
-
 
         if (!response.ok) {
 
@@ -64,13 +54,17 @@ async function loadDirectory() {
 
         }
 
+        const verifiedVendors =
+            vendors.filter(function (vendor) {
 
-        const verifiedVendors = vendors.filter(function (vendor) {
-            return String(vendor.status || "").toLowerCase() === "verified";
-        });
+                return String(
+                    vendor.status || ""
+                ).toLowerCase() === "verified";
 
-        allVerifiedVendors = verifiedVendors;
+            });
 
+        allVerifiedVendors =
+            verifiedVendors;
 
         if (
             verifiedVendors.length === 0
@@ -81,7 +75,6 @@ async function loadDirectory() {
             return;
 
         }
-
 
         filterVendors();
 
@@ -98,14 +91,11 @@ async function loadDirectory() {
 }
 
 
-
 // =====================================================
 // GET VENDOR RATING
 // =====================================================
 
-async function getVendorRating(
-    vendorId
-) {
+async function getVendorRating(vendorId) {
 
     try {
 
@@ -113,7 +103,6 @@ async function getVendorRating(
             await fetch(
                 `http://localhost:5000/api/reviews/vendor/${encodeURIComponent(vendorId)}`
             );
-
 
         if (!response.ok) {
 
@@ -124,10 +113,8 @@ async function getVendorRating(
 
         }
 
-
         const data =
             await response.json();
-
 
         return data;
 
@@ -147,28 +134,22 @@ async function getVendorRating(
 }
 
 
-
 // =====================================================
 // DISPLAY VENDORS
 // =====================================================
 
-async function displayVendors(
-    vendors
-) {
+async function displayVendors(vendors) {
 
     if (!vendorDirectory) {
         return;
     }
 
-    const renderVersion = ++directoryRenderVersion;
+    const renderVersion =
+        ++directoryRenderVersion;
 
-    vendorDirectory.innerHTML =
-        "";
+    vendorDirectory.innerHTML = "";
 
-
-    if (
-        vendors.length === 0
-    ) {
+    if (vendors.length === 0) {
 
         showNoVendors();
 
@@ -176,103 +157,362 @@ async function displayVendors(
 
     }
 
+    const ratings =
+        await Promise.all(
+            vendors.map(function (vendor) {
 
-    const ratings = await Promise.all(
-        vendors.map(function (vendor) {
-            return vendor.id ? getVendorRating(vendor.id) : Promise.resolve({ averageRating: 0, reviewCount: 0 });
-        })
-    );
+                return vendor.id
+                    ? getVendorRating(vendor.id)
+                    : Promise.resolve({
+                        averageRating: 0,
+                        reviewCount: 0
+                    });
 
-    // Ignore an older asynchronous render if a newer filter was applied.
-    if (renderVersion !== directoryRenderVersion) {
+            })
+        );
+
+    // Ignore older asynchronous render
+    if (
+        renderVersion !==
+        directoryRenderVersion
+    ) {
+
         return;
+
     }
 
-    const fragment = document.createDocumentFragment();
+    const fragment =
+        document.createDocumentFragment();
+
 
     vendors.forEach(function (vendor, index) {
-        const card = document.createElement("div");
-        const header = document.createElement("div");
-        const heading = document.createElement("h2");
-        const badge = document.createElement("span");
-        const ratingContainer = document.createElement("div");
-        const ratingStars = document.createElement("span");
-        const reviewCount = document.createElement("span");
-        const viewButton = document.createElement("button");
-        const rateButton = document.createElement("button");
-        const rating = ratings[index];
-        const averageRating = Number(rating.averageRating || 0).toFixed(1);
 
-        card.className = "vendor-card";
-        header.className = "vendor-card-header";
-        heading.textContent = vendor.businessName || "Business";
-        badge.className = "verified-badge";
-        badge.textContent = "✓ Verified";
-        header.append(heading, badge);
+        const card =
+            document.createElement("div");
 
-        addVendorDetail(card, "Owner", vendor.name);
-        addVendorDetail(card, "Category", vendor.category);
-        addVendorDetail(card, "District", vendor.district);
-        addVendorDetail(card, "Business Experience", `${vendor.years || 0} years`);
+        const header =
+            document.createElement("div");
+
+        const heading =
+            document.createElement("h2");
+
+        const badge =
+            document.createElement("span");
+
+        const ratingContainer =
+            document.createElement("div");
+
+        const ratingStars =
+            document.createElement("span");
+
+        const reviewCount =
+            document.createElement("span");
+
+        // =================================================
+        // VIEW PROFILE BUTTON
+        // =================================================
+
+        const profileButton =
+            document.createElement("button");
+
+        // =================================================
+        // VIEW REVIEWS BUTTON
+        // =================================================
+
+        const viewButton =
+            document.createElement("button");
+
+        // =================================================
+        // RATE & REVIEW BUTTON
+        // =================================================
+
+        const rateButton =
+            document.createElement("button");
+
+        const rating =
+            ratings[index];
+
+        const averageRating =
+            Number(
+                rating.averageRating || 0
+            ).toFixed(1);
+
+
+        // =================================================
+        // CARD
+        // =================================================
+
+        card.className =
+            "vendor-card";
+
+
+        // =================================================
+        // HEADER
+        // =================================================
+
+        header.className =
+            "vendor-card-header";
+
+        heading.textContent =
+            vendor.businessName ||
+            "Business";
+
+        badge.className =
+            "verified-badge";
+
+        badge.textContent =
+            "✓ Verified";
+
+        header.append(
+            heading,
+            badge
+        );
+
+
+        // =================================================
+        // VENDOR DETAILS
+        // =================================================
+
+        addVendorDetail(
+            card,
+            "Owner",
+            vendor.name
+        );
+
+        addVendorDetail(
+            card,
+            "Category",
+            vendor.category
+        );
+
+        addVendorDetail(
+            card,
+            "District",
+            vendor.district
+        );
+
+        addVendorDetail(
+            card,
+            "Business Experience",
+            `${vendor.years || 0} years`
+        );
+
+
+        // =================================================
+        // DESCRIPTION
+        // =================================================
 
         if (vendor.description) {
-            const description = document.createElement("p");
-            description.textContent = vendor.description;
-            card.appendChild(description);
+
+            const description =
+                document.createElement("p");
+
+            description.textContent =
+                vendor.description;
+
+            card.appendChild(
+                description
+            );
+
         }
 
-        ratingContainer.className = "vendor-rating";
-        ratingStars.className = "rating-stars";
-        ratingStars.textContent = `⭐ ${averageRating}`;
-        reviewCount.className = "review-count";
-        reviewCount.textContent = `(${rating.reviewCount || 0} Reviews)`;
-        ratingContainer.append(ratingStars, reviewCount);
 
-        viewButton.type = "button";
-        viewButton.className = "view-reviews-btn";
-        viewButton.textContent = "View Reviews";
-        viewButton.addEventListener("click", function () {
-            viewReviews(vendor.id);
-        });
+        // =================================================
+        // RATING
+        // =================================================
 
-        rateButton.type = "button";
-        rateButton.className = "rate-review-btn";
-        rateButton.textContent = "⭐ Rate & Review";
-        rateButton.addEventListener("click", function () {
-            openReviewModal(vendor.id, vendor.businessName || "Business");
-        });
+        ratingContainer.className =
+            "vendor-rating";
+
+        ratingStars.className =
+            "rating-stars";
+
+        ratingStars.textContent =
+            `⭐ ${averageRating}`;
+
+        reviewCount.className =
+            "review-count";
+
+        reviewCount.textContent =
+            `(${rating.reviewCount || 0} Reviews)`;
+
+        ratingContainer.append(
+            ratingStars,
+            reviewCount
+        );
+
+
+        // =================================================
+        // VIEW PROFILE BUTTON
+        // =================================================
+
+        profileButton.type =
+            "button";
+
+        profileButton.className =
+            "view-profile-btn";
+
+        profileButton.textContent =
+            "View Profile";
+
+        profileButton.addEventListener(
+            "click",
+            function () {
+
+                if (!vendor.id) {
+                    return;
+                }
+
+                window.location.href =
+                    `vendor.html?id=${encodeURIComponent(vendor.id)}`;
+
+            }
+        );
+
+
+        // =================================================
+        // VIEW REVIEWS BUTTON
+        // =================================================
+
+        viewButton.type =
+            "button";
+
+        viewButton.className =
+            "view-reviews-btn";
+
+        viewButton.textContent =
+            "View Reviews";
+
+        viewButton.addEventListener(
+            "click",
+            function () {
+
+                if (!vendor.id) {
+                    return;
+                }
+
+                viewReviews(
+                    vendor.id
+                );
+
+            }
+        );
+
+
+        // =================================================
+        // RATE & REVIEW BUTTON
+        // =================================================
+
+        rateButton.type =
+            "button";
+
+        rateButton.className =
+            "rate-review-btn";
+
+        rateButton.textContent =
+            "⭐ Rate & Review";
+
+        rateButton.addEventListener(
+            "click",
+            function () {
+
+                if (!vendor.id) {
+                    return;
+                }
+
+                openReviewModal(
+                    vendor.id,
+                    vendor.businessName ||
+                    "Business"
+                );
+
+            }
+        );
+
+
+        // =================================================
+        // DISABLE BUTTONS IF NO ID
+        // =================================================
 
         if (!vendor.id) {
-            viewButton.disabled = true;
-            rateButton.disabled = true;
+
+            profileButton.disabled =
+                true;
+
+            viewButton.disabled =
+                true;
+
+            rateButton.disabled =
+                true;
+
         }
 
-        card.prepend(header);
-        card.append(ratingContainer, viewButton, rateButton);
-        fragment.appendChild(card);
+
+        // =================================================
+        // ADD EVERYTHING TO CARD
+        // =================================================
+
+        card.prepend(
+            header
+        );
+
+        card.append(
+            ratingContainer,
+            profileButton,
+            viewButton,
+            rateButton
+        );
+
+        fragment.appendChild(
+            card
+        );
+
     });
 
-    vendorDirectory.appendChild(fragment);
+
+    vendorDirectory.appendChild(
+        fragment
+    );
 }
 
-function addVendorDetail(card, label, value) {
-    const detail = document.createElement("p");
-    const labelElement = document.createElement("strong");
 
-    labelElement.textContent = `${label}: `;
-    detail.append(labelElement, document.createTextNode(value || "N/A"));
-    card.appendChild(detail);
+// =====================================================
+// ADD VENDOR DETAIL
+// =====================================================
+
+function addVendorDetail(
+    card,
+    label,
+    value
+) {
+
+    const detail =
+        document.createElement("p");
+
+    const labelElement =
+        document.createElement("strong");
+
+    labelElement.textContent =
+        `${label}: `;
+
+    detail.append(
+        labelElement,
+        document.createTextNode(
+            value || "N/A"
+        )
+    );
+
+    card.appendChild(
+        detail
+    );
 }
-
 
 
 // =====================================================
 // VIEW REVIEWS
 // =====================================================
 
-async function viewReviews(
-    vendorId
-) {
+async function viewReviews(vendorId) {
 
     try {
 
@@ -281,10 +521,8 @@ async function viewReviews(
                 `http://localhost:5000/api/reviews/vendor/${encodeURIComponent(vendorId)}`
             );
 
-
         const data =
             await response.json();
-
 
         if (!response.ok) {
 
@@ -295,7 +533,6 @@ async function viewReviews(
             return;
 
         }
-
 
         let reviewText =
             `Average Rating: ${
@@ -326,7 +563,6 @@ async function viewReviews(
 
         }
 
-
         alert(
             reviewText
         );
@@ -346,12 +582,15 @@ async function viewReviews(
 }
 
 
-
 // =====================================================
 // NO VENDORS
 // =====================================================
 
 function showNoVendors() {
+
+    if (!vendorDirectory) {
+        return;
+    }
 
     vendorDirectory.innerHTML = `
 
@@ -372,15 +611,20 @@ function showNoVendors() {
 }
 
 
-
 // =====================================================
 // FILTER VENDORS
 // =====================================================
 
 function filterVendors() {
 
-    if (!searchInput || !categoryFilter || !districtFilter) {
+    if (
+        !searchInput ||
+        !categoryFilter ||
+        !districtFilter
+    ) {
+
         return;
+
     }
 
     const search =
@@ -388,10 +632,8 @@ function filterVendors() {
             .toLowerCase()
             .trim();
 
-
     const category =
         categoryFilter.value;
-
 
     const district =
         districtFilter.value
@@ -399,53 +641,60 @@ function filterVendors() {
             .trim();
 
 
-        const filteredVendors =
-            allVerifiedVendors.filter(
-                function (vendor) {
+    const filteredVendors =
+        allVerifiedVendors.filter(
+            function (vendor) {
 
-                    const matchesSearch =
+                const matchesSearch =
 
-                        String(vendor.name || "")
-                            .toLowerCase()
-                            .includes(search)
+                    String(
+                        vendor.name || ""
+                    )
+                        .toLowerCase()
+                        .includes(search)
 
-                        ||
+                    ||
 
-                        String(vendor.businessName || "")
-                            .toLowerCase()
-                            .includes(search);
-
-
-                    const matchesCategory =
-
-                        category === "" ||
-
-                        vendor.category ===
-                        category;
+                    String(
+                        vendor.businessName || ""
+                    )
+                        .toLowerCase()
+                        .includes(search);
 
 
-                    const matchesDistrict =
+                const matchesCategory =
 
-                        district === "" ||
+                    category === "" ||
 
-                        String(vendor.district || "")
-                            .toLowerCase()
-                            .includes(district);
-
-
-                    return (
-                        matchesSearch &&
-                        matchesCategory &&
-                        matchesDistrict
-                    );
-
-                }
-            );
+                    vendor.category ===
+                    category;
 
 
-        displayVendors(filteredVendors);
+                const matchesDistrict =
+
+                    district === "" ||
+
+                    String(
+                        vendor.district || ""
+                    )
+                        .toLowerCase()
+                        .includes(district);
+
+
+                return (
+                    matchesSearch &&
+                    matchesCategory &&
+                    matchesDistrict
+                );
+
+            }
+        );
+
+
+    displayVendors(
+        filteredVendors
+    );
 }
-
 
 
 // =====================================================
@@ -456,11 +705,13 @@ if (searchInput) {
 
     searchInput.addEventListener(
         "input",
-        debounce(filterVendors, 200)
+        debounce(
+            filterVendors,
+            200
+        )
     );
 
 }
-
 
 if (categoryFilter) {
 
@@ -470,7 +721,6 @@ if (categoryFilter) {
     );
 
 }
-
 
 if (districtFilter) {
 
@@ -482,13 +732,11 @@ if (districtFilter) {
 }
 
 
-
 // =====================================================
 // RATING & REVIEW
 // =====================================================
 
 let selectedRating = 0;
-
 
 
 // =====================================================
@@ -500,22 +748,16 @@ function openReviewModal(
     vendorName
 ) {
 
-    // IMPORTANT:
-    // Customer login stores token as customerToken
-
     const token =
         localStorage.getItem(
             "customerToken"
         );
-
 
     const role =
         localStorage.getItem(
             "customerRole"
         );
 
-
-    // Check customer login
 
     if (
         !token ||
@@ -526,10 +768,8 @@ function openReviewModal(
             "Please login as a customer to submit a review."
         );
 
-
         window.location.href =
             "../customer/login.html";
-
 
         return;
 
@@ -555,7 +795,8 @@ function openReviewModal(
         vendorName;
 
 
-    selectedRating = 0;
+    selectedRating =
+        0;
 
 
     document.getElementById(
@@ -575,33 +816,35 @@ function openReviewModal(
 }
 
 
-
 // =====================================================
 // CLOSE REVIEW MODAL
 // =====================================================
 
 function closeReviewModal() {
 
-    document.getElementById(
-        "reviewModal"
-    ).style.display =
-        "none";
+    const modal =
+        document.getElementById(
+            "reviewModal"
+        );
+
+    if (modal) {
+
+        modal.style.display =
+            "none";
+
+    }
 
 }
-
 
 
 // =====================================================
 // SELECT RATING
 // =====================================================
 
-function selectRating(
-    rating
-) {
+function selectRating(rating) {
 
     selectedRating =
         rating;
-
 
     document.getElementById(
         "selectedRating"
@@ -610,11 +853,9 @@ function selectRating(
         rating +
         " out of 5";
 
-
     updateStars();
 
 }
-
 
 
 // =====================================================
@@ -627,7 +868,6 @@ function updateStars() {
         document.querySelectorAll(
             ".star-rating span"
         );
-
 
     stars.forEach(
         function (
@@ -658,7 +898,6 @@ function updateStars() {
 }
 
 
-
 // =====================================================
 // SUBMIT REVIEW
 // =====================================================
@@ -668,7 +907,6 @@ const reviewForm =
         "reviewForm"
     );
 
-
 if (reviewForm) {
 
     reviewForm.addEventListener(
@@ -677,8 +915,6 @@ if (reviewForm) {
 
             event.preventDefault();
 
-
-            // Check rating
 
             if (
                 selectedRating === 0
@@ -706,8 +942,6 @@ if (reviewForm) {
                     .trim();
 
 
-            // Check review text
-
             if (!review) {
 
                 alert(
@@ -719,15 +953,10 @@ if (reviewForm) {
             }
 
 
-            // =========================================
-            // GET CUSTOMER TOKEN
-            // =========================================
-
             const token =
                 localStorage.getItem(
                     "customerToken"
                 );
-
 
             const role =
                 localStorage.getItem(
@@ -814,9 +1043,8 @@ if (reviewForm) {
                 closeReviewModal();
 
 
-                // Reload ratings
-
                 loadDirectory();
+
 
             } catch (error) {
 
@@ -835,7 +1063,6 @@ if (reviewForm) {
     );
 
 }
-
 
 
 // =====================================================

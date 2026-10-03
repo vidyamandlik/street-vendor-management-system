@@ -1,793 +1,1991 @@
+// =====================================================
+// STREET VENDOR MANAGEMENT SYSTEM - VENDOR MODULE
+// =====================================================
 
-// ===============================
-// VENDOR REGISTRATION
-// ===============================
+const API_BASE_URL = "http://localhost:5000/api";
+
+// =====================================================
+// LOCAL STORAGE KEYS
+// =====================================================
 
 const VENDOR_TOKEN_KEY = "vendorToken";
 const VENDOR_ROLE_KEY = "vendorRole";
 const VENDOR_ID_KEY = "loggedInVendorId";
 
-const vendorForm = document.getElementById("vendorForm");
 
-if (vendorForm) {
+// =====================================================
+// UTILITY
+// =====================================================
 
-    vendorForm.addEventListener("submit", async function(event) {
+function escapeHtml(value) {
+    if (value === null || value === undefined) {
+        return "";
+    }
 
-        event.preventDefault();
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
 
-        // Collect vendor information
 
-        const vendor = {
+// =====================================================
+// API RESPONSE HELPER
+// =====================================================
 
-            name:
-                document.getElementById("vendorName").value,
+async function getResponseData(response) {
+    const text = await response.text();
 
-            mobile:
-                document.getElementById("mobile").value,
+    if (!text) {
+        return {};
+    }
 
-            email:
-                document.getElementById("email").value,
+    try {
+        return JSON.parse(text);
+    } catch {
+        return {
+            message: text
+        };
+    }
+}
 
-            password:
-                document.getElementById("vendorPassword").value,
 
-            businessName:
-                document.getElementById("businessName").value,
+// =====================================================
+// VENDOR REGISTRATION
+// =====================================================
 
-            category:
-                document.getElementById("category").value,
+async function handleVendorRegistration(event) {
+    event.preventDefault();
 
-            district:
-                document.getElementById("district").value,
+    const form = event.target;
 
-            address:
-                document.getElementById("address").value,
+    const data = {
+        name: document.getElementById("vendorName")?.value.trim(),
+        mobile: document.getElementById("mobile")?.value.trim(),
+        email: document.getElementById("email")?.value.trim(),
+        password: document.getElementById("vendorPassword")?.value,
 
-            years:
-                document.getElementById("years").value,
+        businessName:
+            document.getElementById("businessName")?.value.trim(),
 
-            description:
-                document.getElementById("description").value
+        category:
+            document.getElementById("category")?.value.trim(),
 
+        district:
+            document.getElementById("district")?.value.trim(),
+
+        address:
+            document.getElementById("address")?.value.trim(),
+
+        years:
+            document.getElementById("years")?.value,
+
+        description:
+            document.getElementById("description")?.value.trim()
+    };
+
+    if (
+        !data.name ||
+        !data.mobile ||
+        !data.email ||
+        !data.password ||
+        !data.businessName ||
+        !data.category ||
+        !data.district ||
+        !data.address ||
+        data.years === ""
+    ) {
+        alert("Please fill all required fields.");
+        return;
+    }
+
+    try {
+        const response = await fetch(
+            `${API_BASE_URL}/vendors`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+            }
+        );
+
+        const result = await getResponseData(response);
+
+        console.log("Vendor registration response:", result);
+
+        if (!response.ok) {
+            throw new Error(
+                result.message ||
+                "Vendor registration failed."
+            );
+        }
+
+        form.style.display = "none";
+
+        const successMessage =
+            document.getElementById("successMessage");
+
+        const vendorIdElement =
+            document.getElementById("vendorId");
+
+        const generatedVendorId =
+            result.vendorId ||
+            result.vendor?.id ||
+            result.id;
+
+        if (vendorIdElement) {
+            vendorIdElement.textContent =
+                generatedVendorId || "Generated successfully";
+        }
+
+        if (successMessage) {
+            successMessage.style.display = "block";
+
+            successMessage.scrollIntoView({
+                behavior: "smooth"
+            });
+        }
+
+    } catch (error) {
+        console.error("Vendor registration error:", error);
+
+        alert(
+            error.message ||
+            "Vendor registration failed."
+        );
+    }
+}
+
+
+// =====================================================
+// VENDOR LOGIN
+// =====================================================
+
+async function handleVendorLogin(event) {
+    event.preventDefault();
+
+    const vendorId =
+        document.getElementById("vendorIdLogin")?.value.trim();
+
+    const password =
+        document.getElementById("vendorPasswordLogin")?.value;
+
+    const errorElement =
+        document.getElementById("vendorLoginError");
+
+    if (errorElement) {
+        errorElement.textContent = "";
+    }
+
+    if (!vendorId || !password) {
+        if (errorElement) {
+            errorElement.textContent =
+                "Please enter Vendor ID and password.";
+        }
+
+        return;
+    }
+
+    try {
+        const response = await fetch(
+            `${API_BASE_URL}/vendors/login`,
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+                    id: vendorId,
+                    password: password
+                })
+            }
+        );
+
+        const result = await getResponseData(response);
+
+        console.log("Vendor login response:", result);
+
+        if (!response.ok) {
+            throw new Error(
+                result.message ||
+                "Invalid Vendor ID or password."
+            );
+        }
+
+        if (!result.token) {
+            throw new Error(
+                "Login successful, but authentication token was not received."
+            );
+        }
+
+        // Save vendor login information
+        localStorage.setItem(
+            VENDOR_TOKEN_KEY,
+            result.token
+        );
+
+        localStorage.setItem(
+            VENDOR_ROLE_KEY,
+            result.role || "vendor"
+        );
+
+        localStorage.setItem(
+            VENDOR_ID_KEY,
+            result.vendor?.id ||
+            result.id ||
+            vendorId
+        );
+
+        console.log("Vendor login saved successfully.");
+
+        // Redirect to vendor dashboard
+        window.location.href = "dashboard.html";
+
+    } catch (error) {
+        console.error("Vendor login error:", error);
+
+        if (errorElement) {
+            errorElement.textContent =
+                error.message ||
+                "Vendor login failed.";
+        } else {
+            alert(
+                error.message ||
+                "Vendor login failed."
+            );
+        }
+    }
+}
+
+
+// =====================================================
+// VENDOR LOGOUT
+// =====================================================
+
+function logoutVendor() {
+    localStorage.removeItem(VENDOR_TOKEN_KEY);
+    localStorage.removeItem(VENDOR_ROLE_KEY);
+    localStorage.removeItem(VENDOR_ID_KEY);
+
+    window.location.href = "login.html";
+}
+
+
+// =====================================================
+// LOAD LOGGED-IN VENDOR PROFILE
+// =====================================================
+
+async function loadVendorProfile() {
+    const token =
+        localStorage.getItem(VENDOR_TOKEN_KEY);
+
+    const vendorId =
+        localStorage.getItem(VENDOR_ID_KEY);
+
+    if (!token || !vendorId) {
+        window.location.href = "login.html";
+        return;
+    }
+
+    try {
+        const response = await fetch(
+            `${API_BASE_URL}/vendors/${encodeURIComponent(vendorId)}`,
+            {
+                method: "GET",
+
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }
+        );
+
+        const result =
+            await getResponseData(response);
+
+        if (!response.ok) {
+            throw new Error(
+                result.message ||
+                "Unable to load vendor profile."
+            );
+        }
+
+        displayVendorProfile(result);
+
+    } catch (error) {
+        console.error(
+            "Vendor profile loading error:",
+            error
+        );
+
+        alert(
+            error.message ||
+            "Unable to load vendor profile."
+        );
+    }
+}
+
+
+// =====================================================
+// DISPLAY VENDOR PROFILE
+// =====================================================
+
+function displayVendorProfile(vendor) {
+    const fields = {
+        vendorName: vendor.name,
+        businessName: vendor.businessName,
+        mobile: vendor.mobile,
+        email: vendor.email,
+        category: vendor.category,
+        district: vendor.district,
+        address: vendor.address,
+        years: vendor.years,
+        description: vendor.description,
+        vendorId: vendor.id
+    };
+
+    Object.entries(fields).forEach(([id, value]) => {
+        const element = document.getElementById(id);
+
+        if (element) {
+            element.textContent = value ?? "";
+        }
+    });
+}
+
+
+// =====================================================
+// CUSTOMER LOGIN CHECK
+// =====================================================
+
+function isCustomerLoggedIn() {
+    const token =
+        localStorage.getItem("customerToken");
+
+    const role =
+        localStorage.getItem("customerRole");
+
+    return Boolean(
+        token &&
+        role === "customer"
+    );
+}
+
+
+// =====================================================
+// PUBLIC VENDOR PROFILE
+// =====================================================
+
+async function loadPublicVendorProfile(vendorId) {
+    const mainContent =
+        document.getElementById("mainContent");
+
+    if (!mainContent) {
+        return;
+    }
+
+    try {
+        const response = await fetch(
+            `${API_BASE_URL}/public/vendors/${encodeURIComponent(vendorId)}`
+        );
+
+        const vendor =
+            await getResponseData(response);
+
+        if (!response.ok) {
+            throw new Error(
+                vendor.message ||
+                "Vendor not found."
+            );
+        }
+
+        renderVendorProfile(vendor);
+
+    } catch (error) {
+        console.error(
+            "Public vendor profile error:",
+            error
+        );
+
+        mainContent.innerHTML = `
+            <div class="vendor-profile-card">
+                <h2>Vendor Not Found</h2>
+
+                <p>
+                    ${escapeHtml(error.message)}
+                </p>
+
+                <a
+                    href="vendors.html"
+                    class="view-profile-btn"
+                >
+                    Back to Directory
+                </a>
+            </div>
+        `;
+    }
+}
+
+
+// =====================================================
+// RENDER PUBLIC VENDOR PROFILE
+// =====================================================
+
+function renderVendorProfile(vendor) {
+
+    const mainContent = document.getElementById("mainContent");
+
+    if (!mainContent) {
+        console.error("mainContent not found.");
+        return;
+    }
+
+    console.log("Vendor profile:", vendor);
+    console.log("Shop details:", vendor.shopDetails);
+
+    const shopDetails = vendor.shopDetails || {};
+
+    const openingDays =
+        Array.isArray(shopDetails.days)
+            ? shopDetails.days
+            : [];
+
+    const closingDay =
+        shopDetails.closingDay || "";
+
+    const openingTime =
+        shopDetails.openingTime || "";
+
+    const closingTime =
+        shopDetails.closingTime || "";
+
+    const products =
+        Array.isArray(shopDetails.products)
+            ? shopDetails.products
+            : [];
+
+
+    /* =====================================================
+       PRODUCTS
+    ===================================================== */
+
+    let productsHTML = "";
+
+    if (products.length > 0) {
+
+        productsHTML = products.map(product => {
+
+            if (typeof product === "string") {
+
+                return `
+                    <div class="profile-product-item">
+
+                        <h4>
+                            ${escapeHtml(product)}
+                        </h4>
+
+                    </div>
+                `;
+            }
+
+            const productName =
+                product.name ||
+                product.productName ||
+                product.title ||
+                "Product";
+
+            const productDescription =
+                product.description ||
+                product.details ||
+                "";
+
+            const productPrice =
+                product.price !== undefined &&
+                product.price !== null &&
+                product.price !== ""
+                    ? product.price
+                    : "";
+
+            return `
+                <div class="profile-product-item">
+
+                    <h4>
+                        ${escapeHtml(productName)}
+                    </h4>
+
+                    ${
+                        productDescription
+                            ? `
+                                <p>
+                                    ${escapeHtml(productDescription)}
+                                </p>
+                              `
+                            : ""
+                    }
+
+                    ${
+                        productPrice
+                            ? `
+                                <strong>
+                                    ₹${escapeHtml(productPrice)}
+                                </strong>
+                              `
+                            : ""
+                    }
+
+                </div>
+            `;
+
+        }).join("");
+
+    } else {
+
+        productsHTML = `
+            <p class="no-shop-data">
+                No products added yet.
+            </p>
+        `;
+    }
+
+
+    /* =====================================================
+       OPENING DAYS
+    ===================================================== */
+
+    let openingDaysHTML = "";
+
+    if (openingDays.length > 0) {
+
+        openingDaysHTML = openingDays
+            .map(day => `
+                <span class="day-badge">
+                    ${escapeHtml(day)}
+                </span>
+            `)
+            .join("");
+
+    } else {
+
+        openingDaysHTML = `
+            <span class="no-shop-data">
+                Not provided
+            </span>
+        `;
+    }
+
+
+    /* =====================================================
+       RATING
+    ===================================================== */
+
+    const rating = vendor.rating || {};
+
+    const averageRating =
+        Number(rating.averageRating || 0).toFixed(1);
+
+    const reviewCount =
+        Number(rating.reviewCount || 0);
+
+
+    /* =====================================================
+       PROFILE HTML
+    ===================================================== */
+
+    mainContent.innerHTML = `
+
+        <div class="vendor-profile-container">
+
+
+            <!-- ==========================================
+                 VENDOR DETAILS
+            =========================================== -->
+
+            <section class="vendor-profile-card">
+
+                <h1>
+                    ${escapeHtml(
+                        vendor.businessName || "Vendor Profile"
+                    )}
+                </h1>
+
+                <p class="vendor-category">
+                    ${escapeHtml(vendor.category || "")}
+                </p>
+
+
+                <div class="vendor-profile-details">
+
+
+                    <div class="profile-detail">
+
+                        <strong>
+                            Vendor ID
+                        </strong>
+
+                        <span>
+                            ${escapeHtml(vendor.id || "N/A")}
+                        </span>
+
+                    </div>
+
+
+                    <div class="profile-detail">
+
+                        <strong>
+                            Owner Name
+                        </strong>
+
+                        <span>
+                            ${escapeHtml(vendor.name || "N/A")}
+                        </span>
+
+                    </div>
+
+
+                    <div class="profile-detail">
+
+                        <strong>
+                            Mobile
+                        </strong>
+
+                        <span>
+                            ${escapeHtml(vendor.mobile || "N/A")}
+                        </span>
+
+                    </div>
+
+
+                    <div class="profile-detail">
+
+                        <strong>
+                            Email
+                        </strong>
+
+                        <span>
+                            ${escapeHtml(vendor.email || "N/A")}
+                        </span>
+
+                    </div>
+
+
+                    <div class="profile-detail">
+
+                        <strong>
+                            Category
+                        </strong>
+
+                        <span>
+                            ${escapeHtml(vendor.category || "N/A")}
+                        </span>
+
+                    </div>
+
+
+                    <div class="profile-detail">
+
+                        <strong>
+                            District
+                        </strong>
+
+                        <span>
+                            ${escapeHtml(vendor.district || "N/A")}
+                        </span>
+
+                    </div>
+
+
+                    <div class="profile-detail">
+
+                        <strong>
+                            Address
+                        </strong>
+
+                        <span>
+                            ${escapeHtml(vendor.address || "N/A")}
+                        </span>
+
+                    </div>
+
+
+                    <div class="profile-detail">
+
+                        <strong>
+                            Experience
+                        </strong>
+
+                        <span>
+                            ${escapeHtml(vendor.years || "N/A")}
+                            years
+                        </span>
+
+                    </div>
+
+
+                </div>
+
+
+                ${
+                    vendor.description
+                        ? `
+                            <div class="vendor-description">
+
+                                <h3>
+                                    About Business
+                                </h3>
+
+                                <p>
+                                    ${escapeHtml(
+                                        vendor.description
+                                    )}
+                                </p>
+
+                            </div>
+                          `
+                        : ""
+                }
+
+            </section>
+
+
+
+            <!-- ==========================================
+                 SHOP DETAILS
+            =========================================== -->
+
+            <section class="shop-details-profile-card">
+
+                <h2>
+                    Shop Details
+                </h2>
+
+
+                <!-- OPENING DAYS -->
+
+                <div class="shop-profile-section">
+
+                    <h3>
+                        Opening Days
+                    </h3>
+
+                    <div class="opening-days-list">
+
+                        ${openingDaysHTML}
+
+                    </div>
+
+                </div>
+
+
+                <!-- CLOSING DAY -->
+
+                <div class="shop-profile-section">
+
+                    <h3>
+                        Closing Day
+                    </h3>
+
+                    <p>
+                        ${
+                            closingDay
+                                ? escapeHtml(closingDay)
+                                : "Not provided"
+                        }
+                    </p>
+
+                </div>
+
+
+                <!-- SHOP TIMINGS -->
+
+                <div class="shop-profile-section">
+
+                    <h3>
+                        Shop Timings
+                    </h3>
+
+
+                    <div class="shop-timing-grid">
+
+
+                        <div class="shop-time-box">
+
+                            <strong>
+                                Opening Time
+                            </strong>
+
+                            <span>
+                                ${
+                                    openingTime
+                                        ? escapeHtml(openingTime)
+                                        : "Not provided"
+                                }
+                            </span>
+
+                        </div>
+
+
+                        <div class="shop-time-box">
+
+                            <strong>
+                                Closing Time
+                            </strong>
+
+                            <span>
+                                ${
+                                    closingTime
+                                        ? escapeHtml(closingTime)
+                                        : "Not provided"
+                                }
+                            </span>
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+
+                <!-- PRODUCTS -->
+
+                <div class="shop-profile-section">
+
+                    <h3>
+                        Products
+                    </h3>
+
+
+                    <div class="profile-products">
+
+                        ${productsHTML}
+
+                    </div>
+
+                </div>
+
+
+            </section>
+
+
+
+            <!-- ==========================================
+                 RATING
+            =========================================== -->
+
+            <section class="vendor-rating-card">
+
+                <h2>
+                    Customer Rating
+                </h2>
+
+
+                <div class="rating-summary">
+
+                    <span class="average-rating">
+                        ⭐ ${averageRating}
+                    </span>
+
+                    <span>
+                        ${reviewCount}
+                        review${reviewCount === 1 ? "" : "s"}
+                    </span>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="rate-review-btn"
+                    onclick="openReviewModal(
+                        '${escapeHtml(vendor.id)}',
+                        '${escapeHtml(
+                            vendor.businessName || ""
+                        )}'
+                    )">
+
+                    Rate & Review
+
+                </button>
+
+            </section>
+
+
+
+            <!-- ==========================================
+                 REVIEWS
+            =========================================== -->
+
+            <section class="vendor-reviews-section">
+
+                <h2>
+                    Customer Reviews
+                </h2>
+
+
+                <div id="vendorReviews">
+
+                    <p>
+                        Loading reviews...
+                    </p>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- ==========================================
+                 BACK
+            =========================================== -->
+
+            <div class="profile-back-container">
+
+                <button
+                    type="button"
+                    class="back-to-directory-btn"
+                    onclick="loadVendorDirectory()">
+
+                    ← Back to Vendor Directory
+
+                </button>
+
+            </div>
+
+
+        </div>
+    `;
+
+
+    /* Load reviews */
+
+    if (vendor.id) {
+        loadVendorReviews(vendor.id);
+    }
+
+}
+
+
+// =====================================================
+// LOAD VERIFIED VENDOR DIRECTORY
+// =====================================================
+
+async function loadVendorDirectory() {
+    const mainContent =
+        document.getElementById("mainContent");
+
+    if (!mainContent) {
+        return;
+    }
+
+    try {
+        const response = await fetch(
+            `${API_BASE_URL}/public/vendors`
+        );
+
+        const vendors =
+            await getResponseData(response);
+
+        if (!response.ok) {
+            throw new Error(
+                vendors.message ||
+                "Unable to load vendors."
+            );
+        }
+
+        renderVendorDirectory(vendors);
+
+    } catch (error) {
+        console.error(
+            "Vendor directory error:",
+            error
+        );
+
+        mainContent.innerHTML = `
+            <section class="directory-page">
+
+                <div class="directory-header">
+
+                    <h1>
+                        Vendor Directory
+                    </h1>
+
+                    <p>
+                        Unable to load vendors.
+                    </p>
+
+                    <p>
+                        ${escapeHtml(error.message)}
+                    </p>
+
+                </div>
+
+            </section>
+        `;
+    }
+}
+
+
+// =====================================================
+// GET VENDOR RATING
+// =====================================================
+
+async function getVendorRating(vendorId) {
+    try {
+        const response = await fetch(
+            `${API_BASE_URL}/reviews/vendor/${encodeURIComponent(vendorId)}`
+        );
+
+        const result =
+            await getResponseData(response);
+
+        if (!response.ok) {
+            return {
+                averageRating: 0,
+                reviewCount: 0
+            };
+        }
+
+        return {
+            averageRating:
+                Number(
+                    result.averageRating || 0
+                ),
+
+            reviewCount:
+                Number(
+                    result.reviewCount || 0
+                )
         };
 
+    } catch (error) {
+        console.error(
+            "Rating loading error:",
+            error
+        );
 
-        try {
+        return {
+            averageRating: 0,
+            reviewCount: 0
+        };
+    }
+}
 
-            // Send vendor data to backend
 
-            const response = await fetch(
-                "http://localhost:5000/api/vendors",
+// =====================================================
+// RENDER VENDOR DIRECTORY
+// =====================================================
+
+async function renderVendorDirectory(vendors) {
+    const mainContent =
+        document.getElementById("mainContent");
+
+    if (!mainContent) {
+        return;
+    }
+
+    if (
+        !Array.isArray(vendors) ||
+        vendors.length === 0
+    ) {
+        mainContent.innerHTML = `
+            <section class="directory-page">
+
+                <div class="directory-header">
+
+                    <h1>
+                        Vendor Directory
+                    </h1>
+
+                    <p>
+                        No verified vendors available.
+                    </p>
+
+                </div>
+
+            </section>
+        `;
+
+        return;
+    }
+
+
+    // Load ratings
+    const vendorsWithRatings =
+        await Promise.all(
+            vendors.map(async vendor => {
+                const rating =
+                    await getVendorRating(
+                        vendor.id
+                    );
+
+                return {
+                    ...vendor,
+                    rating
+                };
+            })
+        );
+
+
+    mainContent.innerHTML = `
+        <section class="directory-page">
+
+            <div class="directory-header">
+
+                <h1>
+                    Vendor Directory
+                </h1>
+
+                <p>
+                    Explore verified street vendors.
+                </p>
+
+            </div>
+
+
+            <div class="vendor-grid">
+
+                ${vendorsWithRatings.map(vendor => {
+
+                    const rating =
+                        vendor.rating || {};
+
+                    const averageRating =
+                        Number(
+                            rating.averageRating || 0
+                        ).toFixed(1);
+
+                    const reviewCount =
+                        Number(
+                            rating.reviewCount || 0
+                        );
+
+                    return `
+                        <div class="vendor-card">
+
+                            <h2>
+                                ${escapeHtml(
+                                    vendor.businessName
+                                )}
+                            </h2>
+
+
+                            <p>
+                                <strong>
+                                    Owner:
+                                </strong>
+
+                                ${escapeHtml(
+                                    vendor.name
+                                )}
+                            </p>
+
+
+                            <p>
+                                <strong>
+                                    Category:
+                                </strong>
+
+                                ${escapeHtml(
+                                    vendor.category
+                                )}
+                            </p>
+
+
+                            <p>
+                                <strong>
+                                    District:
+                                </strong>
+
+                                ${escapeHtml(
+                                    vendor.district
+                                )}
+                            </p>
+
+
+                            <p class="vendor-card-rating">
+
+                                ★ ${averageRating}
+
+                                <span>
+                                    (${reviewCount} reviews)
+                                </span>
+
+                            </p>
+
+
+                            <a
+                                class="view-profile-btn"
+                                href="vendors.html?id=${encodeURIComponent(
+                                    vendor.id
+                                )}"
+                            >
+                                View Profile
+                            </a>
+
+                        </div>
+                    `;
+
+                }).join("")}
+
+            </div>
+
+        </section>
+    `;
+}
+
+
+// =====================================================
+// REVIEWS
+// =====================================================
+
+let selectedRating = 0;
+
+
+// =====================================================
+// OPEN REVIEW MODAL
+// =====================================================
+
+function openReviewModal(vendorId, vendorName) {
+    const modal =
+        document.getElementById("reviewModal");
+
+    const vendorIdInput =
+        document.getElementById("reviewVendorId");
+
+    const vendorNameElement =
+        document.getElementById("reviewVendorName");
+
+    const reviewMessage =
+        document.getElementById("reviewMessage");
+
+    const reviewText =
+        document.getElementById("reviewText");
+
+    if (!modal) {
+        console.error("Review modal not found.");
+        return;
+    }
+
+    if (vendorIdInput) {
+        vendorIdInput.value = vendorId;
+    }
+
+    if (vendorNameElement) {
+        vendorNameElement.textContent = vendorName;
+    }
+
+    if (reviewMessage) {
+        reviewMessage.textContent = "";
+    }
+
+    if (reviewText) {
+        reviewText.value = "";
+    }
+
+    selectedRating = 0;
+
+    updateStars();
+
+    const selectedRatingElement =
+        document.getElementById("selectedRating");
+
+    if (selectedRatingElement) {
+        selectedRatingElement.textContent =
+            "Select your rating";
+    }
+
+    modal.style.display = "flex";
+}
+
+
+// =====================================================
+// CLOSE REVIEW MODAL
+// =====================================================
+
+function closeReviewModal() {
+    const modal =
+        document.getElementById("reviewModal");
+
+    if (modal) {
+        modal.style.display = "none";
+    }
+}
+
+
+// =====================================================
+// SELECT RATING
+// =====================================================
+
+function selectRating(rating) {
+    selectedRating = Number(rating);
+
+    const selectedRatingElement =
+        document.getElementById("selectedRating");
+
+    if (selectedRatingElement) {
+        selectedRatingElement.textContent =
+            `${selectedRating} out of 5 stars`;
+    }
+
+    updateStars();
+}
+
+
+// =====================================================
+// UPDATE STARS
+// =====================================================
+
+function updateStars() {
+    const stars =
+        document.querySelectorAll(
+            ".rating-star"
+        );
+
+    stars.forEach(star => {
+        const rating =
+            Number(
+                star.dataset.rating
+            );
+
+        star.classList.toggle(
+            "selected",
+            rating <= selectedRating
+        );
+    });
+}
+
+
+// =====================================================
+// SUBMIT REVIEW
+// =====================================================
+
+// =====================================================
+// SUBMIT REVIEW
+// =====================================================
+
+async function submitReview(event) {
+
+    event.preventDefault();
+
+    const messageElement =
+        document.getElementById("reviewMessage");
+
+    const vendorIdElement =
+        document.getElementById("reviewVendorId");
+
+    const reviewTextElement =
+        document.getElementById("reviewText");
+
+
+    if (!messageElement) {
+        console.error(
+            "reviewMessage element not found."
+        );
+        return;
+    }
+
+
+    if (!vendorIdElement) {
+
+        messageElement.textContent =
+            "Vendor ID field not found.";
+
+        return;
+    }
+
+
+    if (!reviewTextElement) {
+
+        messageElement.textContent =
+            "Review field not found.";
+
+        return;
+    }
+
+
+    const vendorId =
+        vendorIdElement.value.trim();
+
+    const reviewText =
+        reviewTextElement.value.trim();
+
+    const token =
+        localStorage.getItem("customerToken");
+
+    const customerRole =
+        localStorage.getItem("customerRole");
+
+    const rating =
+        Number(selectedRating);
+
+
+    console.log(
+        "========== SUBMIT REVIEW =========="
+    );
+
+    console.log(
+        "Vendor ID:",
+        vendorId
+    );
+
+    console.log(
+        "Rating:",
+        rating
+    );
+
+    console.log(
+        "Review:",
+        reviewText
+    );
+
+    console.log(
+        "Customer Role:",
+        customerRole
+    );
+
+    console.log(
+        "Customer Token Exists:",
+        Boolean(token)
+    );
+
+
+    // =================================================
+    // CUSTOMER LOGIN CHECK
+    // =================================================
+
+    if (!token) {
+
+        messageElement.textContent =
+            "Please login as a customer first.";
+
+        return;
+    }
+
+
+    if (customerRole !== "customer") {
+
+        messageElement.textContent =
+            "Please login using a customer account.";
+
+        return;
+    }
+
+
+    // =================================================
+    // VENDOR CHECK
+    // =================================================
+
+    if (!vendorId) {
+
+        messageElement.textContent =
+            "Vendor ID is missing.";
+
+        return;
+    }
+
+
+    // =================================================
+    // RATING CHECK
+    // =================================================
+
+    if (
+        !Number.isInteger(rating) ||
+        rating < 1 ||
+        rating > 5
+    ) {
+
+        messageElement.textContent =
+            "Please select a rating from 1 to 5.";
+
+        return;
+    }
+
+
+    // =================================================
+    // REVIEW CHECK
+    // =================================================
+
+    if (!reviewText) {
+
+        messageElement.textContent =
+            "Please write your review.";
+
+        return;
+    }
+
+
+    try {
+
+        messageElement.textContent =
+            "Submitting review...";
+
+
+        // =================================================
+        // SEND REVIEW TO BACKEND
+        // =================================================
+
+        const response =
+            await fetch(
+                `${API_BASE_URL}/reviews`,
                 {
                     method: "POST",
 
                     headers: {
-                         "Content-Type": "application/json"
-                     },
+                        "Content-Type":
+                            "application/json",
 
-                    body: JSON.stringify(vendor)
+                        "Authorization":
+                            `Bearer ${token}`
+                    },
+
+                    body: JSON.stringify({
+
+                        vendorId:
+                            vendorId,
+
+                        rating:
+                            rating,
+
+                        review:
+                            reviewText
+                    })
                 }
             );
 
 
-            const result = await response.json();
+        const data =
+            await getResponseData(response);
 
 
-            if (!response.ok) {
-
-                throw new Error(
-                    result.message || "Registration failed"
-                );
-
-            }
-
-
-            // Hide form
-
-            vendorForm.style.display = "none";
-
-
-            // Show success message
-
-            document.getElementById(
-                "successMessage"
-            ).style.display = "block";
-
-
-            document.getElementById(
-                "vendorId"
-            ).textContent = result.vendorId;
-
-
-        } catch (error) {
-
-            console.error(
-                "Registration error:",
-                error
-            );
-
-            alert(
-                "Unable to register vendor. Please try again."
-            );
-
-        }
-
-    });
-
-}
-// ===============================
-// VENDOR LOGIN
-// ===============================
-
-const vendorLoginForm =
-    document.getElementById("vendorLoginForm");
-
-if (vendorLoginForm) {
-
-    vendorLoginForm.addEventListener(
-        "submit",
-        async function(event) {
-
-            event.preventDefault();
-
-            const enteredId =
-                document.getElementById(
-                    "vendorIdLogin"
-                ).value.trim();
-
-            const enteredPassword =
-                document.getElementById(
-                    "vendorPasswordLogin"
-                ).value;
-
-            try {
-
-                const response = await fetch(
-                    "http://localhost:5000/api/vendors/login",
-                    {
-                        method: "POST",
-
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
-
-                        body: JSON.stringify({
-                            id: enteredId,
-                            password: enteredPassword
-                        })
-                    }
-                );
-
-                const result =
-                    await response.json();
-
-                console.log(
-                    "Login response:",
-                    result
-                );
-
-                if (!response.ok) {
-
-                    document.getElementById(
-                        "vendorLoginError"
-                    ).textContent =
-                        result.message ||
-                        "Invalid Vendor ID or password.";
-
-                    return;
-                }
-
-                // Save JWT token
-                localStorage.setItem(
-                    VENDOR_TOKEN_KEY,
-                    result.token
-                );
-
-                // Save user role
-                localStorage.setItem(
-                    VENDOR_ROLE_KEY,
-                    result.role
-                );
-
-                // Save logged-in vendor ID
-                localStorage.setItem(
-                    VENDOR_ID_KEY,
-                    result.vendor.id
-                );
-
-                console.log(
-                    "Saved Vendor ID:",
-                    localStorage.getItem(
-                        VENDOR_ID_KEY
-                    )
-                );
-
-                // Open dashboard
-                window.location.href =
-                    "dashboard.html";
-
-            } catch (error) {
-
-                console.error(
-                    "Login error:",
-                    error
-                );
-
-                document.getElementById(
-                    "vendorLoginError"
-                ).textContent =
-                    "Unable to connect to server. Please try again.";
-            }
-
-        }
-    );
-
-}
-// ===============================
-// VENDOR DASHBOARD
-// ===============================
-
-const vendorDashboard =
-    document.querySelector(
-        ".vendor-dashboard"
-    );
-
-
-if (vendorDashboard) {
-
-    // Get authentication information
-
-    const token =
-        localStorage.getItem(VENDOR_TOKEN_KEY);
-
-    const userRole =
-        localStorage.getItem(VENDOR_ROLE_KEY);
-
-
-    // Check vendor authentication
-
-    if (!token || userRole !== "vendor") {
-
-        alert(
-            "Access denied. Vendor login required."
+        console.log(
+            "Review HTTP status:",
+            response.status
         );
 
-        window.location.href =
-            "login.html";
-
-    } else {
-
-        loadVendorDashboard();
-
-    }
-
-}
-
-// ===============================
-// LOAD VENDOR INFORMATION
-// ===============================
-
-async function loadVendorDashboard() {
-
-    const loggedInVendorId =
-        localStorage.getItem(
-            VENDOR_ID_KEY
+        console.log(
+            "Review server response:",
+            data
         );
 
 
-    if (!loggedInVendorId) {
-
-        window.location.href =
-            "login.html";
-
-        return;
-
-    }
-
-
-    try {
-
-        // Get JWT token
-
-            const token =
-             localStorage.getItem(VENDOR_TOKEN_KEY);
-
-
-          if (!token) {
-
-                window.location.href =
-                   "login.html";
-
-                  return;
-
-               }
-                //GET VENDOR INFOMATION FROM BACKEND
-              const response = await fetch(
-               `http://localhost:5000/api/vendors/${encodeURIComponent(loggedInVendorId)}`,
-         {
-                 headers: {
-                    Authorization:
-                    `Bearer ${token}`
-              }
-            }
-        );
-
-
-        const vendor =
-            await response.json();
-
-
-        if (response.status === 401 || response.status === 403) {
-            handleVendorSessionExpired();
-            return;
-        }
+        // =================================================
+        // BACKEND ERROR
+        // =================================================
 
         if (!response.ok) {
 
-            console.error(
-                "Vendor not found:",
-                vendor.message
+            throw new Error(
+                data.message ||
+                `Review submission failed (${response.status}).`
             );
-
-            return;
-
         }
 
 
-        // Display vendor information
+        // =================================================
+        // SUCCESS
+        // =================================================
 
-        document.getElementById(
-            "vendorName"
-        ).textContent =
-            vendor.name;
-
-
-        document.getElementById(
-            "vendorId"
-        ).textContent =
-            vendor.id;
+        messageElement.textContent =
+            "Review submitted successfully!";
 
 
-        document.getElementById(
-            "businessName"
-        ).textContent =
-            vendor.businessName;
+        reviewTextElement.value = "";
 
 
-        document.getElementById(
-            "category"
-        ).textContent =
-            vendor.category;
+        selectedRating = 0;
 
 
-        document.getElementById(
-            "mobile"
-        ).textContent =
-            vendor.mobile;
+        updateStars();
 
 
-        document.getElementById(
-            "email"
-        ).textContent =
-            vendor.email;
+        const selectedRatingElement =
+            document.getElementById(
+                "selectedRating"
+            );
 
 
-        document.getElementById(
-            "district"
-        ).textContent =
-            vendor.district;
+        if (selectedRatingElement) {
+
+            selectedRatingElement.textContent =
+                "Select your rating";
+        }
 
 
-        document.getElementById(
-            "years"
-        ).textContent =
-            vendor.years;
+        // =================================================
+        // RELOAD REVIEWS
+        // =================================================
 
-
-        document.getElementById(
-            "address"
-        ).textContent =
-            vendor.address;
-
-
-        document.getElementById(
-            "description"
-        ).textContent =
-            vendor.description;
-
-
-        // Display vendor status
-
-        displayVendorStatus(
-            vendor.status
+        await loadVendorReviews(
+            vendorId
         );
+
+
+        // =================================================
+        // RELOAD VENDOR PROFILE
+        // This updates average rating + review count
+        // =================================================
+
+        setTimeout(async () => {
+
+            const currentUrl =
+                new URLSearchParams(
+                    window.location.search
+                );
+
+            const currentVendorId =
+                currentUrl.get("id");
+
+
+            if (
+                currentVendorId &&
+                currentVendorId === vendorId
+            ) {
+
+                await loadPublicVendorProfile(
+                    vendorId
+                );
+
+            }
+
+
+            const modal =
+                document.getElementById(
+                    "reviewModal"
+                );
+
+
+            if (modal) {
+
+                modal.style.display =
+                    "none";
+            }
+
+
+            messageElement.textContent =
+                "";
+
+        }, 1000);
 
 
     } catch (error) {
 
         console.error(
-            "Error loading vendor:",
-            error
+            "========== REVIEW SUBMIT ERROR =========="
         );
 
-    }
+        console.error(error);
 
+
+        // fetch failed completely
+        if (
+            error instanceof TypeError
+        ) {
+
+            messageElement.textContent =
+                "Unable to connect to server. Make sure backend is running on port 5000.";
+
+            return;
+        }
+
+
+        // backend returned an error
+        messageElement.textContent =
+            error.message ||
+            "Failed to submit review.";
+    }
 }
 
+// =====================================================
+// LOAD VENDOR REVIEWS
+// =====================================================
 
-// ===============================
-// DISPLAY STATUS
-// ===============================
-
-function displayVendorStatus(status) {
-
-
-    const statusElement =
+async function loadVendorReviews(vendorId) {
+    const reviewsContainer =
         document.getElementById(
-            "vendorStatus"
+            "vendorReviews"
         );
 
-
-    if (status === "Verified") {
-
-        statusElement.innerHTML = `
-            <div class="verified-status">
-                ✓ Verified Vendor
-            </div>
-        `;
-
-    }
-
-    else if (status === "Rejected") {
-
-        statusElement.innerHTML = `
-            <div class="rejected-status">
-                ✕ Application Rejected
-            </div>
-        `;
-
-    }
-
-    else {
-
-        statusElement.innerHTML = `
-            <div class="pending-status">
-                ⏳ Pending Verification
-            </div>
-        `;
-
-    }
-
-}
-
-// ===============================
-// VENDOR EDIT PROFILE
-// ===============================
-
-async function showEditProfile() {
-
-    const loggedInVendorId =
-        localStorage.getItem(
-            VENDOR_ID_KEY
-        );
-
-
-    if (!loggedInVendorId) {
-
-        window.location.href =
-            "login.html";
-
+    if (!reviewsContainer) {
         return;
-
     }
-
 
     try {
+        const response = await fetch(
+            `${API_BASE_URL}/reviews/vendor/${encodeURIComponent(
+                vendorId
+            )}`
+        );
 
-        // Get current vendor information from MongoDB
-
-     const token = localStorage.getItem(VENDOR_TOKEN_KEY);
-
-if (!token) {
-    alert("Vendor session expired. Please login again.");
-    window.location.href = "login.html";
-    return;
-}
-
-       const response = await fetch(
-             `http://localhost:5000/api/vendors/${encodeURIComponent(loggedInVendorId)}`,
-         {
-               headers: {
-               "Authorization": `Bearer ${token}`
-             }
-           }
-       );
-
-
-        const vendor =
-            await response.json();
-
-
-        if (response.status === 401 || response.status === 403) {
-            handleVendorSessionExpired();
-            return;
-        }
+        const result =
+            await getResponseData(response);
 
         if (!response.ok) {
-
-            alert(
-                "Unable to load vendor information."
+            throw new Error(
+                result.message ||
+                "Unable to load reviews."
             );
+        }
+
+        const reviews =
+            Array.isArray(result)
+                ? result
+                : Array.isArray(result.reviews)
+                    ? result.reviews
+                    : [];
+
+
+        if (reviews.length === 0) {
+            reviewsContainer.innerHTML = `
+                <p class="no-products">
+                    No reviews yet.
+                </p>
+            `;
 
             return;
-
         }
 
 
-        // Fill edit form
+        reviewsContainer.innerHTML =
+            reviews.map(review => {
 
-        document.getElementById(
-            "editName"
-        ).value =
-            vendor.name;
+                const rating =
+                    Math.max(
+                        0,
+                        Math.min(
+                            5,
+                            Number(
+                                review.rating || 0
+                            )
+                        )
+                    );
 
+                const stars =
+                    "★".repeat(rating) +
+                    "☆".repeat(5 - rating);
 
-        document.getElementById(
-            "editMobile"
-        ).value =
-            vendor.mobile;
+                return `
+                    <div class="review-card">
 
+                        <div class="review-header">
 
-        document.getElementById(
-            "editEmail"
-        ).value =
-            vendor.email;
+                            <strong>
+                                ${escapeHtml(
+                                    review.customerName ||
+                                    "Customer"
+                                )}
+                            </strong>
 
+                            <span>
+                                ${stars}
+                            </span>
 
-        document.getElementById(
-            "editBusinessName"
-        ).value =
-            vendor.businessName;
-
-
-        document.getElementById(
-            "editCategory"
-        ).value =
-            vendor.category;
-
-
-        document.getElementById(
-            "editDistrict"
-        ).value =
-            vendor.district;
-
-
-        document.getElementById(
-            "editAddress"
-        ).value =
-            vendor.address;
+                        </div>
 
 
-        document.getElementById(
-            "editYears"
-        ).value =
-            vendor.years;
+                        <p>
+                            ${escapeHtml(
+                                review.review ||
+                                review.comment ||
+                                ""
+                            )}
+                        </p>
 
+                    </div>
+                `;
 
-        document.getElementById(
-            "editDescription"
-        ).value =
-            vendor.description;
-
-
-        document.getElementById(
-            "editProfileSection"
-        ).style.display =
-            "block";
-
+            }).join("");
 
     } catch (error) {
-
         console.error(
-            "Error loading edit profile:",
+            "Review loading error:",
             error
         );
 
-        alert(
-            "Unable to connect to server."
-        );
-
+        reviewsContainer.innerHTML = `
+            <p>
+                Unable to load reviews.
+            </p>
+        `;
     }
-
 }
 
-// ===============================
-// VENDOR EDIT PROFILE FORM SUBMISSION
-// ===============================
 
-const editProfileForm =
-    document.getElementById(
-        "editProfileForm"
-    );
+// =====================================================
+// INITIALIZATION
+// =====================================================
 
-if (editProfileForm) {
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
 
-    editProfileForm.addEventListener(
-        "submit",
-        async function(event) {
+        // =================================================
+        // VENDOR REGISTRATION
+        // =================================================
 
-            event.preventDefault();
+        const vendorForm =
+            document.getElementById(
+                "vendorForm"
+            );
 
-
-            const loggedInVendorId =
-                localStorage.getItem(
-                    VENDOR_ID_KEY
-                );
-
-
-            if (!loggedInVendorId) {
-
-                alert(
-                    "Vendor session not found."
-                );
-
-                window.location.href =
-                    "login.html";
-
-                return;
-
-            }
+        if (vendorForm) {
+            vendorForm.addEventListener(
+                "submit",
+                handleVendorRegistration
+            );
+        }
 
 
-            const updatedVendor = {
+        // =================================================
+        // VENDOR LOGIN
+        // =================================================
 
-                name:
-                    document.getElementById(
-                        "editName"
-                    ).value,
+        const vendorLoginForm =
+            document.getElementById(
+                "vendorLoginForm"
+            );
 
-                mobile:
-                    document.getElementById(
-                        "editMobile"
-                    ).value,
-
-                email:
-                    document.getElementById(
-                        "editEmail"
-                    ).value,
-
-                businessName:
-                    document.getElementById(
-                        "editBusinessName"
-                    ).value,
-
-                category:
-                    document.getElementById(
-                        "editCategory"
-                    ).value,
-
-                district:
-                    document.getElementById(
-                        "editDistrict"
-                    ).value,
-
-                address:
-                    document.getElementById(
-                        "editAddress"
-                    ).value,
-
-                years:
-                    document.getElementById(
-                        "editYears"
-                    ).value,
-
-                description:
-                    document.getElementById(
-                        "editDescription"
-                    ).value
-
-            };
+        if (vendorLoginForm) {
+            vendorLoginForm.addEventListener(
+                "submit",
+                handleVendorLogin
+            );
+        }
 
 
-            try {
+        // =================================================
+        // REVIEW FORM
+        // =================================================
 
-                 const token = localStorage.getItem(VENDOR_TOKEN_KEY);
+        const reviewForm =
+            document.getElementById(
+                "reviewForm"
+            );
 
-           if (!token) {
-                   alert("Vendor session expired. Please login again.");
-                   window.location.href = "login.html";
-                   return;
-                 }
-
-                   const response = await fetch(
-                  `http://localhost:5000/api/vendors/${encodeURIComponent(loggedInVendorId)}`,
-            {
-                       method: "PUT",
-
-                      headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${token}`
-                     },
-
-                      body: JSON.stringify(updatedVendor)
-                     }
-                  );
+        if (reviewForm) {
+            reviewForm.addEventListener(
+                "submit",
+                submitReview
+            );
+        }
 
 
-                   const result = await response.json();
+        // =================================================
+        // REVIEW STAR BUTTONS
+        // =================================================
 
-                   console.log("Update response:", result);
+        const ratingStars =
+            document.querySelectorAll(
+                ".rating-star"
+            );
 
+        ratingStars.forEach(star => {
+            star.addEventListener(
+                "click",
+                function () {
 
-                if (response.status === 401 || response.status === 403) {
-                    handleVendorSessionExpired();
-                    return;
-                }
-
-                if (!response.ok) {
-
-                    throw new Error(
-                        result.message ||
-                        "Profile update failed"
+                    selectRating(
+                        Number(
+                            this.dataset.rating
+                        )
                     );
 
                 }
+            );
+        });
 
 
-                alert(
-                    "Profile updated successfully!"
+        // =================================================
+        // CLOSE MODAL OUTSIDE CLICK
+        // =================================================
+
+        const reviewModal =
+            document.getElementById(
+                "reviewModal"
+            );
+
+        if (reviewModal) {
+            reviewModal.addEventListener(
+                "click",
+                function (event) {
+
+                    if (
+                        event.target ===
+                        reviewModal
+                    ) {
+                        closeReviewModal();
+                    }
+
+                }
+            );
+        }
+
+
+        // =================================================
+        // DIRECTORY / PROFILE
+        // =================================================
+
+        const mainContent =
+            document.getElementById(
+                "mainContent"
+            );
+
+        if (mainContent) {
+
+            const params =
+                new URLSearchParams(
+                    window.location.search
                 );
 
+            const vendorId =
+                params.get("id");
 
-                location.reload();
+            if (vendorId) {
 
+                // Open single vendor profile
+                loadPublicVendorProfile(
+                    vendorId
+                );
 
-            } catch (error) {
+            } else {
 
-                 console.error("Profile update error:", error);
-
-                 alert(
-                 "Profile update failed:\n\n" + error.message
-              );
-             }
-
+                // Open vendor directory
+                loadVendorDirectory();
+            }
         }
-    );
-
-}
-
-// ===============================
-// VENDOR CANCEL EDIT PROFILE
-// ===============================
-
-function cancelEdit() {
-
-    document.getElementById("editProfileSection").style.display = "none";
-
-}
 
 
-// ===============================
-// VENDOR LOGOUT
-// ===============================
+        // =================================================
+        // CUSTOMER DIRECTORY NAVBAR
+        // =================================================
 
-function clearVendorSession() {
-    localStorage.removeItem(VENDOR_TOKEN_KEY);
-    localStorage.removeItem(VENDOR_ROLE_KEY);
-    localStorage.removeItem(VENDOR_ID_KEY);
-    localStorage.removeItem("vendorLoggedIn");
-}
+        const customerDirectory =
+            document.getElementById(
+                "customerVendorDirectory"
+            );
 
-function handleVendorSessionExpired() {
-    clearVendorSession();
-    alert("Your vendor session has expired. Please log in again.");
-    window.location.href = "login.html";
-}
+        const customerToken =
+            localStorage.getItem(
+                "customerToken"
+            );
 
-function vendorLogout() {
+        const customerRole =
+            localStorage.getItem(
+                "customerRole"
+            );
 
-    clearVendorSession();
+        if (
+            customerDirectory &&
+            customerToken &&
+            customerRole === "customer"
+        ) {
+            customerDirectory.style.display =
+                "list-item";
+        }
 
-    window.location.href = "login.html";
-
-}
+    }
+);

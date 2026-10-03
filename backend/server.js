@@ -1,95 +1,241 @@
-const dns = require("dns");
+// =====================================================
+// STREET VENDOR MANAGEMENT SYSTEM - BACKEND SERVER
+// =====================================================
 
+const dns = require("dns");
 dns.setServers(["8.8.8.8"]);
 
 const express = require("express");
 const cors = require("cors");
 const { MongoClient } = require("mongodb");
 const jwt = require("jsonwebtoken");
-const { randomUUID, randomBytes, scrypt, timingSafeEqual } = require("crypto");
+const {
+    randomUUID,
+    randomBytes,
+    scrypt,
+    timingSafeEqual
+} = require("crypto");
 const { promisify } = require("util");
-
 const path = require("path");
-require("dotenv").config({ path: path.resolve(__dirname, ".env") });
+
+require("dotenv").config({
+    path: path.resolve(__dirname, ".env")
+});
+
+
+// =====================================================
+// ENVIRONMENT VARIABLES
+// =====================================================
 
 if (!process.env.JWT_SECRET) {
     throw new Error("JWT_SECRET must be configured in backend/.env.");
 }
 
-const scryptAsync = promisify(scrypt);
-const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || "http://localhost:5500,http://127.0.0.1:5500")
+const PORT = process.env.PORT || 5000;
+
+const MONGODB_URI =
+    process.env.MONGODB_URI ||
+    "mongodb://localhost:27017";
+
+
+// =====================================================
+// APP
+// =====================================================
+
+const app = express();
+
+
+// =====================================================
+// ALLOWED CORS ORIGINS
+// =====================================================
+
+const ALLOWED_ORIGINS = (
+    process.env.ALLOWED_ORIGINS ||
+    "http://localhost:5500," +
+    "http://127.0.0.1:5500," +
+    "http://localhost:3000," +
+    "http://127.0.0.1:3000," +
+    "http://localhost:5173," +
+    "http://127.0.0.1:5173"
+)
     .split(",")
     .map(origin => origin.trim())
     .filter(Boolean);
 
+
+// =====================================================
+// CORS
+// IMPORTANT:
+// Do NOT add app.options("*", cors()) in Express 5.
+// cors middleware itself handles preflight requests.
+// =====================================================
+
+app.use(
+    cors({
+        origin: (origin, callback) => {
+
+            console.log("REQUEST ORIGIN:", origin);
+
+            // Allow:
+            // - requests without origin
+            // - file:// origin during local testing
+            // - allowed localhost/127.0.0.1 origins
+            if (
+                !origin ||
+                origin === "null" ||
+                ALLOWED_ORIGINS.includes(origin)
+            ) {
+                callback(null, true);
+            } else {
+                console.log("BLOCKED ORIGIN:", origin);
+                callback(new Error("Origin is not allowed by CORS."));
+            }
+        },
+
+        credentials: true,
+
+        methods: [
+            "GET",
+            "POST",
+            "PUT",
+            "PATCH",
+            "DELETE",
+            "OPTIONS"
+        ],
+
+        allowedHeaders: [
+            "Content-Type",
+            "Authorization"
+        ]
+    })
+);
+
+
+// =====================================================
+// JSON BODY
+// =====================================================
+
+app.use(express.json());
+
+
+// =====================================================
+// PASSWORD HASHING
+// =====================================================
+
+const scryptAsync = promisify(scrypt);
+
 async function hashPassword(password) {
+
     const salt = randomBytes(16).toString("hex");
-    const derivedKey = await scryptAsync(password, salt, 64);
+
+    const derivedKey = await scryptAsync(
+        password,
+        salt,
+        64
+    );
+
     return `${salt}:${derivedKey.toString("hex")}`;
 }
 
+
 async function verifyPassword(password, storedPassword) {
-    if (typeof storedPassword !== "string" || !storedPassword.includes(":")) {
+
+    if (
+        typeof storedPassword !== "string" ||
+        !storedPassword.includes(":")
+    ) {
         return false;
     }
 
-    const [salt, storedHash] = storedPassword.split(":");
-    const derivedKey = await scryptAsync(password, salt, 64);
-    const storedKey = Buffer.from(storedHash, "hex");
-    return storedKey.length === derivedKey.length && timingSafeEqual(storedKey, derivedKey);
+    const [salt, storedHash] =
+        storedPassword.split(":");
+
+    const derivedKey =
+        await scryptAsync(
+            password,
+            salt,
+            64
+        );
+
+    const storedKey =
+        Buffer.from(
+            storedHash,
+            "hex"
+        );
+
+    return (
+        storedKey.length === derivedKey.length &&
+        timingSafeEqual(
+            storedKey,
+            derivedKey
+        )
+    );
 }
 
 
-const app = express();
-
-app.use(cors({
-    origin(origin, callback) {
-        if (!origin || ALLOWED_ORIGINS.includes(origin)) {
-            return callback(null, true);
-        }
-        return callback(new Error("Origin is not allowed by CORS."));
-    }
-}));
-app.use(express.json());
+// =====================================================
+// LOGIN RATE LIMITER
+// =====================================================
 
 const loginAttempts = new Map();
+
 function limitLoginAttempts(req, res, next) {
-    const key = `${req.ip}:${req.path}`;
+
+    const key =
+        `${req.ip}:${req.path}`;
+
     const now = Date.now();
-    const windowMs = 15 * 60 * 1000;
+
+    const windowMs =
+        15 * 60 * 1000;
+
     const maxAttempts = 10;
-    const attempts = (loginAttempts.get(key) || []).filter(time => now - time < windowMs);
+
+    const attempts =
+        (
+            loginAttempts.get(key) || []
+        ).filter(
+            time =>
+                now - time < windowMs
+        );
 
     if (attempts.length >= maxAttempts) {
-        return res.status(429).json({ message: "Too many login attempts. Please try again later." });
+
+        return res.status(429).json({
+            message:
+                "Too many login attempts. Please try again later."
+        });
     }
 
     res.on("finish", () => {
-        if (res.statusCode >= 400 && res.statusCode < 500) {
+
+        if (
+            res.statusCode >= 400 &&
+            res.statusCode < 500
+        ) {
+
             attempts.push(now);
-            loginAttempts.set(key, attempts);
+
+            loginAttempts.set(
+                key,
+                attempts
+            );
         }
     });
+
     next();
 }
 
 
-const PORT = process.env.PORT || 5000;
+// =====================================================
+// MONGODB
+// =====================================================
 
+const client =
+    new MongoClient(MONGODB_URI);
 
-// ===============================
-// MONGODB CONNECTION
-// ===============================
-
-const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost:27017";
-const client = new MongoClient(MONGODB_URI);
-
-const db = client.db("streetVendorDB");
-
-
-// ===============================
-// COLLECTIONS
-// ===============================
+const db =
+    client.db("streetVendorDB");
 
 const vendorsCollection =
     db.collection("vendors");
@@ -101,11 +247,15 @@ const reviewsCollection =
     db.collection("reviews");
 
 
-// ===============================
-// AUTHENTICATION MIDDLEWARE
-// ===============================
+// =====================================================
+// JWT AUTHENTICATION
+// =====================================================
 
-function authenticateToken(req, res, next) {
+function authenticateToken(
+    req,
+    res,
+    next
+) {
 
     const authHeader =
         req.headers.authorization;
@@ -114,18 +264,13 @@ function authenticateToken(req, res, next) {
         authHeader &&
         authHeader.split(" ")[1];
 
-
     if (!token) {
 
         return res.status(401).json({
-
             message:
                 "Access denied. Please login first."
-
         });
-
     }
-
 
     try {
 
@@ -135,524 +280,771 @@ function authenticateToken(req, res, next) {
                 process.env.JWT_SECRET
             );
 
-
         req.user = user;
 
         next();
 
-
     } catch (error) {
 
         return res.status(403).json({
-
             message:
                 "Invalid or expired token."
-
         });
-
     }
-
 }
 
-
-// ===============================
-// ROLE AUTHORIZATION MIDDLEWARE
-// ===============================
 
 function authorizeRole(role) {
 
     return (req, res, next) => {
 
-        if (req.user.role !== role) {
+        if (
+            !req.user ||
+            req.user.role !== role
+        ) {
 
             return res.status(403).json({
-
                 message:
                     "You are not authorized to access this resource."
-
             });
-
         }
 
-
         next();
-
     };
-
 }
 
 
-// ===============================
-// START SERVER
-// ===============================
+// =====================================================
+// ROOT ROUTE
+// =====================================================
 
-async function startServer() {
+app.get("/", (req, res) => {
 
-    try {
-
-        await client.connect();
-
-        await Promise.all([
-            vendorsCollection.createIndex({ id: 1 }, { unique: true }),
-            vendorsCollection.createIndex({ email: 1 }, { unique: true }),
-            vendorsCollection.createIndex({ mobile: 1 }, { unique: true }),
-            customersCollection.createIndex({ id: 1 }, { unique: true }),
-            customersCollection.createIndex({ email: 1 }, { unique: true }),
-            customersCollection.createIndex({ mobile: 1 }, { unique: true }),
-            reviewsCollection.createIndex({ vendorId: 1, createdAt: -1 })
-        ]);
-
-
-        console.log(
-            "MongoDB connected successfully!"
-        );
-
-
-        // ===============================
-        // HOME ROUTE
-        // ===============================
-
-        app.get("/", (req, res) => {
-
-            res.send(
-                "Street Vendor Management System Backend is running!"
-            );
-
-        });
-
-
-        // =====================================================
-        // ADMIN LOGIN
-        // =====================================================
-
-        app.post(
-            "/api/admin/login",
-            limitLoginAttempts,
-            async (req, res) => {
-
-                try {
-
-                    const {
-                        username,
-                        password
-                    } = req.body;
-
-
-                    if (!process.env.ADMIN_USERNAME || !process.env.ADMIN_PASSWORD_HASH) {
-                        return res.status(503).json({ message: "Admin login is not configured." });
-                    }
-
-                    if (
-                        username === process.env.ADMIN_USERNAME &&
-                        await verifyPassword(password, process.env.ADMIN_PASSWORD_HASH)
-                    ) {
-
-                        const token =
-                            jwt.sign(
-
-                                {
-                                    username: username,
-                                    role: "admin"
-                                },
-
-                                process.env.JWT_SECRET,
-
-                                {
-                                    expiresIn: "2h"
-                                }
-
-                            );
-
-
-                        return res.json({
-
-                            message:
-                                "Admin login successful",
-
-                            token: token,
-
-                            role: "admin"
-
-                        });
-
-                    }
-
-
-                    return res.status(401).json({
-
-                        message:
-                            "Invalid username or password."
-
-                    });
-
-
-                } catch (error) {
-
-                    console.error(
-                        "Admin login error:",
-                        error
-                    );
-
-
-                    res.status(500).json({
-
-                        message:
-                            "Admin login failed."
-
-                    });
-
-                }
-
-            }
-        );
-
-
-        // =====================================================
-        // GET ALL VENDORS
-        // ADMIN ONLY
-        // =====================================================
-// PUBLIC VERIFIED VENDORS - FOR DIRECTORY
-app.get("/api/vendors", async (req, res) => {
-    try {
-        const vendors = await db
-            .collection("vendors")
-            .find({ status: "Verified" })
-            .project({
-                _id: 0,
-                id: 1,
-                name: 1,
-                businessName: 1,
-                category: 1,
-                district: 1,
-                years: 1,
-                description: 1
-            })
-            .toArray();
-
-        res.json(vendors);
-
-    } catch (error) {
-        console.error("Error fetching vendors:", error);
-
-        res.status(500).json({
-            message: "Failed to fetch vendors"
-        });
-    }
+    res.send(
+        "Street Vendor Management System Backend is running!"
+    );
 });
 
-// GET ALL VENDORS
-// ADMIN ONLY
+
+// =====================================================
+// ADMIN LOGIN
+// =====================================================
+
+app.post(
+    "/api/admin/login",
+    limitLoginAttempts,
+    async (req, res) => {
+
+        try {
+
+            const {
+                username,
+                password
+            } = req.body;
+
+            if (
+                !username ||
+                !password
+            ) {
+
+                return res.status(400).json({
+                    message:
+                        "Username and password are required."
+                });
+            }
+
+            if (
+                username !==
+                process.env.ADMIN_USERNAME
+            ) {
+
+                return res.status(401).json({
+                    message:
+                        "Invalid admin credentials."
+                });
+            }
+
+            const valid =
+                await verifyPassword(
+                    password,
+                    process.env.ADMIN_PASSWORD_HASH
+                );
+
+            if (!valid) {
+
+                return res.status(401).json({
+                    message:
+                        "Invalid admin credentials."
+                });
+            }
+
+            const token =
+                jwt.sign(
+                    {
+                        username,
+                        role: "admin"
+                    },
+                    process.env.JWT_SECRET,
+                    {
+                        expiresIn: "2h"
+                    }
+                );
+
+            res.json({
+                message:
+                    "Admin login successful.",
+                token,
+                role: "admin"
+            });
+
+        } catch (error) {
+
+            console.error(
+                "Admin login error:",
+                error
+            );
+
+            res.status(500).json({
+                message:
+                    "Server error during admin login."
+            });
+        }
+    }
+);
+
+
+// =====================================================
+// GET ALL VERIFIED VENDORS
+// =====================================================
+
+app.get(
+    "/api/vendors",
+    async (req, res) => {
+
+        try {
+
+            const vendors =
+                await vendorsCollection
+                    .find({
+                        status: "Verified"
+                    })
+                    .project({
+                        password: 0
+                    })
+                    .toArray();
+
+            res.json(vendors);
+
+        } catch (error) {
+
+            console.error(
+                "Get vendors error:",
+                error
+            );
+
+            res.status(500).json({
+                message:
+                    "Failed to fetch vendors."
+            });
+        }
+    }
+);
+
+
+// =====================================================
+// ADMIN - GET ALL VENDORS
+// =====================================================
+
 app.get(
     "/api/admin/vendors",
     authenticateToken,
     authorizeRole("admin"),
     async (req, res) => {
+
         try {
-            const vendors = await vendorsCollection
-                .find({})
-                .project({ password: 0 })
-                .toArray();
+
+            const vendors =
+                await vendorsCollection
+                    .find({})
+                    .project({
+                        password: 0
+                    })
+                    .toArray();
 
             res.json(vendors);
+
         } catch (error) {
-            console.error("Error fetching admin vendor data:", error);
-            res.status(500).json({ message: "Failed to fetch vendors" });
+
+            console.error(
+                "Admin get vendors error:",
+                error
+            );
+
+            res.status(500).json({
+                message:
+                    "Failed to fetch vendors."
+            });
         }
     }
 );
 
-        // =====================================================
-        // VENDOR REGISTRATION
-        // =====================================================
-        async function generateVendorId() {
+
+// =====================================================
+// GENERATE VENDOR ID
+// =====================================================
+
+async function generateVendorId() {
+
     let vendorId;
     let exists = true;
 
     while (exists) {
-        const number = Math.floor(1000 + Math.random() * 9000);
-        vendorId = `VND-${number}`;
 
-        exists = await vendorsCollection.findOne({ id: vendorId });
+        const number =
+            Math.floor(
+                1000 +
+                Math.random() * 9000
+            );
+
+        vendorId =
+            `VND-${number}`;
+
+        const existing =
+            await vendorsCollection.findOne({
+                id: vendorId
+            });
+
+        exists = Boolean(existing);
     }
 
     return vendorId;
 }
-        app.post(
-            "/api/vendors",
-            async (req, res) => {
-
-                try {
-
-                    const {
-                        name,
-                        mobile,
-                        email,
-                        businessName,
-                        category,
-                        district,
-                        address,
-                        years,
-                        description,
-                        password
-                    } = req.body;
-
-                    if (!name || !mobile || !email || !businessName || !category || !district || !address || !password) {
-                        return res.status(400).json({
-                            message: "All required vendor details must be provided."
-                        });
-                    }
-
-                    // Assign identity and approval state on the server so clients cannot forge them.
-                    const existingVendor = await vendorsCollection.findOne({
-                        $or: [{ email }, { mobile }]
-                    });
-
-                    if (existingVendor) {
-                        return res.status(409).json({ message: "A vendor with this email or mobile already exists." });
-                    }
-
-                    const vendor = {
-                       id: await generateVendorId(),
-                        name,
-                        mobile,
-                        email,
-                        businessName,
-                        category,
-                        district,
-                        address,
-                        years,
-                        description,
-                        password: await hashPassword(password),
-                        status: "Pending",
-                        createdAt: new Date()
-                    };
 
 
-                    const result =
-                        await vendorsCollection
-                            .insertOne(vendor);
+// =====================================================
+// VENDOR REGISTRATION
+// =====================================================
 
+app.post(
+    "/api/vendors",
+    async (req, res) => {
 
-                    res.status(201).json({
+        try {
 
-                        message:
-                            "Vendor registered successfully",
+            const {
+                name,
+                mobile,
+                email,
+                password,
+                businessName,
+                category,
+                district,
+                address,
+                years,
+                description
+            } = req.body;
 
-                        vendorId: vendor.id
+            if (
+                !name ||
+                !mobile ||
+                !email ||
+                !password ||
+                !businessName ||
+                !category ||
+                !district ||
+                !address ||
+                years === undefined ||
+                years === null ||
+                !description
+            ) {
 
-                    });
-
-
-                } catch (error) {
-
-                    console.error(
-                        "Error adding vendor:",
-                        error
-                    );
-
-
-                    res.status(500).json({
-
-                        message:
-                            "Failed to register vendor"
-
-                    });
-
-                }
-
-            }
-        );
-
-
-        // =====================================================
-        // GET ONE VENDOR
-        // VENDOR ONLY - OWN PROFILE
-        // =====================================================
-
-        app.get(
-            "/api/vendors/:id",
-
-            authenticateToken,
-
-            authorizeRole("vendor"),
-
-            async (req, res) => {
-
-                try {
-
-                    const vendorId =
-                        req.params.id;
-
-
-                    // Vendor can access only own profile
-
-                    if (
-                        req.user.id !== vendorId
-                    ) {
-
-                        return res.status(403).json({
-
-                            message:
-                                "You are not authorized to access this vendor profile."
-
-                        });
-
-                    }
-
-
-                    const vendor =
-                        await vendorsCollection
-                            .findOne({
-
-                                id: vendorId
-
-                            });
-
-
-                    if (!vendor) {
-
-                        return res.status(404).json({
-
-                            message:
-                                "Vendor not found"
-
-                        });
-
-                    }
-
-
-                    res.json(vendor);
-
-
-                } catch (error) {
-
-                    console.error(
-                        "Error fetching vendor:",
-                        error
-                    );
-
-
-                    res.status(500).json({
-
-                        message:
-                            "Failed to fetch vendor"
-
-                    });
-
-                }
-
-            }
-        );
-
-
-        // =====================================================
-        // UPDATE VENDOR
-        // =====================================================
-
-        app.put(
-                 "/api/vendors/:id",
-                authenticateToken,
-                authorizeRole("vendor"),
-                async (req, res) => {
-                try {
-
-                    const vendorId =
-                        req.params.id;
-                       // Vendor can update only their own profile
-                       if (req.user.id !== vendorId) {
-
-                        return res.status(403).json({
+                return res.status(400).json({
                     message:
-                    "You are not authorized to update this vendor profile."
-             });
-
-           }
-                    const editableFields = [
-                        "name",
-                        "mobile",
-                        "email",
-                        "businessName",
-                        "category",
-                        "district",
-                        "address",
-                        "years",
-                        "description"
-                    ];
-
-                    const updatedVendor = Object.fromEntries(
-                        editableFields
-                            .filter(field => Object.prototype.hasOwnProperty.call(req.body, field))
-                            .map(field => [field, req.body[field]])
-                    );
-
-                    if (Object.keys(updatedVendor).length === 0) {
-                        return res.status(400).json({
-                            message: "No editable vendor details were provided."
-                        });
-                    }
-
-
-                    const result =
-                        await vendorsCollection
-                            .updateOne(
-
-                                {
-                                    id: vendorId
-                                },
-
-                                {
-                                    $set:
-                                        updatedVendor
-                                }
-
-                            );
-
-
-                    if (
-                        result.matchedCount === 0
-                    ) {
-
-                        return res.status(404).json({
-
-                            message:
-                                "Vendor not found"
-
-                        });
-
-                    }
-
-
-                    res.json({
-
-                        message:
-                            "Vendor updated successfully"
-
-                    });
-
-
-                } catch (error) {
-
-                    console.error(
-                        "Error updating vendor:",
-                        error
-                    );
-
-
-                    res.status(500).json({
-
-                        message:
-                            "Failed to update vendor"
-
-                    });
-
-                }
-
+                        "All required fields must be filled."
+                });
             }
-        );
 
-        // =====================================================
-// ADMIN UPDATE VENDOR STATUS
-// ADMIN ONLY
+            if (password.length < 8) {
+
+                return res.status(400).json({
+                    message:
+                        "Password must be at least 8 characters."
+                });
+            }
+
+            const existing =
+                await vendorsCollection.findOne({
+                    $or: [
+                        { email },
+                        { mobile }
+                    ]
+                });
+
+            if (existing) {
+
+                return res.status(409).json({
+                    message:
+                        "Email or mobile number already registered."
+                });
+            }
+
+            const vendorId =
+                await generateVendorId();
+
+            const hashedPassword =
+                await hashPassword(password);
+
+            const vendor = {
+
+                id: vendorId,
+
+                name: name.trim(),
+
+                mobile: mobile.trim(),
+
+                email: email.trim().toLowerCase(),
+
+                password: hashedPassword,
+
+                businessName:
+                    businessName.trim(),
+
+                category:
+                    category.trim(),
+
+                district:
+                    district.trim(),
+
+                address:
+                    address.trim(),
+
+                years:
+                    Number(years),
+
+                description:
+                    description.trim(),
+
+                status: "Pending",
+
+                createdAt: new Date()
+            };
+
+            await vendorsCollection.insertOne(
+                vendor
+            );
+
+            res.status(201).json({
+                message:
+                    "Vendor registered successfully. Your account is pending verification.",
+                vendorId
+            });
+
+        } catch (error) {
+
+            console.error(
+                "Vendor registration error:",
+                error
+            );
+
+            res.status(500).json({
+                message:
+                    "Failed to register vendor."
+            });
+        }
+    }
+);
+
+
+// =====================================================
+// VENDOR PROFILE
+// =====================================================
+
+app.get(
+    "/api/vendors/:id",
+    authenticateToken,
+    authorizeRole("vendor"),
+    async (req, res) => {
+
+        try {
+
+            const vendorId =
+                req.params.id;
+
+            if (
+                req.user.id !== vendorId
+            ) {
+
+                return res.status(403).json({
+                    message:
+                        "You can only access your own profile."
+                });
+            }
+
+            const vendor =
+                await vendorsCollection.findOne(
+                    {
+                        id: vendorId
+                    },
+                    {
+                        projection: {
+                            password: 0
+                        }
+                    }
+                );
+
+            if (!vendor) {
+
+                return res.status(404).json({
+                    message:
+                        "Vendor not found."
+                });
+            }
+
+            res.json(vendor);
+
+        } catch (error) {
+
+            console.error(
+                "Vendor profile error:",
+                error
+            );
+
+            res.status(500).json({
+                message:
+                    "Failed to fetch vendor profile."
+            });
+        }
+    }
+);
+
+
+// =====================================================
+// VENDOR UPDATE PROFILE
+// =====================================================
+
+app.put(
+    "/api/vendors/:id",
+    authenticateToken,
+    authorizeRole("vendor"),
+    async (req, res) => {
+
+        try {
+
+            const vendorId =
+                req.params.id;
+
+            if (
+                req.user.id !== vendorId
+            ) {
+
+                return res.status(403).json({
+                    message:
+                        "You can only update your own profile."
+                });
+            }
+
+            const {
+                name,
+                mobile,
+                email,
+                businessName,
+                category,
+                district,
+                address,
+                years,
+                description
+            } = req.body;
+
+            const updateData = {};
+
+            if (name !== undefined)
+                updateData.name = name.trim();
+
+            if (mobile !== undefined)
+                updateData.mobile = mobile.trim();
+
+            if (email !== undefined)
+                updateData.email =
+                    email.trim().toLowerCase();
+
+            if (businessName !== undefined)
+                updateData.businessName =
+                    businessName.trim();
+
+            if (category !== undefined)
+                updateData.category =
+                    category.trim();
+
+            if (district !== undefined)
+                updateData.district =
+                    district.trim();
+
+            if (address !== undefined)
+                updateData.address =
+                    address.trim();
+
+            if (years !== undefined)
+                updateData.years =
+                    Number(years);
+
+            if (description !== undefined)
+                updateData.description =
+                    description.trim();
+
+            if (Object.keys(updateData).length === 0) {
+
+                return res.status(400).json({
+                    message:
+                        "No fields provided for update."
+                });
+            }
+
+            const duplicateConditions = [];
+
+            if (mobile !== undefined) {
+                duplicateConditions.push({
+                    mobile:
+                        mobile.trim()
+                });
+            }
+
+            if (email !== undefined) {
+                duplicateConditions.push({
+                    email:
+                        email.trim().toLowerCase()
+                });
+            }
+
+            if (
+                duplicateConditions.length > 0
+            ) {
+
+                const duplicate =
+                    await vendorsCollection.findOne({
+                        id: {
+                            $ne: vendorId
+                        },
+                        $or:
+                            duplicateConditions
+                    });
+
+                if (duplicate) {
+
+                    return res.status(409).json({
+                        message:
+                            "Email or mobile number is already used by another vendor."
+                    });
+                }
+            }
+
+            const result =
+                await vendorsCollection.updateOne(
+                    {
+                        id: vendorId
+                    },
+                    {
+                        $set:
+                            updateData
+                    }
+                );
+
+            if (result.matchedCount === 0) {
+
+                return res.status(404).json({
+                    message:
+                        "Vendor not found."
+                });
+            }
+
+            res.json({
+                message:
+                    "Vendor profile updated successfully."
+            });
+
+        } catch (error) {
+
+            console.error(
+                "Vendor update error:",
+                error
+            );
+
+            res.status(500).json({
+                message:
+                    "Failed to update vendor profile."
+            });
+        }
+    }
+);
+
+
+// =====================================================
+// VENDOR SHOP DETAILS
+// =====================================================
+
+// =====================================================
+// VENDOR SHOP DETAILS
+// =====================================================
+
+// =====================================================
+// VENDOR SHOP DETAILS
+// =====================================================
+
+app.put(
+    "/api/vendors/:id/shop-details",
+    authenticateToken,
+    authorizeRole("vendor"),
+    async (req, res) => {
+
+        try {
+
+            const vendorId = req.params.id;
+
+            // Vendor can update only own shop details
+            if (req.user.id !== vendorId) {
+
+                return res.status(403).json({
+                    message:
+                        "You can only update your own shop details."
+                });
+            }
+
+            const {
+                days,
+                closingDay,
+                products,
+                openingTime,
+                closingTime
+            } = req.body;
+
+            // Validate arrays
+            if (!Array.isArray(days)) {
+
+                return res.status(400).json({
+                    message:
+                        "Opening days must be an array."
+                });
+            }
+
+            if (!Array.isArray(products)) {
+
+                return res.status(400).json({
+                    message:
+                        "Products must be an array."
+                });
+            }
+
+            // Validate closing day
+            if (
+                typeof closingDay !== "string" ||
+                !closingDay.trim()
+            ) {
+
+                return res.status(400).json({
+                    message:
+                        "Closing day is required."
+                });
+            }
+
+            // Validate opening time
+            if (
+                typeof openingTime !== "string" ||
+                !openingTime.trim()
+            ) {
+
+                return res.status(400).json({
+                    message:
+                        "Opening time is required."
+                });
+            }
+
+            // Validate closing time
+            if (
+                typeof closingTime !== "string" ||
+                !closingTime.trim()
+            ) {
+
+                return res.status(400).json({
+                    message:
+                        "Closing time is required."
+                });
+            }
+
+            // Save shop details
+            const result =
+                await vendorsCollection.updateOne(
+                    {
+                        id: vendorId
+                    },
+                    {
+                        $set: {
+                            shopDetails: {
+
+                                // Opening days
+                                days: days,
+
+                                // Closing day
+                                closingDay:
+                                    closingDay.trim(),
+
+                                // Products
+                                products: products,
+
+                                // Opening time
+                                openingTime:
+                                    openingTime.trim(),
+
+                                // Closing time
+                                closingTime:
+                                    closingTime.trim(),
+
+                                // Last updated
+                                updatedAt:
+                                    new Date()
+                            }
+                        }
+                    }
+                );
+
+            if (result.matchedCount === 0) {
+
+                return res.status(404).json({
+                    message:
+                        "Vendor not found."
+                });
+            }
+
+            res.json({
+                message:
+                    "Shop details updated successfully.",
+                shopDetails: {
+                    days,
+                    closingDay:
+                        closingDay.trim(),
+                    products,
+                    openingTime:
+                        openingTime.trim(),
+                    closingTime:
+                        closingTime.trim()
+                }
+            });
+
+        } catch (error) {
+
+            console.error(
+                "Shop details error:",
+                error
+            );
+
+            res.status(500).json({
+                message:
+                    "Failed to update shop details."
+            });
+        }
+    }
+);
+
+// =====================================================
+// ADMIN - UPDATE VENDOR STATUS
 // =====================================================
 
 app.put(
@@ -663,28 +1055,37 @@ app.put(
 
         try {
 
-            const vendorId = req.params.id;
-            const { status } = req.body;
+            const vendorId =
+                req.params.id;
 
-            // Only allow valid statuses
+            const {
+                status
+            } = req.body;
+
+            const allowedStatuses = [
+                "Pending",
+                "Verified",
+                "Rejected"
+            ];
+
             if (
-                status !== "Verified" &&
-                status !== "Rejected" &&
-                status !== "Pending"
+                !allowedStatuses.includes(status)
             ) {
 
                 return res.status(400).json({
-                    message: "Invalid vendor status."
+                    message:
+                        "Invalid vendor status."
                 });
-
             }
 
             const result =
                 await vendorsCollection.updateOne(
-                    { id: vendorId },
+                    {
+                        id: vendorId
+                    },
                     {
                         $set: {
-                            status: status
+                            status
                         }
                     }
                 );
@@ -692,579 +1093,589 @@ app.put(
             if (result.matchedCount === 0) {
 
                 return res.status(404).json({
-                    message: "Vendor not found."
+                    message:
+                        "Vendor not found."
                 });
-
             }
 
             res.json({
-                message: `Vendor ${status.toLowerCase()} successfully.`
+                message:
+                    `Vendor status updated to ${status}.`
             });
 
         } catch (error) {
 
             console.error(
-                "Admin vendor status update error:",
+                "Vendor status error:",
                 error
             );
 
             res.status(500).json({
-                message: "Failed to update vendor status."
+                message:
+                    "Failed to update vendor status."
             });
-
         }
-
     }
 );
 
 
-        // =====================================================
-        // VENDOR LOGIN
-        // =====================================================
+// =====================================================
+// VENDOR LOGIN
+// =====================================================
 
-        app.post(
-            "/api/vendors/login",
-            limitLoginAttempts,
-            async (req, res) => {
+app.post(
+    "/api/vendors/login",
+    limitLoginAttempts,
+    async (req, res) => {
 
-                try {
+        try {
 
-                    const {
-                        id,
-                        password
-                    } = req.body;
+            const {
+                id,
+                password
+            } = req.body;
 
+            if (
+                !id ||
+                !password
+            ) {
 
-                    const vendor =
-                        await vendorsCollection
-                            .findOne({
+                return res.status(400).json({
+                    message:
+                        "Vendor ID and password are required."
+                });
+            }
 
-                                id: id
+            const vendor =
+                await vendorsCollection.findOne({
+                    id: id.trim()
+                });
 
-                            });
+            if (!vendor) {
 
+                return res.status(401).json({
+                    message:
+                        "Invalid Vendor ID or password."
+                });
+            }
 
-                    if (!vendor || !await verifyPassword(password, vendor.password)) {
+            const valid =
+                await verifyPassword(
+                    password,
+                    vendor.password
+                );
 
-                        return res.status(401).json({
+            if (!valid) {
 
-                            message:
-                                "Invalid Vendor ID or password."
+                return res.status(401).json({
+                    message:
+                        "Invalid Vendor ID or password."
+                });
+            }
 
-                        });
-
-                    }
-
-
-                    // Create Vendor JWT
-
-                    const token =
-                        jwt.sign(
-
-                            {
-
-                                id: vendor.id,
-
-                                role: "vendor"
-
-                            },
-
-                            process.env.JWT_SECRET,
-
-                            {
-
-                                expiresIn: "2h"
-
-                            }
-
-                        );
-
-
-                    res.json({
-
-                        message:
-                            "Login successful",
-
-                        token: token,
-
+            const token =
+                jwt.sign(
+                    {
+                        id: vendor.id,
                         role: "vendor",
-
-                        vendor: {
-
-                            id: vendor.id,
-
-                            name: vendor.name
-
-                        }
-
-                    });
-
-
-                } catch (error) {
-
-                    console.error(
-                        "Vendor login error:",
-                        error
-                    );
-
-
-                    res.status(500).json({
-
-                        message:
-                            "Login failed"
-
-                    });
-
-                }
-
-            }
-        );
-
-
-        // =====================================================
-        // PUBLIC VERIFIED VENDORS
-        // CUSTOMER CAN ACCESS
-        // =====================================================
-
-        app.get(
-            "/api/public/vendors",
-            async (req, res) => {
-
-                try {
-
-                    const vendors =
-                        await vendorsCollection
-                            .find({
-
-                                status: "Verified"
-
-                            })
-                            .project({
-                                _id: 0,
-                                id: 1,
-                                name: 1,
-                                businessName: 1,
-                                category: 1,
-                                district: 1,
-                                years: 1,
-                                description: 1
-                            })
-                            .toArray();
-
-
-                    res.json(vendors);
-
-
-                } catch (error) {
-
-                    console.error(
-                        "Error loading verified vendors:",
-                        error
-                    );
-
-
-                    res.status(500).json({
-
-                        message:
-                            "Failed to load verified vendors"
-
-                    });
-
-                }
-
-            }
-        );
-
-
-        // =====================================================
-        // CUSTOMER REGISTRATION
-        // =====================================================
-
-        app.post(
-            "/api/customers",
-            async (req, res) => {
-
-                try {
-
-                    const {
-                        name,
-                        mobile,
-                        email,
-                        password
-                    } = req.body;
-
-
-                    // Check required fields
-
-                    if (
-                        !name ||
-                        !mobile ||
-                        !email ||
-                        !password
-                    ) {
-
-                        return res.status(400).json({
-
-                            message:
-                                "All fields are required"
-
-                        });
-
+                        name: vendor.name
+                    },
+                    process.env.JWT_SECRET,
+                    {
+                        expiresIn: "2h"
                     }
+                );
+
+            res.json({
+
+                message:
+                    "Vendor login successful.",
+
+                token,
+
+                role: "vendor",
+
+                vendor: {
+                    id: vendor.id,
+                    name: vendor.name,
+                    businessName:
+                        vendor.businessName,
+                    status:
+                        vendor.status
+                }
+            });
+
+        } catch (error) {
+
+            console.error(
+                "Vendor login error:",
+                error
+            );
+
+            res.status(500).json({
+                message:
+                    "Server error during vendor login."
+            });
+        }
+    }
+);
 
 
-                    // Check existing customer
+// =====================================================
+// PUBLIC VERIFIED VENDORS
+// =====================================================
 
-                    const existingCustomer =
-                        await customersCollection.findOne({
+app.get(
+    "/api/public/vendors",
+    async (req, res) => {
 
-                            $or: [
+        try {
 
-                                {
-                                    email: email
+            const vendors =
+                await vendorsCollection
+                    .find({
+                        status: "Verified"
+                    })
+                    .project({
+                        password: 0
+                    })
+                    .toArray();
+
+            res.json(vendors);
+
+        } catch (error) {
+
+            console.error(
+                "Public vendors error:",
+                error
+            );
+
+            res.status(500).json({
+                message:
+                    "Failed to fetch public vendors."
+            });
+        }
+    }
+);
+
+
+// =====================================================
+// PUBLIC SINGLE VENDOR
+// =====================================================
+
+app.get(
+    "/api/public/vendors/:id",
+    async (req, res) => {
+
+        try {
+
+            const vendorId =
+                req.params.id;
+
+            const vendor =
+                await vendorsCollection.findOne(
+                    {
+                        id: vendorId,
+                        status: "Verified"
+                    },
+                    {
+                        projection: {
+                            password: 0
+                        }
+                    }
+                );
+
+            if (!vendor) {
+
+                return res.status(404).json({
+                    message:
+                        "Verified vendor not found."
+                });
+            }
+
+            const summary =
+                await reviewsCollection
+                    .aggregate([
+                        {
+                            $match: {
+                                vendorId
+                            }
+                        },
+                        {
+                            $group: {
+                                _id: null,
+
+                                averageRating: {
+                                    $avg:
+                                        "$rating"
                                 },
 
-                                {
-                                    mobile: mobile
+                                reviewCount: {
+                                    $sum: 1
                                 }
+                            }
+                        }
+                    ])
+                    .toArray();
 
-                            ]
+            const rating =
+                summary.length > 0
+                    ? {
+                        averageRating:
+                            Number(
+                                summary[0]
+                                    .averageRating
+                                    .toFixed(1)
+                            ),
 
-                        });
-
-
-                    if (existingCustomer) {
-
-                        return res.status(409).json({
-
-                            message:
-                                "Customer with this email or mobile already exists"
-
-                        });
-
+                        reviewCount:
+                            summary[0]
+                                .reviewCount
                     }
-
-
-                    // Generate Customer ID
-
-                    const customerId = `CUS-${randomUUID()}`;
-
-
-                    // Customer object
-
-                    const customer = {
-
-                        id: customerId,
-
-                        name: name,
-
-                        mobile: mobile,
-
-                        email: email,
-
-                        password: await hashPassword(password),
-
-                        createdAt: new Date()
-
+                    : {
+                        averageRating: 0,
+                        reviewCount: 0
                     };
 
+            res.json({
+                ...vendor,
+                rating
+            });
 
-                    // Save customer
+        } catch (error) {
 
-                    await customersCollection
-                        .insertOne(customer);
+            console.error(
+                "Public vendor profile error:",
+                error
+            );
+
+            res.status(500).json({
+                message:
+                    "Failed to fetch vendor profile."
+            });
+        }
+    }
+);
 
 
-                    res.status(201).json({
+// =====================================================
+// CUSTOMER REGISTRATION
+// =====================================================
 
-                        message:
-                            "Customer registered successfully",
+app.post(
+    "/api/customers",
+    async (req, res) => {
 
-                        customer: {
+        try {
 
-                            id: customerId,
+            const {
+                name,
+                mobile,
+                email,
+                password
+            } = req.body;
 
-                            name: name,
+            if (
+                !name ||
+                !mobile ||
+                !email ||
+                !password
+            ) {
 
-                            email: email
+                return res.status(400).json({
+                    message:
+                        "All fields are required."
+                });
+            }
 
+            if (password.length < 8) {
+
+                return res.status(400).json({
+                    message:
+                        "Password must be at least 8 characters."
+                });
+            }
+
+            const existing =
+                await customersCollection.findOne({
+                    $or: [
+                        {
+                            email:
+                                email.trim()
+                                    .toLowerCase()
+                        },
+                        {
+                            mobile:
+                                mobile.trim()
                         }
+                    ]
+                });
 
-                    });
+            if (existing) {
 
-
-                } catch (error) {
-
-                    console.error(
-                        "Customer registration error:",
-                        error
-                    );
-
-
-                    res.status(500).json({
-
-                        message:
-                            "Server error during customer registration"
-
-                    });
-
-                }
-
+                return res.status(409).json({
+                    message:
+                        "Email or mobile number already registered."
+                });
             }
-        );
+
+            const customerId =
+                `CUS-${randomUUID()}`;
+
+            const hashedPassword =
+                await hashPassword(password);
+
+            const customer = {
+
+                id: customerId,
+
+                name:
+                    name.trim(),
+
+                mobile:
+                    mobile.trim(),
+
+                email:
+                    email.trim()
+                        .toLowerCase(),
+
+                password:
+                    hashedPassword,
+
+                createdAt:
+                    new Date()
+            };
+
+            await customersCollection.insertOne(
+                customer
+            );
+
+            res.status(201).json({
+
+                message:
+                    "Customer registered successfully.",
+
+                customerId
+            });
+
+        } catch (error) {
+
+            console.error(
+                "Customer registration error:",
+                error
+            );
+
+            res.status(500).json({
+                message:
+                    "Failed to register customer."
+            });
+        }
+    }
+);
 
 
-        // =====================================================
-        // CUSTOMER LOGIN
-        // =====================================================
+// =====================================================
+// CUSTOMER LOGIN
+// CUSTOMER ID + PASSWORD ONLY
+// =====================================================
 
-        app.post(
-            "/api/customers/login",
-            limitLoginAttempts,
-            async (req, res) => {
+app.post(
+    "/api/customers/login",
+    limitLoginAttempts,
+    async (req, res) => {
 
-                try {
+        try {
 
-                    const {
-                        loginId,
-                        password
-                    } = req.body;
+            const {
+                loginId,
+                password
+            } = req.body;
 
+            if (
+                !loginId ||
+                !password
+            ) {
 
-                    // Check input
+                return res.status(400).json({
+                    message:
+                        "Customer ID and password are required."
+                });
+            }
 
-                    if (
-                        !loginId ||
-                        !password
-                    ) {
+            const customer =
+                await customersCollection.findOne({
+                    id: loginId.trim()
+                });
 
-                        return res.status(400).json({
+            if (!customer) {
 
-                            message:
-                                "Email/mobile and password are required"
+                return res.status(401).json({
+                    message:
+                        "Invalid Customer ID or password."
+                });
+            }
 
-                        });
+            let valid =
+                await verifyPassword(
+                    password,
+                    customer.password
+                );
 
-                    }
+            // Legacy plaintext password support
+            if (
+                !valid &&
+                customer.password === password
+            ) {
 
+                valid = true;
 
-                    // Find customer by email OR mobile
+                const newPassword =
+                    await hashPassword(password);
 
-                    const customer =
-                        await customersCollection.findOne({
-
-                            $or: [
-
-                                {
-                                    email: loginId
-                                },
-
-                                {
-                                    mobile: loginId
-                                }
-
-                            ]
-
-                        });
-
-
-                    // Customer not found
-
-                    if (!customer) {
-
-                        return res.status(401).json({
-
-                            message:
-                                "Invalid email/mobile or password"
-
-                        });
-
-                    }
-
-
-                    // Check password
-
-                    let passwordIsValid = await verifyPassword(password, customer.password);
-
-                    // Upgrade legacy plaintext records on their next successful login.
-                    if (!passwordIsValid && customer.password === password) {
-                        passwordIsValid = true;
-                        await customersCollection.updateOne(
-                            { _id: customer._id },
-                            { $set: { password: await hashPassword(password) } }
-                        );
-                    }
-
-                    if (!passwordIsValid) {
-
-                        return res.status(401).json({
-
-                            message:
-                                "Invalid email/mobile or password"
-
-                        });
-
-                    }
-
-
-                    // Create Customer JWT
-
-                    const token =
-                        jwt.sign(
-
-                            {
-
-                                id: customer.id,
-
-                                role: "customer"
-
-                            },
-
-                            process.env.JWT_SECRET,
-
-                            {
-
-                                expiresIn: "2h"
-
-                            }
-
-                        );
-
-
-                    res.json({
-
-                        message:
-                            "Customer login successful",
-
-                        token: token,
-
-                        role: "customer",
-
-                        customer: {
-
-                            id: customer.id,
-
-                            name: customer.name,
-
-                            email: customer.email
-
+                await customersCollection.updateOne(
+                    {
+                        id:
+                            customer.id
+                    },
+                    {
+                        $set: {
+                            password:
+                                newPassword
                         }
-
-                    });
-
-
-                } catch (error) {
-
-                    console.error(
-                        "Customer login error:",
-                        error
-                    );
-
-
-                    res.status(500).json({
-
-                        message:
-                            "Server error during customer login"
-
-                    });
-
-                }
-
-            }
-        );
-
-
-        // =====================================================
-        // GET CUSTOMER PROFILE
-        // CUSTOMER ONLY
-        // =====================================================
-
-        app.get(
-            "/api/customers/:id",
-
-            authenticateToken,
-
-            authorizeRole("customer"),
-
-            async (req, res) => {
-
-                try {
-
-                    const customerId =
-                        req.params.id;
-
-
-                    // Customer can access only own profile
-
-                    if (
-                        req.user.id !== customerId
-                    ) {
-
-                        return res.status(403).json({
-
-                            message:
-                                "You are not authorized to access this profile."
-
-                        });
-
                     }
-
-
-                    const customer =
-                        await customersCollection
-                            .findOne(
-
-                                {
-                                    id: customerId
-                                },
-
-                                {
-                                    projection: {
-                                        password: 0
-                                    }
-                                }
-
-                            );
-
-
-                    if (!customer) {
-
-                        return res.status(404).json({
-
-                            message:
-                                "Customer not found"
-
-                        });
-
-                    }
-
-
-                    res.json(customer);
-
-
-                } catch (error) {
-
-                    console.error(
-                        "Error fetching customer:",
-                        error
-                    );
-
-
-                    res.status(500).json({
-
-                        message:
-                            "Failed to fetch customer profile"
-
-                    });
-
-                }
-
+                );
             }
-        );
 
-        // =====================================================
-// ADD RATING & REVIEW
-// CUSTOMER ONLY
+            if (!valid) {
+
+                return res.status(401).json({
+                    message:
+                        "Invalid Customer ID or password."
+                });
+            }
+
+            const token =
+                jwt.sign(
+                    {
+                        id:
+                            customer.id,
+
+                        role:
+                            "customer",
+
+                        name:
+                            customer.name
+                    },
+                    process.env.JWT_SECRET,
+                    {
+                        expiresIn: "2h"
+                    }
+                );
+
+            res.json({
+
+                message:
+                    "Customer login successful.",
+
+                token,
+
+                role:
+                    "customer",
+
+                customer: {
+                    id:
+                        customer.id,
+
+                    name:
+                        customer.name
+                }
+            });
+
+        } catch (error) {
+
+            console.error(
+                "Customer login error:",
+                error
+            );
+
+            res.status(500).json({
+                message:
+                    "Server error during customer login."
+            });
+        }
+    }
+);
+
+
+// =====================================================
+// CUSTOMER PROFILE
+// =====================================================
+
+app.get(
+    "/api/customers/:id",
+    authenticateToken,
+    authorizeRole("customer"),
+    async (req, res) => {
+
+        try {
+
+            const customerId =
+                req.params.id;
+
+            if (
+                req.user.id !== customerId
+            ) {
+
+                return res.status(403).json({
+                    message:
+                        "You can only access your own profile."
+                });
+            }
+
+            const customer =
+                await customersCollection.findOne(
+                    {
+                        id: customerId
+                    },
+                    {
+                        projection: {
+                            password: 0
+                        }
+                    }
+                );
+
+            if (!customer) {
+
+                return res.status(404).json({
+                    message:
+                        "Customer not found."
+                });
+            }
+
+            res.json(customer);
+
+        } catch (error) {
+
+            console.error(
+                "Customer profile error:",
+                error
+            );
+
+            res.status(500).json({
+                message:
+                    "Failed to fetch customer profile."
+            });
+        }
+    }
+);
+
+
+// =====================================================
+// ADD REVIEW
+// =====================================================
+// =====================================================
+// ADD / UPDATE REVIEW
+// ONE REVIEW PER CUSTOMER PER VENDOR
 // =====================================================
 
 app.post(
@@ -1275,6 +1686,15 @@ app.post(
 
         try {
 
+            console.log("========== ADD / UPDATE REVIEW ==========");
+            console.log("USER:", req.user);
+            console.log("BODY:", req.body);
+
+
+            // =================================================
+            // GET DATA
+            // =================================================
+
             const {
                 vendorId,
                 rating,
@@ -1282,142 +1702,305 @@ app.post(
             } = req.body;
 
 
-            // Check required fields
+            // =================================================
+            // VALIDATE VENDOR ID
+            // =================================================
 
             if (
-                !vendorId ||
-                !rating ||
-                !review
+                typeof vendorId !== "string" ||
+                !vendorId.trim()
             ) {
 
                 return res.status(400).json({
-
                     message:
-                        "Vendor ID, rating and review are required"
-
+                        "Vendor ID is required."
                 });
-
             }
 
 
-            // Check rating
+            const cleanVendorId =
+                vendorId.trim();
+
+
+            // =================================================
+            // VALIDATE RATING
+            // =================================================
 
             if (
-                rating < 1 ||
-                rating > 5
+                rating === undefined ||
+                rating === null ||
+                rating === ""
             ) {
 
                 return res.status(400).json({
-
                     message:
-                        "Rating must be between 1 and 5"
-
+                        "Rating is required."
                 });
-
             }
 
 
-            // Check vendor exists
+            const numericRating =
+                Number(rating);
+
+
+            if (
+                !Number.isInteger(numericRating) ||
+                numericRating < 1 ||
+                numericRating > 5
+            ) {
+
+                return res.status(400).json({
+                    message:
+                        "Rating must be between 1 and 5."
+                });
+            }
+
+
+            // =================================================
+            // VALIDATE REVIEW
+            // =================================================
+
+            if (
+                typeof review !== "string"
+            ) {
+
+                return res.status(400).json({
+                    message:
+                        "Review must be text."
+                });
+            }
+
+
+            const cleanReview =
+                review.trim();
+
+
+            if (!cleanReview) {
+
+                return res.status(400).json({
+                    message:
+                        "Review cannot be empty."
+                });
+            }
+
+
+            // =================================================
+            // CHECK CUSTOMER
+            // =================================================
+
+            const customer =
+                await customersCollection.findOne({
+                    id: req.user.id
+                });
+
+
+            if (!customer) {
+
+                return res.status(404).json({
+                    message:
+                        "Customer account not found. Please login again."
+                });
+            }
+
+
+            // =================================================
+            // CHECK VENDOR
+            // =================================================
 
             const vendor =
                 await vendorsCollection.findOne({
-
-                    id: vendorId,
-
-                    status: "Verified"
-
+                    id: cleanVendorId
                 });
 
 
             if (!vendor) {
 
                 return res.status(404).json({
-
                     message:
-                        "Verified vendor not found"
-
+                        "Vendor not found."
                 });
-
             }
 
 
-            // Create review
+            // =================================================
+            // ONLY VERIFIED VENDOR
+            // =================================================
 
-            const newReview = {
+            if (
+                vendor.status !== "Verified"
+            ) {
 
-                customerId: req.user.id,
-
-                vendorId: vendorId,
-
-                rating: Number(rating),
-
-                review: review.trim(),
-
-                createdAt: new Date()
-
-            };
+                return res.status(400).json({
+                    message:
+                        "You can review only verified vendors."
+                });
+            }
 
 
-            // Save review
+            // =================================================
+            // CHECK EXISTING REVIEW
+            // =================================================
 
-            const result =
-                await reviewsCollection.insertOne(
-                    newReview
+            const existingReview =
+                await reviewsCollection.findOne({
+                    customerId:
+                        req.user.id,
+
+                    vendorId:
+                        cleanVendorId
+                });
+
+
+            // =================================================
+            // UPDATE EXISTING REVIEW
+            // =================================================
+
+            if (existingReview) {
+
+                const updateResult =
+                    await reviewsCollection.updateOne(
+                        {
+                            _id:
+                                existingReview._id
+                        },
+                        {
+                            $set: {
+
+                                rating:
+                                    numericRating,
+
+                                review:
+                                    cleanReview,
+
+                                updatedAt:
+                                    new Date()
+                            }
+                        }
+                    );
+
+
+                if (
+                    !updateResult.acknowledged
+                ) {
+
+                    return res.status(500).json({
+                        message:
+                            "Review could not be updated."
+                    });
+                }
+
+
+                console.log(
+                    "Existing review updated successfully."
                 );
 
 
-            res.status(201).json({
+                return res.status(200).json({
+
+                    message:
+                        "Review updated successfully.",
+
+                    reviewId:
+                        existingReview._id
+                });
+            }
+
+
+            // =================================================
+            // CREATE NEW REVIEW
+            // =================================================
+
+            const reviewDocument = {
+
+                customerId:
+                    req.user.id,
+
+                vendorId:
+                    cleanVendorId,
+
+                rating:
+                    numericRating,
+
+                review:
+                    cleanReview,
+
+                createdAt:
+                    new Date()
+            };
+
+
+            const result =
+                await reviewsCollection.insertOne(
+                    reviewDocument
+                );
+
+
+            if (
+                !result.acknowledged
+            ) {
+
+                return res.status(500).json({
+                    message:
+                        "Review could not be saved."
+                });
+            }
+
+
+            console.log(
+                "New review saved successfully:",
+                result.insertedId
+            );
+
+
+            return res.status(201).json({
 
                 message:
-                    "Rating and review submitted successfully",
+                    "Review submitted successfully.",
 
-                review: {
-
-                    _id: result.insertedId,
-
-                    customerId:
-                        newReview.customerId,
-
-                    vendorId:
-                        newReview.vendorId,
-
-                    rating:
-                        newReview.rating,
-
-                    review:
-                        newReview.review,
-
-                    createdAt:
-                        newReview.createdAt
-
-                }
-
+                reviewId:
+                    result.insertedId
             });
 
 
         } catch (error) {
 
             console.error(
-                "Review submission error:",
-                error
+                "========== ADD / UPDATE REVIEW ERROR =========="
             );
 
+            console.error(error);
 
-            res.status(500).json({
+
+            // =================================================
+            // DUPLICATE INDEX ERROR
+            // =================================================
+
+            if (
+                error &&
+                error.code === 11000
+            ) {
+
+                return res.status(409).json({
+
+                    message:
+                        "You have already reviewed this vendor."
+                });
+            }
+
+
+            return res.status(500).json({
 
                 message:
-                    "Failed to submit rating and review"
-
+                    error.message ||
+                    "Failed to submit review."
             });
-
         }
-
     }
 );
 
 // =====================================================
 // GET VENDOR REVIEWS
-// PUBLIC
+// WITH CUSTOMER NAME
 // =====================================================
 
 app.get(
@@ -1429,92 +2012,316 @@ app.get(
             const vendorId =
                 req.params.vendorId;
 
-            const requestedPage = Number.parseInt(req.query.page, 10) || 1;
-            const requestedLimit = Number.parseInt(req.query.limit, 10) || 20;
-            const page = Math.max(1, requestedPage);
-            const limit = Math.min(50, Math.max(1, requestedLimit));
+            const page =
+                Math.max(
+                    parseInt(
+                        req.query.page || "1",
+                        10
+                    ),
+                    1
+                );
+
+            const limit =
+                Math.min(
+                    Math.max(
+                        parseInt(
+                            req.query.limit || "10",
+                            10
+                        ),
+                        1
+                    ),
+                    50
+                );
 
 
-            // Get all reviews for this vendor
+            // =============================================
+            // REVIEWS + CUSTOMER NAME
+            // =============================================
 
-            const [reviews, summary] = await Promise.all([
-                reviewsCollection
-                    .find({ vendorId: vendorId })
-                    .project({ customerId: 0 })
-                    .sort({ createdAt: -1 })
-                    .skip((page - 1) * limit)
-                    .limit(limit)
-                    .toArray(),
-                reviewsCollection.aggregate([
-                    { $match: { vendorId: vendorId } },
-                    { $group: { _id: null, averageRating: { $avg: "$rating" }, reviewCount: { $sum: 1 } } }
-                ]).toArray()
-            ]);
+            const reviews =
+                await reviewsCollection
+                    .aggregate([
+
+                        {
+                            $match: {
+                                vendorId:
+                                    vendorId
+                            }
+                        },
+
+                        {
+                            $sort: {
+                                createdAt:
+                                    -1
+                            }
+                        },
+
+                        {
+                            $skip:
+                                (page - 1) *
+                                limit
+                        },
+
+                        {
+                            $limit:
+                                limit
+                        },
+
+                        {
+                            $lookup: {
+
+                                from:
+                                    "customers",
+
+                                localField:
+                                    "customerId",
+
+                                foreignField:
+                                    "id",
+
+                                as:
+                                    "customer"
+                            }
+                        },
+
+                        {
+                            $unwind: {
+
+                                path:
+                                    "$customer",
+
+                                preserveNullAndEmptyArrays:
+                                    true
+                            }
+                        },
+
+                        {
+                            $project: {
+
+                                _id: 1,
+
+                                vendorId: 1,
+
+                                rating: 1,
+
+                                review: 1,
+
+                                createdAt: 1,
+
+                                customerName: {
+
+                                    $ifNull: [
+                                        "$customer.name",
+                                        "Customer"
+                                    ]
+                                }
+                            }
+                        }
+
+                    ])
+                    .toArray();
 
 
-            // No reviews
+            // =============================================
+            // RATING SUMMARY
+            // =============================================
 
-            if (summary.length === 0) {
+            const summary =
+                await reviewsCollection
+                    .aggregate([
 
-                return res.json({
+                        {
+                            $match: {
+                                vendorId:
+                                    vendorId
+                            }
+                        },
 
-                    averageRating: 0,
+                        {
+                            $group: {
 
-                    reviewCount: 0,
-                    reviews: [],
-                    page,
-                    limit
+                                _id:
+                                    null,
 
-                });
+                                averageRating: {
+                                    $avg:
+                                        "$rating"
+                                },
 
+                                reviewCount: {
+                                    $sum:
+                                        1
+                                }
+                            }
+                        }
+
+                    ])
+                    .toArray();
+
+
+            let averageRating = 0;
+            let reviewCount = 0;
+
+
+            if (
+                summary.length > 0
+            ) {
+
+                averageRating =
+                    Number(
+                        summary[0]
+                            .averageRating
+                            .toFixed(1)
+                    );
+
+                reviewCount =
+                    summary[0]
+                        .reviewCount;
             }
-
-
-            // Calculate total rating
-
-            const { averageRating, reviewCount } = summary[0];
 
 
             res.json({
 
-                averageRating:
-                    Number(
-                        averageRating.toFixed(1)
-                    ),
+                averageRating,
 
-                reviewCount: reviewCount,
+                reviewCount,
 
-                reviews:
-                    reviews,
+                reviews,
 
                 page,
+
                 limit
-
             });
-
 
         } catch (error) {
 
             console.error(
-                "Error fetching vendor reviews:",
+                "Get vendor reviews error:",
                 error
             );
 
-
             res.status(500).json({
-
                 message:
-                    "Failed to load vendor reviews"
-
+                    "Failed to fetch vendor reviews."
             });
-
         }
-
     }
 );
-        // =====================================================
-        // START EXPRESS SERVER
-        // =====================================================
+
+
+// =====================================================
+// ERROR HANDLER
+// =====================================================
+
+app.use(
+    (err, req, res, next) => {
+
+        console.error(
+            "Server error:",
+            err
+        );
+
+        if (
+            err.message ===
+            "Origin is not allowed by CORS."
+        ) {
+
+            return res.status(403).json({
+                message:
+                    "CORS origin is not allowed."
+            });
+        }
+
+        res.status(500).json({
+            message:
+                "Internal server error."
+        });
+    }
+);
+
+
+// =====================================================
+// START SERVER
+// =====================================================
+
+async function startServer() {
+
+    try {
+
+        await client.connect();
+
+        console.log(
+            "MongoDB connected successfully!"
+        );
+
+
+        // =============================================
+        // DATABASE INDEXES
+        // =============================================
+
+        await vendorsCollection.createIndex(
+            {
+                id: 1
+            },
+            {
+                unique: true
+            }
+        );
+
+        await vendorsCollection.createIndex(
+            {
+                email: 1
+            },
+            {
+                unique: true
+            }
+        );
+
+        await vendorsCollection.createIndex(
+            {
+                mobile: 1
+            },
+            {
+                unique: true
+            }
+        );
+
+
+        await customersCollection.createIndex(
+            {
+                id: 1
+            },
+            {
+                unique: true
+            }
+        );
+
+        await customersCollection.createIndex(
+            {
+                email: 1
+            },
+            {
+                unique: true
+            }
+        );
+
+        await customersCollection.createIndex(
+            {
+                mobile: 1
+            },
+            {
+                unique: true
+            }
+        );
+
+
+        await reviewsCollection.createIndex(
+            {
+                vendorId: 1,
+                createdAt: -1
+            }
+        );
+
 
         app.listen(
             PORT,
@@ -1523,20 +2330,18 @@ app.get(
                 console.log(
                     `Server running on http://localhost:${PORT}`
                 );
-
             }
         );
-
 
     } catch (error) {
 
         console.error(
-            "MongoDB connection failed:",
+            "Failed to start server:",
             error
         );
 
+        process.exit(1);
     }
-
 }
 
 

@@ -5,42 +5,59 @@
 
     <meta charset="UTF-8">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>Vendor Dashboard</title>
 
-    <link rel="stylesheet"
-          href="../css/style.css">
+    <link
+        rel="stylesheet"
+        href="../css/style.css"
+    >
 
 </head>
 
 <body>
-
 
 <header>
 
     <nav>
 
         <div class="logo">
-    <a href="../index.html">
-        <img src="../img/logo.png" alt="Street Vendor Management System">
-    </a>
-</div>
+
+            <a href="../index.html">
+
+                <img
+                    src="../img/logo.png"
+                    alt="Street Vendor Management System"
+                >
+
+            </a>
+
+        </div>
+
+
         <ul class="nav-links">
 
             <li>
+
                 <a href="../index.html">
                     Home
                 </a>
+
             </li>
 
-
             <li>
-                <a href="#"
-                   onclick="vendorLogout()">
+
+                <a
+                    href="#"
+                    onclick="vendorLogout(); return false;"
+                >
                     Logout
                 </a>
+
             </li>
 
         </ul>
@@ -52,41 +69,60 @@
 
 <main class="vendor-dashboard">
 
-    <h1>Welcome, <span id="vendorName"></span> 👋</h1>
+    <!-- =========================================
+         WELCOME
+    ========================================== -->
+
+    <h1>
+
+        Welcome,
+        <span id="vendorName">Vendor</span>
+        👋
+
+    </h1>
 
     <p>
         Manage and view your vendor information.
     </p>
 
 
-    <!-- Status Card -->
+    <!-- =========================================
+         VERIFICATION STATUS
+    ========================================== -->
 
     <section class="vendor-status-card">
 
-        <h2>Verification Status</h2>
+        <h2>
+            Verification Status
+        </h2>
 
         <div id="vendorStatus">
-
+            Loading...
         </div>
 
     </section>
 
 
-    <!-- Vendor Information -->
+    <!-- =========================================
+         VENDOR INFORMATION
+    ========================================== -->
 
     <section class="vendor-info">
 
-        <h2>Vendor Information</h2>
+        <h2>
+            Vendor Information
+        </h2>
 
 
         <div class="info-grid">
-
 
             <div class="info-item">
 
                 <strong>Vendor ID</strong>
 
-                <span id="vendorId"></span>
+                <span id="vendorId">
+                    Loading...
+                </span>
 
             </div>
 
@@ -95,7 +131,9 @@
 
                 <strong>Business Name</strong>
 
-                <span id="businessName"></span>
+                <span id="businessName">
+                    Loading...
+                </span>
 
             </div>
 
@@ -104,7 +142,9 @@
 
                 <strong>Category</strong>
 
-                <span id="category"></span>
+                <span id="category">
+                    Loading...
+                </span>
 
             </div>
 
@@ -113,7 +153,9 @@
 
                 <strong>Mobile</strong>
 
-                <span id="mobile"></span>
+                <span id="mobile">
+                    Loading...
+                </span>
 
             </div>
 
@@ -122,7 +164,9 @@
 
                 <strong>Email</strong>
 
-                <span id="email"></span>
+                <span id="email">
+                    Loading...
+                </span>
 
             </div>
 
@@ -131,7 +175,9 @@
 
                 <strong>District</strong>
 
-                <span id="district"></span>
+                <span id="district">
+                    Loading...
+                </span>
 
             </div>
 
@@ -140,7 +186,9 @@
 
                 <strong>Years in Business</strong>
 
-                <span id="years"></span>
+                <span id="years">
+                    Loading...
+                </span>
 
             </div>
 
@@ -149,177 +197,551 @@
 
                 <strong>Address</strong>
 
-                <span id="address"></span>
+                <span id="address">
+                    Loading...
+                </span>
 
             </div>
-
 
         </div>
 
     </section>
 
 
-    <!-- Description -->
+    <!-- =========================================
+         BUSINESS DESCRIPTION
+    ========================================== -->
 
     <section class="vendor-description">
 
-        <h2>Business Description</h2>
+        <h2>
+            Business Description
+        </h2>
 
-        <p id="description"></p>
+        <p id="description">
+            Loading...
+        </p>
 
     </section>
 
 
-    <!-- Edit Profile Button -->
+    <!-- =========================================
+         MY SHOP DETAILS
+    ========================================== -->
+
+    <section class="vendor-shop-details">
+
+        <h2>
+            My Shop Details
+        </h2>
+
+        <p>
+            Add or update information about your shop so
+            customers can view your shop details and products.
+        </p>
+
+
+        <form id="shopDetailsForm">
+
+
+            <!-- SHOP DESCRIPTION -->
+
+            <div class="edit-form-group">
+
+                <label for="shopDescription">
+                    Shop Description
+                </label>
+
+                <textarea
+                    id="shopDescription"
+                    rows="4"
+                    placeholder="Describe your shop and what you offer..."
+                ></textarea>
+
+            </div>
+
+
+            <!-- SHOP ADDRESS -->
+
+            <div class="edit-form-group">
+
+                <label for="shopAddress">
+                    Shop Address
+                </label>
+
+                <textarea
+                    id="shopAddress"
+                    rows="3"
+                    placeholder="Enter your shop/stall location..."
+                ></textarea>
+
+            </div>
+
+
+            <!-- CONTACT -->
+
+            <div class="edit-form-group">
+
+                <label for="shopContact">
+                    Contact Number
+                </label>
+
+                <input
+                    type="tel"
+                    id="shopContact"
+                    placeholder="Enter contact number"
+                >
+
+            </div>
+
+
+            <!-- OPENING TIME -->
+
+            <div class="edit-form-group">
+
+                <label for="openingTime">
+                    Opening Time
+                </label>
+
+                <input
+                    type="time"
+                    id="openingTime"
+                >
+
+            </div>
+
+
+            <!-- CLOSING TIME -->
+
+            <div class="edit-form-group">
+
+                <label for="closingTime">
+                    Closing Time
+                </label>
+
+                <input
+                    type="time"
+                    id="closingTime"
+                >
+
+            </div>
+
+
+            <!-- AVAILABLE DAYS -->
+
+            <div class="edit-form-group">
+
+                <label>
+                    Available Days
+                </label>
+
+
+                <div class="shop-days">
+
+                    <label>
+
+                        <input
+                            type="checkbox"
+                            name="availableDays"
+                            value="Monday"
+                        >
+
+                        <span>Monday</span>
+
+                    </label>
+
+
+                    <label>
+
+                        <input
+                            type="checkbox"
+                            name="availableDays"
+                            value="Tuesday"
+                        >
+
+                        <span>Tuesday</span>
+
+                    </label>
+
+
+                    <label>
+
+                        <input
+                            type="checkbox"
+                            name="availableDays"
+                            value="Wednesday"
+                        >
+
+                        <span>Wednesday</span>
+
+                    </label>
+
+
+                    <label>
+
+                        <input
+                            type="checkbox"
+                            name="availableDays"
+                            value="Thursday"
+                        >
+
+                        <span>Thursday</span>
+
+                    </label>
+
+
+                    <label>
+
+                        <input
+                            type="checkbox"
+                            name="availableDays"
+                            value="Friday"
+                        >
+
+                        <span>Friday</span>
+
+                    </label>
+
+
+                    <label>
+
+                        <input
+                            type="checkbox"
+                            name="availableDays"
+                            value="Saturday"
+                        >
+
+                        <span>Saturday</span>
+
+                    </label>
+
+
+                    <label>
+
+                        <input
+                            type="checkbox"
+                            name="availableDays"
+                            value="Sunday"
+                        >
+
+                        <span>Sunday</span>
+
+                    </label>
+
+                </div>
+
+            </div>
+
+
+            <!-- CLOSING DAY -->
+
+            <div class="edit-form-group">
+
+                <label for="closingDay">
+                    Closing Day
+                </label>
+
+                <select id="closingDay">
+
+                    <option value="">
+                        Select Closing Day
+                    </option>
+
+                    <option value="Monday">
+                        Monday
+                    </option>
+
+                    <option value="Tuesday">
+                        Tuesday
+                    </option>
+
+                    <option value="Wednesday">
+                        Wednesday
+                    </option>
+
+                    <option value="Thursday">
+                        Thursday
+                    </option>
+
+                    <option value="Friday">
+                        Friday
+                    </option>
+
+                    <option value="Saturday">
+                        Saturday
+                    </option>
+
+                    <option value="Sunday">
+                        Sunday
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- PRODUCTS -->
+
+            <div class="edit-form-group">
+
+                <label>
+                    Products Available
+                </label>
+
+
+                <div id="productsContainer"></div>
+
+
+                <button
+                    type="button"
+                    class="btn"
+                    id="addProductButton"
+                >
+                    + Add Product
+                </button>
+
+            </div>
+
+
+            <!-- ADDITIONAL INFORMATION -->
+
+            <div class="edit-form-group">
+
+                <label for="additionalInformation">
+                    Additional Information
+                </label>
+
+                <textarea
+                    id="additionalInformation"
+                    rows="4"
+                    placeholder="Any additional information for customers..."
+                ></textarea>
+
+            </div>
+
+
+            <!-- SAVE -->
+
+            <button
+                type="submit"
+                class="btn"
+            >
+                Save Shop Details
+            </button>
+
+
+            <p id="shopDetailsMessage"></p>
+
+        </form>
+
+    </section>
+
+
+    <!-- =========================================
+         EDIT PROFILE BUTTON
+    ========================================== -->
 
     <section class="edit-profile-button">
 
-        <button class="btn" onclick="showEditProfile()">
+        <button
+            class="btn"
+            onclick="showEditProfile()"
+        >
             Edit Profile
         </button>
 
     </section>
 
 
-    <!-- Edit Profile Section -->
+    <!-- =========================================
+         EDIT PROFILE
+    ========================================== -->
 
-    <section id="editProfileSection" style="display: none;">
+    <section
+        id="editProfileSection"
+        style="display: none;"
+    >
 
-        <h2>Edit Profile</h2>
+        <h2>
+            Edit Profile
+        </h2>
+
 
         <form id="editProfileForm">
 
+
             <div class="edit-form-group">
 
-                <label>Vendor Name</label>
+                <label for="editName">
+                    Vendor Name
+                </label>
 
-                <input type="text"
-                       id="editName"
-                       required>
+                <input
+                    type="text"
+                    id="editName"
+                    required
+                >
 
             </div>
 
 
             <div class="edit-form-group">
 
-                <label>Mobile Number</label>
+                <label for="editMobile">
+                    Mobile Number
+                </label>
 
-                <input type="tel"
-                       id="editMobile"
-                       required>
-
-            </div>
-
-
-            <div class="edit-form-group">
-
-                <label>Email</label>
-
-                <input type="email"
-                       id="editEmail"
-                       required>
+                <input
+                    type="tel"
+                    id="editMobile"
+                    required
+                >
 
             </div>
 
 
             <div class="edit-form-group">
 
-                <label>Business Name</label>
+                <label for="editEmail">
+                    Email
+                </label>
 
-                <input type="text"
-                       id="editBusinessName"
-                       required>
-
-            </div>
-
-
-            <div class="edit-form-group">
-
-                <label>Business Category</label>
-
-                <select id="editCategory" required>
-
-    <option value="Food">
-        Food
-    </option>
-
-    <option value="Fruits and Vegetables">
-        Fruits and Vegetables
-    </option>
-
-    <option value="Clothing">
-        Clothing
-    </option>
-
-    <option value="Accessories">
-        Accessories
-    </option>
-
-    <option value="Grocery">
-        Grocery
-    </option>
-
-    <option value="Other">
-        Other
-    </option>
-
-</select>
-            </div>
-
-
-            <div class="edit-form-group">
-
-                <label>District</label>
-
-                <input type="text"
-                       id="editDistrict"
-                       required>
+                <input
+                    type="email"
+                    id="editEmail"
+                    required
+                >
 
             </div>
 
 
             <div class="edit-form-group">
 
-                <label>Business Address</label>
+                <label for="editBusinessName">
+                    Business Name
+                </label>
 
-                <textarea id="editAddress"
-                          required></textarea>
-
-            </div>
-
-
-            <div class="edit-form-group">
-
-                <label>Years in Business</label>
-
-                <input type="number"
-                       id="editYears"
-                       min="0"
-                       required>
+                <input
+                    type="text"
+                    id="editBusinessName"
+                    required
+                >
 
             </div>
 
 
             <div class="edit-form-group">
 
-                <label>Business Description</label>
+                <label for="editCategory">
+                    Business Category
+                </label>
 
-                <textarea id="editDescription"></textarea>
+                <select
+                    id="editCategory"
+                    required
+                >
+
+                    <option value="Food">
+                        Food
+                    </option>
+
+                    <option value="Fruits and Vegetables">
+                        Fruits and Vegetables
+                    </option>
+
+                    <option value="Clothing">
+                        Clothing
+                    </option>
+
+                    <option value="Accessories">
+                        Accessories
+                    </option>
+
+                    <option value="Grocery">
+                        Grocery
+                    </option>
+
+                    <option value="Other">
+                        Other
+                    </option>
+
+                </select>
 
             </div>
 
 
-            <button type="submit" class="btn">
+            <div class="edit-form-group">
+
+                <label for="editDistrict">
+                    District
+                </label>
+
+                <input
+                    type="text"
+                    id="editDistrict"
+                    required
+                >
+
+            </div>
+
+
+            <div class="edit-form-group">
+
+                <label for="editAddress">
+                    Business Address
+                </label>
+
+                <textarea
+                    id="editAddress"
+                    required
+                ></textarea>
+
+            </div>
+
+
+            <div class="edit-form-group">
+
+                <label for="editYears">
+                    Years in Business
+                </label>
+
+                <input
+                    type="number"
+                    id="editYears"
+                    min="0"
+                    required
+                >
+
+            </div>
+
+
+            <div class="edit-form-group">
+
+                <label for="editDescription">
+                    Business Description
+                </label>
+
+                <textarea
+                    id="editDescription"
+                ></textarea>
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="btn"
+            >
                 Save Changes
             </button>
 
 
-            <button type="button"
-                    class="btn"
-                    onclick="cancelEdit()">
-
+            <button
+                type="button"
+                class="btn"
+                onclick="cancelEdit()"
+            >
                 Cancel
-
             </button>
 
         </form>
@@ -327,13 +749,15 @@
     </section>
 
 
-    <!-- ================================= -->
-    <!-- VENDOR SUPPORT SERVICES -->
-    <!-- ================================= -->
+    <!-- =========================================
+         SUPPORT SERVICES
+    ========================================== -->
 
     <section class="vendor-services">
 
-        <h2>Vendor Support Services</h2>
+        <h2>
+            Vendor Support Services
+        </h2>
 
         <p>
             Useful information and services to help you
@@ -344,15 +768,15 @@
         <div class="services-grid">
 
 
-            <!-- Online Payment -->
-
             <div class="service-card">
 
                 <div class="service-icon">
                     💳
                 </div>
 
-                <h3>Online Payments</h3>
+                <h3>
+                    Online Payments
+                </h3>
 
                 <p>
                     Learn how to accept digital payments
@@ -360,17 +784,15 @@
                     payment methods.
                 </p>
 
-                <a href="payment.html"
-                   class="btn">
-
+                <a
+                    href="payment.html"
+                    class="btn"
+                >
                     View Payment Information
-
                 </a>
 
             </div>
 
-
-            <!-- Government Schemes -->
 
             <div class="service-card">
 
@@ -378,7 +800,9 @@
                     🏛️
                 </div>
 
-                <h3>Government Schemes</h3>
+                <h3>
+                    Government Schemes
+                </h3>
 
                 <p>
                     Explore government schemes, financial
@@ -386,11 +810,11 @@
                     street vendors.
                 </p>
 
-                <a href="schemes.html"
-                   class="btn">
-
+                <a
+                    href="schemes.html"
+                    class="btn"
+                >
                     View Government Schemes
-
                 </a>
 
             </div>
@@ -399,7 +823,6 @@
         </div>
 
     </section>
-
 
 </main>
 
@@ -415,6 +838,991 @@
 
 <script src="../js/vendor.js"></script>
 
-</body>
 
+<script>
+
+// ================================================
+// PAGE LOAD
+// ================================================
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        loadVendorDashboard();
+
+        loadShopDetails();
+
+
+        const addProductButton =
+            document.getElementById(
+                "addProductButton"
+            );
+
+
+        if (addProductButton) {
+
+            addProductButton.addEventListener(
+                "click",
+                function () {
+
+                    addProductRow();
+
+                }
+            );
+
+        }
+
+
+        const shopDetailsForm =
+            document.getElementById(
+                "shopDetailsForm"
+            );
+
+
+        if (shopDetailsForm) {
+
+            shopDetailsForm.addEventListener(
+                "submit",
+                function (event) {
+
+                    event.preventDefault();
+
+                    saveShopDetails();
+
+                }
+            );
+
+        }
+
+    }
+);
+
+
+// ================================================
+// LOAD VENDOR INFORMATION
+// ================================================
+
+async function loadVendorDashboard() {
+
+    const vendorId =
+        localStorage.getItem(
+            "loggedInVendorId"
+        );
+
+
+    const token =
+        localStorage.getItem(
+            "vendorToken"
+        );
+
+
+    if (!vendorId || !token) {
+
+        window.location.href =
+            "login.html";
+
+        return;
+
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+                `${API_BASE_URL}/vendors/${encodeURIComponent(vendorId)}`,
+                {
+                    headers: {
+
+                        Authorization:
+                            `Bearer ${token}`
+
+                    }
+
+                }
+            );
+
+
+        const result =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                result.message ||
+                "Unable to load vendor information."
+            );
+
+        }
+
+
+        const vendor =
+            result.vendor ||
+            result;
+
+
+        setText(
+            "vendorName",
+            vendor.name
+        );
+
+
+        setText(
+            "vendorId",
+            vendor.id
+        );
+
+
+        setText(
+            "businessName",
+            vendor.businessName
+        );
+
+
+        setText(
+            "category",
+            vendor.category
+        );
+
+
+        setText(
+            "mobile",
+            vendor.mobile
+        );
+
+
+        setText(
+            "email",
+            vendor.email
+        );
+
+
+        setText(
+            "district",
+            vendor.district
+        );
+
+
+        setText(
+            "years",
+            vendor.years
+        );
+
+
+        setText(
+            "address",
+            vendor.address
+        );
+
+
+        setText(
+            "description",
+            vendor.description
+        );
+
+
+        const statusElement =
+            document.getElementById(
+                "vendorStatus"
+            );
+
+
+        if (statusElement) {
+
+            statusElement.textContent =
+                vendor.status ||
+                "Pending";
+
+
+            if (
+                vendor.status ===
+                "Verified"
+            ) {
+
+                statusElement.style.color =
+                    "green";
+
+            } else if (
+                vendor.status ===
+                "Rejected"
+            ) {
+
+                statusElement.style.color =
+                    "red";
+
+            } else {
+
+                statusElement.style.color =
+                    "#d68910";
+
+            }
+
+        }
+
+
+        // ========================================
+        // EDIT PROFILE FIELDS
+        // ========================================
+
+        setValue(
+            "editName",
+            vendor.name
+        );
+
+
+        setValue(
+            "editMobile",
+            vendor.mobile
+        );
+
+
+        setValue(
+            "editEmail",
+            vendor.email
+        );
+
+
+        setValue(
+            "editBusinessName",
+            vendor.businessName
+        );
+
+
+        setValue(
+            "editCategory",
+            vendor.category
+        );
+
+
+        setValue(
+            "editDistrict",
+            vendor.district
+        );
+
+
+        setValue(
+            "editAddress",
+            vendor.address
+        );
+
+
+        setValue(
+            "editYears",
+            vendor.years
+        );
+
+
+        setValue(
+            "editDescription",
+            vendor.description
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Dashboard loading error:",
+            error
+        );
+
+
+        setText(
+            "vendorStatus",
+            error.message
+        );
+
+    }
+
+}
+
+
+// ================================================
+// HELPER
+// ================================================
+
+function setText(
+    elementId,
+    value
+) {
+
+    const element =
+        document.getElementById(
+            elementId
+        );
+
+
+    if (element) {
+
+        element.textContent =
+            value ||
+            "Not available";
+
+    }
+
+}
+
+
+function setValue(
+    elementId,
+    value
+) {
+
+    const element =
+        document.getElementById(
+            elementId
+        );
+
+
+    if (element) {
+
+        element.value =
+            value ||
+            "";
+
+    }
+
+}
+
+
+// ================================================
+// ADD PRODUCT
+// ================================================
+
+let productNumber = 0;
+
+
+function addProductRow(
+    productName = "",
+    productDescription = ""
+) {
+
+    productNumber++;
+
+
+    const container =
+        document.getElementById(
+            "productsContainer"
+        );
+
+
+    if (!container) {
+
+        return;
+
+    }
+
+
+    const row =
+        document.createElement(
+            "div"
+        );
+
+
+    row.className =
+        "product-row";
+
+
+    row.innerHTML = `
+
+        <input
+            type="text"
+            class="product-name"
+            placeholder="Product name"
+            value="${escapeAttribute(productName)}"
+        >
+
+        <input
+            type="text"
+            class="product-description"
+            placeholder="Product description"
+            value="${escapeAttribute(productDescription)}"
+        >
+
+        <button
+            type="button"
+            class="remove-product-btn"
+        >
+            Remove
+        </button>
+
+    `;
+
+
+    const removeButton =
+        row.querySelector(
+            ".remove-product-btn"
+        );
+
+
+    removeButton.addEventListener(
+        "click",
+        function () {
+
+            row.remove();
+
+        }
+    );
+
+
+    container.appendChild(
+        row
+    );
+
+}
+
+
+// ================================================
+// ESCAPE ATTRIBUTE
+// ================================================
+
+function escapeAttribute(value) {
+
+    return String(
+        value || ""
+    )
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        );
+
+}
+
+
+// ================================================
+// GET PRODUCTS
+// ================================================
+
+function getProducts() {
+
+    const rows =
+        document.querySelectorAll(
+            ".product-row"
+        );
+
+
+    const products = [];
+
+
+    rows.forEach(
+        function (row) {
+
+            const name =
+                row.querySelector(
+                    ".product-name"
+                ).value.trim();
+
+
+            const description =
+                row.querySelector(
+                    ".product-description"
+                ).value.trim();
+
+
+            if (name) {
+
+                products.push({
+
+                    name:
+                        name,
+
+                    description:
+                        description
+
+                });
+
+            }
+
+        }
+    );
+
+
+    return products;
+
+}
+
+
+// ================================================
+// SAVE SHOP DETAILS
+// ================================================
+
+async function saveShopDetails() {
+
+    const vendorId =
+        localStorage.getItem(
+            "loggedInVendorId"
+        );
+
+
+    const token =
+        localStorage.getItem(
+            "vendorToken"
+        );
+
+
+    if (!vendorId || !token) {
+
+        window.location.href =
+            "login.html";
+
+        return;
+
+    }
+
+
+    const availableDays =
+        Array.from(
+            document.querySelectorAll(
+                'input[name="availableDays"]:checked'
+            )
+        ).map(
+            function (checkbox) {
+
+                return checkbox.value;
+
+            }
+        );
+
+
+    const closingDayElement =
+        document.getElementById(
+            "closingDay"
+        );
+
+
+    const shopDetails = {
+
+        days:
+            availableDays,
+
+        closingDay:
+            closingDayElement
+                ? closingDayElement.value
+                : "",
+
+        products:
+            getProducts(),
+
+        openingTime:
+            document.getElementById(
+                "openingTime"
+            ).value,
+
+        closingTime:
+            document.getElementById(
+                "closingTime"
+            ).value
+
+    };
+
+
+    const message =
+        document.getElementById(
+            "shopDetailsMessage"
+        );
+
+
+    try {
+
+        const response =
+            await fetch(
+                `${API_BASE_URL}/vendors/${encodeURIComponent(vendorId)}/shop-details`,
+                {
+
+                    method:
+                        "PUT",
+
+                    headers: {
+
+                        "Content-Type":
+                            "application/json",
+
+                        Authorization:
+                            `Bearer ${token}`
+
+                    },
+
+                    body:
+                        JSON.stringify(
+                            shopDetails
+                        )
+
+                }
+            );
+
+
+        const result =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                result.message ||
+                "Unable to save shop details."
+            );
+
+        }
+
+
+        // ========================================
+        // KEEP LOCAL STORAGE
+        // ========================================
+
+        const localShopDetails = {
+
+            description:
+                document.getElementById(
+                    "shopDescription"
+                ).value.trim(),
+
+            address:
+                document.getElementById(
+                    "shopAddress"
+                ).value.trim(),
+
+            contact:
+                document.getElementById(
+                    "shopContact"
+                ).value.trim(),
+
+            openingTime:
+                document.getElementById(
+                    "openingTime"
+                ).value,
+
+            closingTime:
+                document.getElementById(
+                    "closingTime"
+                ).value,
+
+            availableDays:
+                availableDays,
+
+            closingDay:
+                closingDayElement
+                    ? closingDayElement.value
+                    : "",
+
+            products:
+                getProducts(),
+
+            additionalInformation:
+                document.getElementById(
+                    "additionalInformation"
+                ).value.trim()
+
+        };
+
+
+        localStorage.setItem(
+            `shopDetails_${vendorId}`,
+            JSON.stringify(
+                localShopDetails
+            )
+        );
+
+
+        if (message) {
+
+            message.style.color =
+                "green";
+
+
+            message.textContent =
+                "Shop details saved successfully.";
+
+        }
+
+
+    } catch (error) {
+
+        console.error(
+            "Shop details save error:",
+            error
+        );
+
+
+        if (message) {
+
+            message.style.color =
+                "red";
+
+
+            message.textContent =
+                error.message ||
+                "Unable to save shop details.";
+
+        }
+
+    }
+
+}
+
+
+// ================================================
+// LOAD SHOP DETAILS
+// ================================================
+
+function loadShopDetails() {
+
+    const vendorId =
+        localStorage.getItem(
+            "loggedInVendorId"
+        );
+
+
+    if (!vendorId) {
+
+        return;
+
+    }
+
+
+    const savedData =
+        localStorage.getItem(
+            `shopDetails_${vendorId}`
+        );
+
+
+    if (!savedData) {
+
+        addProductRow();
+
+        return;
+
+    }
+
+
+    try {
+
+        const shop =
+            JSON.parse(
+                savedData
+            );
+
+
+        setValue(
+            "shopDescription",
+            shop.description
+        );
+
+
+        setValue(
+            "shopAddress",
+            shop.address
+        );
+
+
+        setValue(
+            "shopContact",
+            shop.contact
+        );
+
+
+        setValue(
+            "openingTime",
+            shop.openingTime
+        );
+
+
+        setValue(
+            "closingTime",
+            shop.closingTime
+        );
+
+
+        setValue(
+            "additionalInformation",
+            shop.additionalInformation
+        );
+
+
+        // ========================================
+        // AVAILABLE DAYS
+        // ========================================
+
+        const availableDays =
+            shop.availableDays ||
+            shop.days ||
+            [];
+
+
+        document
+            .querySelectorAll(
+                'input[name="availableDays"]'
+            )
+            .forEach(
+                function (checkbox) {
+
+                    checkbox.checked =
+                        availableDays.includes(
+                            checkbox.value
+                        );
+
+                }
+            );
+
+
+        // ========================================
+        // CLOSING DAY
+        // ========================================
+
+        const closingDayElement =
+            document.getElementById(
+                "closingDay"
+            );
+
+
+        if (closingDayElement) {
+
+            closingDayElement.value =
+                shop.closingDay ||
+                "";
+
+        }
+
+
+        // ========================================
+        // PRODUCTS
+        // ========================================
+
+        const container =
+            document.getElementById(
+                "productsContainer"
+            );
+
+
+        if (container) {
+
+            container.innerHTML = "";
+
+        }
+
+
+        const products =
+            shop.products ||
+            [];
+
+
+        if (products.length === 0) {
+
+            addProductRow();
+
+        } else {
+
+            products.forEach(
+                function (product) {
+
+                    if (
+                        typeof product ===
+                        "string"
+                    ) {
+
+                        addProductRow(
+                            product,
+                            ""
+                        );
+
+                    } else {
+
+                        addProductRow(
+
+                            product.name ||
+                            product.productName ||
+                            product.title ||
+                            "",
+
+                            product.description ||
+                            product.details ||
+                            ""
+
+                        );
+
+                    }
+
+                }
+            );
+
+        }
+
+
+    } catch (error) {
+
+        console.error(
+            "Shop details loading error:",
+            error
+        );
+
+
+        addProductRow();
+
+    }
+
+}
+
+
+// ================================================
+// EDIT PROFILE
+// ================================================
+
+function showEditProfile() {
+
+    const section =
+        document.getElementById(
+            "editProfileSection"
+        );
+
+
+    if (section) {
+
+        section.style.display =
+            "block";
+
+
+        section.scrollIntoView({
+
+            behavior:
+                "smooth"
+
+        });
+
+    }
+
+}
+
+
+function cancelEdit() {
+
+    const section =
+        document.getElementById(
+            "editProfileSection"
+        );
+
+
+    if (section) {
+
+        section.style.display =
+            "none";
+
+    }
+
+}
+
+</script>
+
+</body>
 </html>
