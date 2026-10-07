@@ -116,6 +116,13 @@ app.use(
 // =====================================================
 
 app.use(express.json());
+function isValidMobile(value) {
+    return typeof value === "string" && /^[0-9]{10}$/.test(value.trim());
+}
+
+function allStrings(...values) {
+    return values.every(v => typeof v === "string");
+}
 
 
 // =====================================================
@@ -563,6 +570,26 @@ app.post(
                         "All required fields must be filled."
                 });
             }
+            if (!allStrings(name, mobile, email, password,
+                businessName, category, district,
+                address, description)) {
+    return res.status(400).json({
+        message: "Invalid data in the form."
+    });
+}
+
+if (!isValidMobile(mobile)) {
+    return res.status(400).json({
+        message: "Mobile number must be exactly 10 digits."
+    });
+}
+
+const yearsNumber = Number(years);
+if (!Number.isFinite(yearsNumber) || yearsNumber < 0 || yearsNumber > 100) {
+    return res.status(400).json({
+        message: "Years must be a number between 0 and 100."
+    });
+}
 
             if (password.length < 8) {
 
@@ -575,9 +602,9 @@ app.post(
             const existing =
                 await vendorsCollection.findOne({
                     $or: [
-                        { email },
-                        { mobile }
-                    ]
+                       { email: email.trim().toLowerCase() },
+                       { mobile: mobile.trim() }
+                      ]
                 });
 
             if (existing) {
@@ -641,6 +668,11 @@ app.post(
 
         } catch (error) {
 
+               if (error && error.code === 11000) {
+               return res.status(409).json({
+               message: "Email or mobile number already registered."
+               });
+              }
             console.error(
                 "Vendor registration error:",
                 error
@@ -754,6 +786,22 @@ app.put(
                 years,
                 description
             } = req.body;
+              const provided = [name, mobile, email, businessName,
+                    category, district, address, description]
+                   .filter(v => v !== undefined);
+
+  if (!allStrings(...provided)) {
+      return res.status(400).json({ message: "Invalid data." });
+  }
+  if (mobile !== undefined && !isValidMobile(mobile)) {
+      return res.status(400).json({ message: "Mobile number must be exactly 10 digits." });
+  }
+  if (years !== undefined) {
+      const y = Number(years);
+      if (!Number.isFinite(y) || y < 0 || y > 100) {
+          return res.status(400).json({ message: "Years must be between 0 and 100." });
+      }
+  }
 
             const updateData = {};
 
@@ -1138,7 +1186,11 @@ app.post(
             if (
                 !id ||
                 !password
-            ) {
+            ) 
+              if (!allStrings(id, password)) {
+               return res.status(400).json({ message: "Invalid login data." });
+             }
+            {
 
                 return res.status(400).json({
                     message:
@@ -1380,7 +1432,10 @@ app.post(
                 !mobile ||
                 !email ||
                 !password
-            ) {
+            ) 
+            if (!allStrings(name, mobile, email, password)) { return res.status(400).json({ message: "Invalid data." }); } 
+             if (!isValidMobile(mobile)) { return res.status(400).json({ message: "Mobile number must be exactly 10 digits." }); }
+            {
 
                 return res.status(400).json({
                     message:
@@ -1494,7 +1549,9 @@ app.post(
             if (
                 !loginId ||
                 !password
-            ) {
+            ) if (!allStrings(loginId, password)) { return res.status(400).json({ message: "Invalid login data." }); }
+            
+            {
 
                 return res.status(400).json({
                     message:
@@ -2231,6 +2288,11 @@ app.use(
                     "CORS origin is not allowed."
             });
         }
+         if (err.type === "entity.parse.failed") {
+    return res.status(400).json({
+        message: "Invalid JSON in request body."
+    });
+}
 
         res.status(500).json({
             message:
@@ -2321,6 +2383,10 @@ async function startServer() {
                 createdAt: -1
             }
         );
+             await reviewsCollection.createIndex(
+           { customerId: 1, vendorId: 1 },
+           { unique: true }
+          );
 
 
         app.listen(
