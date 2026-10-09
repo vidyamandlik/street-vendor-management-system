@@ -34,22 +34,47 @@ function debounce(func, delay = 250) {
 }
 
 
+// Standardized Authentication Storage Keys
+const AUTH_TOKEN_KEY = "authToken";
+const USER_ROLE_KEY = "userRole";
+const USER_ID_KEY = "userId";
+const USER_NAME_KEY = "userName";
+
+// Backward-compatible getters
+function getCustomerAuthToken() {
+    return localStorage.getItem(AUTH_TOKEN_KEY) || localStorage.getItem("customerToken");
+}
+
+function getCustomerAuthRole() {
+    return localStorage.getItem(USER_ROLE_KEY) || localStorage.getItem("customerRole");
+}
+
+function getCustomerAuthId() {
+    return localStorage.getItem(USER_ID_KEY) || localStorage.getItem("customerId");
+}
+
+function getCustomerAuthName() {
+    return localStorage.getItem(USER_NAME_KEY) || localStorage.getItem("customerName");
+}
+
+function clearCustomerAuth() {
+    localStorage.removeItem(AUTH_TOKEN_KEY);
+    localStorage.removeItem(USER_ROLE_KEY);
+    localStorage.removeItem(USER_ID_KEY);
+    localStorage.removeItem(USER_NAME_KEY);
+    localStorage.removeItem("customerToken");
+    localStorage.removeItem("customerRole");
+    localStorage.removeItem("customerId");
+    localStorage.removeItem("customerName");
+}
+
 // Utility: Safely parse JSON response
 async function parseJsonResponse(response) {
-
     try {
-
         const text = await response.text();
-
         return text ? JSON.parse(text) : {};
-
     } catch (err) {
-
-        console.warn(
-            "Failed to parse JSON response:",
-            err
-        );
-
+        console.warn("Failed to parse JSON response:", err);
         return null;
     }
 }
@@ -293,39 +318,27 @@ if (customerLoginForm) {
 
 
                 if (response.ok) {
+                    const token = data.token;
+                    const role = data.role || "customer";
+                    const id = (data.customer && data.customer.id) || data.id;
+                    const name = (data.customer && data.customer.name) || data.name || "Customer";
 
-                    // Save customer information
+                    // Standardized authentication keys
+                    localStorage.setItem(AUTH_TOKEN_KEY, token);
+                    localStorage.setItem(USER_ROLE_KEY, role);
+                    localStorage.setItem(USER_ID_KEY, id);
+                    localStorage.setItem(USER_NAME_KEY, name);
 
-                    localStorage.setItem(
-                        "customerToken",
-                        data.token
-                    );
+                    // Backward-compatible keys
+                    localStorage.setItem("customerToken", token);
+                    localStorage.setItem("customerRole", role);
+                    localStorage.setItem("customerId", id);
+                    localStorage.setItem("customerName", name);
 
-
-                    localStorage.setItem(
-                        "customerRole",
-                        "customer"
-                    );
-
-
-                    localStorage.setItem(
-                        "customerId",
-                        data.customer.id
-                    );
-
-
-                    localStorage.setItem(
-                        "customerName",
-                        data.customer.name
-                    );
-
-// Show Vendor Directory only for logged-in customers
-localStorage.setItem("showVendorDirectory", "true");
-                    message.textContent =
-                        "Login successful!";
-
-                    message.style.color =
-                        "green";
+                    // Show Vendor Directory only for logged-in customers
+                    localStorage.setItem("showVendorDirectory", "true");
+                    message.textContent = "Login successful!";
+                    message.style.color = "green";
 
 
                     // Redirect to customer dashboard
@@ -376,54 +389,20 @@ const customerDashboard =
 
 
 if (customerDashboard) {
-
-    const token =
-        localStorage.getItem(
-            "customerToken"
-        );
-
-
-    const role =
-        localStorage.getItem(
-            "customerRole"
-        );
-
-
-    const customerId =
-        localStorage.getItem(
-            "customerId"
-        );
-
+    const token = getCustomerAuthToken();
+    const role = getCustomerAuthRole();
+    const customerId = getCustomerAuthId();
 
     // Check customer login
-
-    if (
-        !token ||
-        role !== "customer" ||
-        !customerId
-    ) {
-
-        alert(
-            "Please login as a customer first."
-        );
-
-
-        window.location.href =
-            "login.html";
-
-
+    if (!token || role !== "customer" || !customerId) {
+        alert("Please login as a customer first.");
+        clearCustomerAuth();
+        window.location.href = "login.html";
     } else {
-
         // Load customer profile
-
-        loadCustomerProfile(
-            customerId,
-            token
-        );
-
+        loadCustomerProfile(customerId, token);
 
         // Load verified vendors
-
         loadVerifiedVendors();
     }
 }
@@ -459,15 +438,19 @@ async function loadCustomerProfile(
             await response.json();
 
 
-        if (!response.ok) {
+      if (!response.ok) {
+    console.error(
+        "Customer profile error:",
+        data
+    );
 
-            console.error(
-                "Customer profile error:",
-                data
-            );
-
-            return;
-        }
+    // Token expired or invalid: log the user out cleanly
+    if (response.status === 401 || response.status === 403) {
+        clearCustomerAuth();
+        window.location.href = "login.html";
+    }
+    return;
+}
 
 
         // Customer ID
@@ -1602,10 +1585,7 @@ if (customerReviewForm) {
             event.preventDefault();
 
 
-            const token =
-                localStorage.getItem(
-                    "customerToken"
-                );
+            const token = getCustomerAuthToken();
 
 
             const vendorId =
@@ -1766,36 +1746,13 @@ const customerLogout =
 
 
 if (customerLogout) {
-
     customerLogout.addEventListener(
         "click",
         function (event) {
-
             event.preventDefault();
-
-
-            localStorage.removeItem(
-                "customerToken"
-            );
-
-
-            localStorage.removeItem(
-                "customerRole"
-            );
-
-
-            localStorage.removeItem(
-                "customerId"
-            );
-
-
-            localStorage.removeItem(
-                "customerName"
-            );
-
-
-            window.location.href =
-                "../index.html";
+            clearCustomerAuth();
+            localStorage.removeItem("showVendorDirectory");
+            window.location.href = "../index.html";
         }
     );
 }

@@ -1,1827 +1,1157 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>Vendor Dashboard</title>
-
-    <link
-        rel="stylesheet"
-        href="../css/style.css"
-    >
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vendor Dashboard - Street Vendor Management System</title>
+    <link rel="stylesheet" href="../css/style.css">
 </head>
-
 <body>
 
 <header>
-
     <nav>
-
         <div class="logo">
-
             <a href="../index.html">
-
-                <img
-                    src="../img/logo.png"
-                    alt="Street Vendor Management System"
-                >
-
+                <img src="../img/logo.png" alt="Street Vendor Management System">
             </a>
-
         </div>
-
-
         <ul class="nav-links">
-
-            <li>
-
-                <a href="../index.html">
-                    Home
-                </a>
-
-            </li>
-
-            <li>
-
-                <a
-                    href="#"
-                    onclick="logoutVendor(); return false;"
-                >
-                    Logout
-                </a>
-
-            </li>
-
+            <li><a href="../index.html">Home</a></li>
+            <li><a href="#" onclick="logoutVendor(); return false;">Logout</a></li>
         </ul>
-
     </nav>
-
 </header>
-
 
 <main class="vendor-dashboard">
 
     <!-- =========================================
-         WELCOME
+         1. VENDOR DASHBOARD HEADER / HERO BANNER
     ========================================== -->
-
-    <h1>
-
-        Welcome,
-        <span id="vendorName">Vendor</span>
-        👋
-
-    </h1>
-
-    <p>
-        Manage and view your vendor information.
-    </p>
-
-
-    <!-- =========================================
-         VERIFICATION STATUS
-    ========================================== -->
-
-    <section class="vendor-status-card">
-
-        <h2>
-            Verification Status
-        </h2>
-
-        <div id="vendorStatus">
-            Loading...
+    <section class="vendor-hero-card">
+        <div class="vendor-hero-left">
+            <div class="vendor-hero-icon">🏪</div>
+            <div class="vendor-hero-details">
+                <span class="vendor-hero-tag">Vendor Management Dashboard</span>
+                <h1>Welcome, <span id="vendorName">Vendor</span> 👋</h1>
+                <div class="vendor-hero-meta">
+                    <span class="meta-item">
+                        <strong>Business:</strong>
+                        <span id="businessNameSubtitle">Loading...</span>
+                    </span>
+                    <span class="meta-item">
+                        <strong>Vendor ID:</strong>
+                        <span id="vendorIdBadge" class="code-badge">Loading...</span>
+                    </span>
+                    <span class="meta-item">
+                        <strong>Status:</strong>
+                        <span id="vendorStatusBadge" class="status-pill status-pending">Loading...</span>
+                    </span>
+                </div>
+            </div>
         </div>
-
+        <div class="vendor-hero-actions">
+            <button type="button" class="btn btn-outline-logout" onclick="logoutVendor(); return false;" title="Log out from vendor account">
+                🚪 Logout
+            </button>
+        </div>
     </section>
 
+    <!-- =========================================
+         2. DASHBOARD STATISTICS CARDS
+    ========================================== -->
+    <section class="vendor-stats-section">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon stat-icon-products">📦</div>
+                <div class="stat-content">
+                    <span class="stat-label">Total Products</span>
+                    <h3 class="stat-value" id="statTotalProducts">0</h3>
+                    <span class="stat-sub">In your catalog</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon stat-icon-available">✅</div>
+                <div class="stat-content">
+                    <span class="stat-label">Available Products</span>
+                    <h3 class="stat-value" id="statAvailableProducts">0</h3>
+                    <span class="stat-sub">Ready to serve</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon stat-icon-unavailable">⏳</div>
+                <div class="stat-content">
+                    <span class="stat-label">Unavailable Products</span>
+                    <h3 class="stat-value" id="statUnavailableProducts">0</h3>
+                    <span class="stat-sub">Out of stock</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon stat-icon-status">🛡️</div>
+                <div class="stat-content">
+                    <span class="stat-label">Business Status</span>
+                    <h3 class="stat-value stat-status-text" id="statBusinessStatus">Pending</h3>
+                    <span class="stat-sub">Verification state</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Hidden compatibility element for vendorStatus if needed -->
+    <span id="vendorStatus" style="display: none;"></span>
 
     <!-- =========================================
-         VENDOR INFORMATION
+         3. BUSINESS INFORMATION CARD
     ========================================== -->
-
-    <section class="vendor-info">
-
-        <h2>
-            Vendor Information
-        </h2>
-
+    <section class="vendor-card vendor-info-card">
+        <div class="card-header-flex">
+            <div>
+                <h2>Business Information</h2>
+                <p class="section-subtitle">Your core registered vendor profile and contact details.</p>
+            </div>
+            <button type="button" class="btn btn-sm" onclick="showEditProfile(); return false;">
+                ✏️ Edit Profile
+            </button>
+        </div>
 
         <div class="info-grid">
-
             <div class="info-item">
-
                 <strong>Vendor ID</strong>
-
-                <span id="vendorId">
-                    Loading...
-                </span>
-
+                <span id="vendorId">Loading...</span>
             </div>
-
-
             <div class="info-item">
-
+                <strong>Vendor Name</strong>
+                <span id="infoVendorName">Loading...</span>
+            </div>
+            <div class="info-item">
                 <strong>Business Name</strong>
-
-                <span id="businessName">
-                    Loading...
-                </span>
-
+                <span id="businessName">Loading...</span>
             </div>
-
-
             <div class="info-item">
-
-                <strong>Category</strong>
-
-                <span id="category">
-                    Loading...
-                </span>
-
+                <strong>Business Category</strong>
+                <span id="category">Loading...</span>
             </div>
-
-
             <div class="info-item">
-
-                <strong>Mobile</strong>
-
-                <span id="mobile">
-                    Loading...
-                </span>
-
+                <strong>Mobile Number</strong>
+                <span id="mobile">Loading...</span>
             </div>
-
-
             <div class="info-item">
-
-                <strong>Email</strong>
-
-                <span id="email">
-                    Loading...
-                </span>
-
+                <strong>Email Address</strong>
+                <span id="email">Loading...</span>
             </div>
-
-
             <div class="info-item">
-
                 <strong>District</strong>
-
-                <span id="district">
-                    Loading...
-                </span>
-
+                <span id="district">Loading...</span>
             </div>
-
-
             <div class="info-item">
-
                 <strong>Years in Business</strong>
-
-                <span id="years">
-                    Loading...
-                </span>
-
+                <span id="years">Loading...</span>
             </div>
-
-
-            <div class="info-item">
-
-                <strong>Address</strong>
-
-                <span id="address">
-                    Loading...
-                </span>
-
+            <div class="info-item" style="grid-column: 1 / -1;">
+                <strong>Registered Address</strong>
+                <span id="address">Loading...</span>
             </div>
-
         </div>
 
+        <div class="description-block">
+            <strong>Business Description</strong>
+            <p id="description" class="description-text">Loading...</p>
+        </div>
     </section>
 
-
     <!-- =========================================
-         BUSINESS DESCRIPTION
+         4. SHOP OPERATIONAL INFORMATION CARD
     ========================================== -->
+    <section class="vendor-card vendor-ops-card">
+        <div class="card-header-flex">
+            <div>
+                <h2>Shop Operational Details</h2>
+                <p class="section-subtitle">Operating hours, open days, and stall location visible to customers.</p>
+            </div>
+            <button type="button" class="btn btn-sm btn-secondary" onclick="scrollToShopForm(); return false;">
+                ⚙️ Update Operational Details
+            </button>
+        </div>
 
-    <section class="vendor-description">
+        <div class="ops-grid">
+            <div class="ops-item">
+                <span class="ops-icon">⏰</span>
+                <div>
+                    <strong>Opening Time</strong>
+                    <span id="opsOpeningTime">Not specified</span>
+                </div>
+            </div>
+            <div class="ops-item">
+                <span class="ops-icon">🌙</span>
+                <div>
+                    <strong>Closing Time</strong>
+                    <span id="opsClosingTime">Not specified</span>
+                </div>
+            </div>
+            <div class="ops-item">
+                <span class="ops-icon">📅</span>
+                <div>
+                    <strong>Available Days</strong>
+                    <span id="opsAvailableDays">Not specified</span>
+                </div>
+            </div>
+            <div class="ops-item">
+                <span class="ops-icon">🚫</span>
+                <div>
+                    <strong>Closing Day</strong>
+                    <span id="opsClosingDay">None / Not specified</span>
+                </div>
+            </div>
+            <div class="ops-item">
+                <span class="ops-icon">📍</span>
+                <div>
+                    <strong>Shop Stall Address</strong>
+                    <span id="opsShopAddress">Not provided</span>
+                </div>
+            </div>
+            <div class="ops-item">
+                <span class="ops-icon">📞</span>
+                <div>
+                    <strong>Shop Contact Number</strong>
+                    <span id="opsShopContact">Not provided</span>
+                </div>
+            </div>
+        </div>
 
-        <h2>
-            Business Description
-        </h2>
-
-        <p id="description">
-            Loading...
-        </p>
-
+        <div class="description-block">
+            <strong>Shop Description</strong>
+            <p id="opsShopDescription" class="description-text">Not provided</p>
+        </div>
     </section>
 
+    <!-- =========================================
+         5. PRODUCT CATALOG / OVERVIEW SECTION
+    ========================================== -->
+    <section class="vendor-card vendor-catalog-card" id="productCatalogSection">
+        <div class="card-header-flex">
+            <div>
+                <h2>Product Catalog Overview</h2>
+                <p class="section-subtitle">Active products in your stall catalog shown to customers.</p>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="focusAddProduct(); return false;">
+                + Add Product
+            </button>
+        </div>
+
+        <div id="productCatalogContainer" class="catalog-grid">
+            <!-- Dynamically populated -->
+        </div>
+    </section>
 
     <!-- =========================================
-         MY SHOP DETAILS
+         6. MY SHOP DETAILS & PRODUCT MANAGEMENT FORM
     ========================================== -->
-
-    <section class="vendor-shop-details">
-
-        <h2>
-            My Shop Details
-        </h2>
-
-        <p>
-            Add or update information about your shop so
-            customers can view your shop details and products.
+    <section class="vendor-card vendor-shop-details" id="shopDetailsFormSection">
+        <h2>Manage Shop Details & Products</h2>
+        <p class="section-subtitle">
+            Configure your shop stall information, operating schedule, and add or manage products.
         </p>
-
 
         <form id="shopDetailsForm">
 
-
             <!-- SHOP DESCRIPTION -->
-
             <div class="edit-form-group">
-
-                <label for="shopDescription">
-                    Shop Description
-                </label>
-
+                <label for="shopDescription">Shop Description</label>
                 <textarea
                     id="shopDescription"
-                    rows="4"
+                    rows="3"
                     placeholder="Describe your shop and what you offer..."
                 ></textarea>
-
             </div>
-
 
             <!-- SHOP ADDRESS -->
-
             <div class="edit-form-group">
-
-                <label for="shopAddress">
-                    Shop Address
-                </label>
-
+                <label for="shopAddress">Shop / Stall Address</label>
                 <textarea
                     id="shopAddress"
-                    rows="3"
+                    rows="2"
                     placeholder="Enter your shop/stall location..."
                 ></textarea>
-
             </div>
 
-
             <!-- CONTACT -->
-
             <div class="edit-form-group">
-
-                <label for="shopContact">
-                    Contact Number
-                </label>
-
+                <label for="shopContact">Shop Contact Number</label>
                 <input
                     type="tel"
                     id="shopContact"
                     placeholder="Enter contact number"
                 >
-
             </div>
 
-
-            <!-- OPENING TIME -->
-
-            <div class="edit-form-group">
-
-                <label for="openingTime">
-                    Opening Time
-                </label>
-
-                <input
-                    type="time"
-                    id="openingTime"
-                >
-
+            <!-- TIMINGS -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div class="edit-form-group">
+                    <label for="openingTime">Opening Time</label>
+                    <input type="time" id="openingTime" required>
+                </div>
+                <div class="edit-form-group">
+                    <label for="closingTime">Closing Time</label>
+                    <input type="time" id="closingTime" required>
+                </div>
             </div>
-
-
-            <!-- CLOSING TIME -->
-
-            <div class="edit-form-group">
-
-                <label for="closingTime">
-                    Closing Time
-                </label>
-
-                <input
-                    type="time"
-                    id="closingTime"
-                >
-
-            </div>
-
 
             <!-- AVAILABLE DAYS -->
-
             <div class="edit-form-group">
-
-                <label>
-                    Available Days
-                </label>
-
-
+                <label>Available Days</label>
                 <div class="shop-days">
-
-                    <label>
-
-                        <input
-                            type="checkbox"
-                            name="availableDays"
-                            value="Monday"
-                        >
-
-                        <span>Monday</span>
-
-                    </label>
-
-
-                    <label>
-
-                        <input
-                            type="checkbox"
-                            name="availableDays"
-                            value="Tuesday"
-                        >
-
-                        <span>Tuesday</span>
-
-                    </label>
-
-
-                    <label>
-
-                        <input
-                            type="checkbox"
-                            name="availableDays"
-                            value="Wednesday"
-                        >
-
-                        <span>Wednesday</span>
-
-                    </label>
-
-
-                    <label>
-
-                        <input
-                            type="checkbox"
-                            name="availableDays"
-                            value="Thursday"
-                        >
-
-                        <span>Thursday</span>
-
-                    </label>
-
-
-                    <label>
-
-                        <input
-                            type="checkbox"
-                            name="availableDays"
-                            value="Friday"
-                        >
-
-                        <span>Friday</span>
-
-                    </label>
-
-
-                    <label>
-
-                        <input
-                            type="checkbox"
-                            name="availableDays"
-                            value="Saturday"
-                        >
-
-                        <span>Saturday</span>
-
-                    </label>
-
-
-                    <label>
-
-                        <input
-                            type="checkbox"
-                            name="availableDays"
-                            value="Sunday"
-                        >
-
-                        <span>Sunday</span>
-
-                    </label>
-
+                    <label><input type="checkbox" name="availableDays" value="Monday"><span>Monday</span></label>
+                    <label><input type="checkbox" name="availableDays" value="Tuesday"><span>Tuesday</span></label>
+                    <label><input type="checkbox" name="availableDays" value="Wednesday"><span>Wednesday</span></label>
+                    <label><input type="checkbox" name="availableDays" value="Thursday"><span>Thursday</span></label>
+                    <label><input type="checkbox" name="availableDays" value="Friday"><span>Friday</span></label>
+                    <label><input type="checkbox" name="availableDays" value="Saturday"><span>Saturday</span></label>
+                    <label><input type="checkbox" name="availableDays" value="Sunday"><span>Sunday</span></label>
                 </div>
-
             </div>
-
 
             <!-- CLOSING DAY -->
-
             <div class="edit-form-group">
-
-                <label for="closingDay">
-                    Closing Day
-                </label>
-
+                <label for="closingDay">Closing Day</label>
                 <select id="closingDay">
-
-                    <option value="">
-                        Select Closing Day
-                    </option>
-
-                    <option value="Monday">
-                        Monday
-                    </option>
-
-                    <option value="Tuesday">
-                        Tuesday
-                    </option>
-
-                    <option value="Wednesday">
-                        Wednesday
-                    </option>
-
-                    <option value="Thursday">
-                        Thursday
-                    </option>
-
-                    <option value="Friday">
-                        Friday
-                    </option>
-
-                    <option value="Saturday">
-                        Saturday
-                    </option>
-
-                    <option value="Sunday">
-                        Sunday
-                    </option>
-
+                    <option value="None">None / Open Everyday</option>
+                    <option value="Monday">Monday</option>
+                    <option value="Tuesday">Tuesday</option>
+                    <option value="Wednesday">Wednesday</option>
+                    <option value="Thursday">Thursday</option>
+                    <option value="Friday">Friday</option>
+                    <option value="Saturday">Saturday</option>
+                    <option value="Sunday">Sunday</option>
                 </select>
-
             </div>
 
-
-            <!-- PRODUCTS -->
-
+            <!-- PRODUCTS LIST -->
             <div class="edit-form-group">
-
-                <label>
-                    Products Available
-                </label>
-
-
+                <label>Products in Catalog</label>
                 <div id="productsContainer"></div>
-
 
                 <button
                     type="button"
-                    class="btn"
+                    class="btn btn-secondary"
                     id="addProductButton"
+                    style="margin-top: 10px;"
                 >
-                    + Add Product
+                    + Add Product Row
                 </button>
-
             </div>
-
 
             <!-- ADDITIONAL INFORMATION -->
-
             <div class="edit-form-group">
-
-                <label for="additionalInformation">
-                    Additional Information
-                </label>
-
+                <label for="additionalInformation">Additional Information</label>
                 <textarea
                     id="additionalInformation"
-                    rows="4"
+                    rows="3"
                     placeholder="Any additional information for customers..."
                 ></textarea>
-
             </div>
 
-
-            <!-- SAVE -->
-
-            <button
-                type="submit"
-                class="btn"
-            >
-                Save Shop Details
+            <!-- SAVE BUTTON -->
+            <button type="submit" class="btn" style="margin-top: 10px;">
+                💾 Save Shop Details
             </button>
-
 
             <p id="shopDetailsMessage"></p>
-
         </form>
-
     </section>
 
-
     <!-- =========================================
-         EDIT PROFILE BUTTON
+         7. EDIT PROFILE SECTION
     ========================================== -->
-
-    <section class="edit-profile-button">
-
-        <button
-            class="btn"
-            onclick="showEditProfile()"
-        >
-            Edit Profile
-        </button>
-
-    </section>
-
-
-    <!-- =========================================
-         EDIT PROFILE
-    ========================================== -->
-
-    <section
-        id="editProfileSection"
-        style="display: none;"
-    >
-
-        <h2>
-            Edit Profile
-        </h2>
-
+    <section id="editProfileSection" class="vendor-card" style="display: none;">
+        <h2>Edit Vendor Profile</h2>
+        <p class="section-subtitle">Update your personal and business registration details.</p>
 
         <form id="editProfileForm">
-
-
             <div class="edit-form-group">
-
-                <label for="editName">
-                    Vendor Name
-                </label>
-
-                <input
-                    type="text"
-                    id="editName"
-                    required
-                >
-
+                <label for="editName">Vendor Name</label>
+                <input type="text" id="editName" required>
             </div>
 
-
             <div class="edit-form-group">
-
-                <label for="editMobile">
-                    Mobile Number
-                </label>
-
-                <input
-                    type="tel"
-                    id="editMobile"
-                    required
-                >
-
+                <label for="editMobile">Mobile Number</label>
+                <input type="tel" id="editMobile" required>
             </div>
 
-
             <div class="edit-form-group">
-
-                <label for="editEmail">
-                    Email
-                </label>
-
-                <input
-                    type="email"
-                    id="editEmail"
-                    required
-                >
-
+                <label for="editEmail">Email Address</label>
+                <input type="email" id="editEmail" required>
             </div>
 
-
             <div class="edit-form-group">
-
-                <label for="editBusinessName">
-                    Business Name
-                </label>
-
-                <input
-                    type="text"
-                    id="editBusinessName"
-                    required
-                >
-
+                <label for="editBusinessName">Business Name</label>
+                <input type="text" id="editBusinessName" required>
             </div>
 
-
             <div class="edit-form-group">
-
-                <label for="editCategory">
-                    Business Category
-                </label>
-
-                <select
-                    id="editCategory"
-                    required
-                >
-
-                    <option value="Food">
-                        Food
-                    </option>
-
-                    <option value="Fruits and Vegetables">
-                        Fruits and Vegetables
-                    </option>
-
-                    <option value="Clothing">
-                        Clothing
-                    </option>
-
-                    <option value="Accessories">
-                        Accessories
-                    </option>
-
-                    <option value="Grocery">
-                        Grocery
-                    </option>
-
-                    <option value="Other">
-                        Other
-                    </option>
-
+                <label for="editCategory">Business Category</label>
+                <select id="editCategory" required>
+                    <option value="Food">Food</option>
+                    <option value="Fruits and Vegetables">Fruits and Vegetables</option>
+                    <option value="Clothing">Clothing</option>
+                    <option value="Accessories">Accessories</option>
+                    <option value="Grocery">Grocery</option>
+                    <option value="Other">Other</option>
                 </select>
-
             </div>
-
 
             <div class="edit-form-group">
-
-                <label for="editDistrict">
-                    District
-                </label>
-
-                <input
-                    type="text"
-                    id="editDistrict"
-                    required
-                >
-
+                <label for="editDistrict">District</label>
+                <input type="text" id="editDistrict" required>
             </div>
-
 
             <div class="edit-form-group">
-
-                <label for="editAddress">
-                    Business Address
-                </label>
-
-                <textarea
-                    id="editAddress"
-                    required
-                ></textarea>
-
+                <label for="editAddress">Business Address</label>
+                <textarea id="editAddress" required></textarea>
             </div>
-
 
             <div class="edit-form-group">
-
-                <label for="editYears">
-                    Years in Business
-                </label>
-
-                <input
-                    type="number"
-                    id="editYears"
-                    min="0"
-                    required
-                >
-
+                <label for="editYears">Years in Business</label>
+                <input type="number" id="editYears" min="0" required>
             </div>
-
 
             <div class="edit-form-group">
-
-                <label for="editDescription">
-                    Business Description
-                </label>
-
-                <textarea
-                    id="editDescription"
-                ></textarea>
-
+                <label for="editDescription">Business Description</label>
+                <textarea id="editDescription"></textarea>
             </div>
 
-
-            <button
-                type="submit"
-                class="btn"
-            >
-                Save Changes
-            </button>
-
-
-            <button
-                type="button"
-                class="btn"
-                onclick="cancelEdit()"
-            >
-                Cancel
-            </button>
-
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <button type="submit" class="btn">Save Profile Changes</button>
+                <button type="button" class="btn btn-secondary" onclick="cancelEdit()">Cancel</button>
+            </div>
+            <p id="editProfileMessage" style="margin-top: 10px; font-weight: 600;"></p>
         </form>
-
     </section>
 
-
     <!-- =========================================
-         SUPPORT SERVICES
+         8. VENDOR SUPPORT SERVICES
     ========================================== -->
+    <section class="vendor-card vendor-services">
+        <h2>Vendor Support Services</h2>
+        <p class="section-subtitle">Useful tools and resources to help you manage and grow your vending business.</p>
 
-    <section class="vendor-services">
-
-        <h2>
-            Vendor Support Services
-        </h2>
-
-        <p>
-            Useful information and services to help you
-            manage and grow your street vending business.
-        </p>
-
-
-        <div class="services-grid">
-
-
+        <div class="services-grid" style="margin-top: 20px;">
             <div class="service-card">
-
-                <div class="service-icon">
-                    💳
-                </div>
-
-                <h3>
-                    Online Payments
-                </h3>
-
-                <p>
-                    Learn how to accept digital payments
-                    using UPI, QR codes and other secure
-                    payment methods.
-                </p>
-
-                <a
-                    href="payment.html"
-                    class="btn"
-                >
-                    View Payment Information
-                </a>
-
+                <div class="service-icon">💳</div>
+                <h3>Online Payments</h3>
+                <p>Learn how to accept digital payments using UPI, QR codes and other secure payment methods.</p>
+                <a href="payment.html" class="btn">View Payment Information</a>
             </div>
-
-
             <div class="service-card">
-
-                <div class="service-icon">
-                    🏛️
-                </div>
-
-                <h3>
-                    Government Schemes
-                </h3>
-
-                <p>
-                    Explore government schemes, financial
-                    support and benefits available for
-                    street vendors.
-                </p>
-
-                <a
-                    href="schemes.html"
-                    class="btn"
-                >
-                    View Government Schemes
-                </a>
-
+                <div class="service-icon">🏛️</div>
+                <h3>Government Schemes</h3>
+                <p>Explore government schemes, financial support and benefits available for street vendors.</p>
+                <a href="schemes.html" class="btn">View Government Schemes</a>
             </div>
-
-
         </div>
-
     </section>
 
 </main>
 
-
 <footer>
-
-    <p>
-        © 2026 Street Vendor Management System
-    </p>
-
+    <p>© 2026 Street Vendor Management System</p>
 </footer>
-
 
 <script src="../js/vendor.js"></script>
 
-
 <script>
+// =====================================================
+// GLOBAL STATE
+// =====================================================
+let currentVendorData = null;
 
-// ================================================
+// =====================================================
 // PAGE LOAD
-// ================================================
+// =====================================================
+document.addEventListener("DOMContentLoaded", function () {
+    loadVendorDashboard();
 
-document.addEventListener(
-    "DOMContentLoaded",
-    function () {
-
-        loadVendorDashboard();
-
-        loadShopDetails();
-
-
-        const addProductButton =
-            document.getElementById(
-                "addProductButton"
-            );
-
-
-        if (addProductButton) {
-
-            addProductButton.addEventListener(
-                "click",
-                function () {
-
-                    addProductRow();
-
-                }
-            );
-
-        }
-
-
-        const shopDetailsForm =
-            document.getElementById(
-                "shopDetailsForm"
-            );
-
-
-        if (shopDetailsForm) {
-
-            shopDetailsForm.addEventListener(
-                "submit",
-                function (event) {
-
-                    event.preventDefault();
-
-                    saveShopDetails();
-
-                }
-            );
-
-        }
-
+    const addProductBtn = document.getElementById("addProductButton");
+    if (addProductBtn) {
+        addProductBtn.addEventListener("click", function () {
+            addProductRow();
+        });
     }
-);
 
+    const shopDetailsForm = document.getElementById("shopDetailsForm");
+    if (shopDetailsForm) {
+        shopDetailsForm.addEventListener("submit", function (e) {
+            e.preventDefault();
+            saveShopDetails();
+        });
+    }
 
-// ================================================
-// LOAD VENDOR INFORMATION
-// ================================================
+    const editProfileForm = document.getElementById("editProfileForm");
+    if (editProfileForm) {
+        editProfileForm.addEventListener("submit", function (e) {
+            e.preventDefault();
+            saveProfileEdit();
+        });
+    }
+});
 
+// =====================================================
+// LOAD VENDOR INFORMATION & DASHBOARD DATA
+// =====================================================
 async function loadVendorDashboard() {
-
     const vendorId =
-        localStorage.getItem(
-            "loggedInVendorId"
-        );
-
+        localStorage.getItem("userId") ||
+        localStorage.getItem("loggedInVendorId");
 
     const token =
-        localStorage.getItem(
-            "vendorToken"
-        );
-
+        localStorage.getItem("authToken") ||
+        localStorage.getItem("vendorToken");
 
     if (!vendorId || !token) {
-
-        window.location.href =
-            "login.html";
-
+        window.location.href = "login.html";
         return;
-
     }
-
 
     try {
-
-        const response =
-            await fetch(
-                `${API_BASE_URL}/vendors/${encodeURIComponent(vendorId)}`,
-                {
-                    headers: {
-
-                        Authorization:
-                            `Bearer ${token}`
-
-                    }
-
+        const response = await fetch(
+            `${API_BASE_URL}/vendors/${encodeURIComponent(vendorId)}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`
                 }
-            );
+            }
+        );
 
-
-        const result =
-            await response.json();
-
+        const result = await response.json();
 
         if (!response.ok) {
-
             throw new Error(
-                result.message ||
-                "Unable to load vendor information."
+                result.message || "Unable to load vendor information."
             );
-
         }
 
+        const vendor = result.vendor || result;
+        currentVendorData = vendor;
 
-        const vendor =
-            result.vendor ||
-            result;
+        // 1. HEADER / HERO
+        const vendorDisplayName = vendor.name || "Vendor";
+        setText("vendorName", vendorDisplayName);
+        setText("businessNameSubtitle", vendor.businessName || "Street Vendor");
+        setText("vendorIdBadge", vendor.id || vendorId);
 
+        // Verification Status Badge
+        updateStatusBadge(vendor.status || "Pending");
 
-        setText(
-            "vendorName",
-            vendor.name
-        );
-
-
-        setText(
-            "vendorId",
-            vendor.id
-        );
-
-
-        setText(
-            "businessName",
-            vendor.businessName
-        );
-
-
-        setText(
-            "category",
-            vendor.category
-        );
-
-
-        setText(
-            "mobile",
-            vendor.mobile
-        );
-
-
-        setText(
-            "email",
-            vendor.email
-        );
-
-
-        setText(
-            "district",
-            vendor.district
-        );
-
-
+        // 2. BUSINESS INFORMATION CARD
+        setText("vendorId", vendor.id || vendorId);
+        setText("infoVendorName", vendor.name || "Not provided");
+        setText("businessName", vendor.businessName || "Not provided");
+        setText("category", vendor.category || "Not provided");
+        setText("mobile", vendor.mobile || "Not provided");
+        setText("email", vendor.email || "Not provided");
+        setText("district", vendor.district || "Not provided");
         setText(
             "years",
-            vendor.years
+            vendor.years !== undefined && vendor.years !== null
+                ? `${vendor.years} years`
+                : "Not provided"
         );
-
-
-        setText(
-            "address",
-            vendor.address
-        );
-
-
+        setText("address", vendor.address || "Not provided");
         setText(
             "description",
-            vendor.description
+            vendor.description || "No business description provided."
         );
 
+        // Populate Edit Profile inputs
+        setValue("editName", vendor.name);
+        setValue("editMobile", vendor.mobile);
+        setValue("editEmail", vendor.email);
+        setValue("editBusinessName", vendor.businessName);
+        setValue("editCategory", vendor.category);
+        setValue("editDistrict", vendor.district);
+        setValue("editAddress", vendor.address);
+        setValue("editYears", vendor.years);
+        setValue("editDescription", vendor.description);
 
-        const statusElement =
-            document.getElementById(
-                "vendorStatus"
-            );
-
-
-        if (statusElement) {
-
-            statusElement.textContent =
-                vendor.status ||
-                "Pending";
-
-
-            if (
-                vendor.status ===
-                "Verified"
-            ) {
-
-                statusElement.style.color =
-                    "green";
-
-            } else if (
-                vendor.status ===
-                "Rejected"
-            ) {
-
-                statusElement.style.color =
-                    "red";
-
-            } else {
-
-                statusElement.style.color =
-                    "#d68910";
-
+        // 3. SHOP OPERATIONAL DETAILS & PRODUCTS
+        // Check MongoDB vendor.shopDetails first, then fallback to localStorage
+        let shopData = vendor.shopDetails;
+        if (!shopData) {
+            const savedLocal = localStorage.getItem(`shopDetails_${vendorId}`);
+            if (savedLocal) {
+                try {
+                    shopData = JSON.parse(savedLocal);
+                } catch {
+                    shopData = null;
+                }
             }
-
         }
 
+        populateOperationalInfo(shopData);
+        populateShopForm(shopData);
 
-        // ========================================
-        // EDIT PROFILE FIELDS
-        // ========================================
-
-        setValue(
-            "editName",
-            vendor.name
-        );
-
-
-        setValue(
-            "editMobile",
-            vendor.mobile
-        );
-
-
-        setValue(
-            "editEmail",
-            vendor.email
-        );
-
-
-        setValue(
-            "editBusinessName",
-            vendor.businessName
-        );
-
-
-        setValue(
-            "editCategory",
-            vendor.category
-        );
-
-
-        setValue(
-            "editDistrict",
-            vendor.district
-        );
-
-
-        setValue(
-            "editAddress",
-            vendor.address
-        );
-
-
-        setValue(
-            "editYears",
-            vendor.years
-        );
-
-
-        setValue(
-            "editDescription",
-            vendor.description
-        );
-
+        const products = (shopData && Array.isArray(shopData.products)) ? shopData.products : [];
+        renderProductCatalogOverview(products);
+        updateStatistics(products, vendor.status || "Pending");
 
     } catch (error) {
-
-        console.error(
-            "Dashboard loading error:",
-            error
-        );
-
-
-        setText(
-            "vendorStatus",
-            error.message
-        );
-
+        console.error("Dashboard loading error:", error);
+        const statusElement = document.getElementById("vendorStatusBadge");
+        if (statusElement) {
+            statusElement.textContent = "Error loading";
+            statusElement.className = "status-pill status-rejected";
+        }
     }
-
 }
 
+// =====================================================
+// STATUS BADGE HELPER
+// =====================================================
+function updateStatusBadge(status) {
+    const badge = document.getElementById("vendorStatusBadge");
+    const statText = document.getElementById("statBusinessStatus");
+    const compatStatus = document.getElementById("vendorStatus");
 
-// ================================================
-// HELPER
-// ================================================
+    const normalizedStatus = status || "Pending";
 
-function setText(
-    elementId,
-    value
-) {
+    if (badge) {
+        badge.textContent = normalizedStatus;
+        badge.className = "status-pill";
 
-    const element =
-        document.getElementById(
-            elementId
-        );
-
-
-    if (element) {
-
-        element.textContent =
-            value ||
-            "Not available";
-
+        if (normalizedStatus.toLowerCase() === "verified") {
+            badge.classList.add("status-verified");
+        } else if (normalizedStatus.toLowerCase() === "rejected") {
+            badge.classList.add("status-rejected");
+        } else {
+            badge.classList.add("status-pending");
+        }
     }
 
-}
-
-
-function setValue(
-    elementId,
-    value
-) {
-
-    const element =
-        document.getElementById(
-            elementId
-        );
-
-
-    if (element) {
-
-        element.value =
-            value ||
-            "";
-
+    if (statText) {
+        statText.textContent = normalizedStatus;
+        if (normalizedStatus.toLowerCase() === "verified") {
+            statText.style.color = "#15803d";
+        } else if (normalizedStatus.toLowerCase() === "rejected") {
+            statText.style.color = "#b91c1c";
+        } else {
+            statText.style.color = "#b45309";
+        }
     }
 
+    if (compatStatus) {
+        compatStatus.textContent = normalizedStatus;
+    }
 }
 
-
-// ================================================
-// ADD PRODUCT
-// ================================================
-
-let productNumber = 0;
-
-
-function addProductRow(
-    productName = "",
-    productDescription = ""
-) {
-
-    productNumber++;
-
-
-    const container =
-        document.getElementById(
-            "productsContainer"
-        );
-
-
-    if (!container) {
-
+// =====================================================
+// OPERATIONAL INFO CARD POPULATION
+// =====================================================
+function populateOperationalInfo(shopData) {
+    if (!shopData) {
+        setText("opsOpeningTime", "Not specified");
+        setText("opsClosingTime", "Not specified");
+        setText("opsAvailableDays", "Not specified");
+        setText("opsClosingDay", "None / Not specified");
+        setText("opsShopAddress", "Not provided");
+        setText("opsShopContact", "Not provided");
+        setText("opsShopDescription", "Not provided");
         return;
-
     }
 
+    setText("opsOpeningTime", formatTime(shopData.openingTime) || "Not specified");
+    setText("opsClosingTime", formatTime(shopData.closingTime) || "Not specified");
 
-    const row =
-        document.createElement(
-            "div"
-        );
+    const days = shopData.days || shopData.availableDays;
+    if (Array.isArray(days) && days.length > 0) {
+        setText("opsAvailableDays", days.join(", "));
+    } else {
+        setText("opsAvailableDays", "Not specified");
+    }
 
+    setText(
+        "opsClosingDay",
+        shopData.closingDay && shopData.closingDay !== "None"
+            ? shopData.closingDay
+            : "None / Not specified"
+    );
 
-    row.className =
-        "product-row";
+    setText("opsShopAddress", shopData.address || "Not provided");
+    setText("opsShopContact", shopData.contact || "Not provided");
+    setText("opsShopDescription", shopData.description || "Not provided");
+}
 
+// =====================================================
+// SHOP FORM POPULATION
+// =====================================================
+function populateShopForm(shopData) {
+    const productsContainer = document.getElementById("productsContainer");
+    if (productsContainer) {
+        productsContainer.innerHTML = "";
+    }
+
+    if (!shopData) {
+        addProductRow();
+        return;
+    }
+
+    setValue("shopDescription", shopData.description);
+    setValue("shopAddress", shopData.address);
+    setValue("shopContact", shopData.contact);
+    setValue("openingTime", shopData.openingTime);
+    setValue("closingTime", shopData.closingTime);
+    setValue("additionalInformation", shopData.additionalInformation);
+
+    const availableDays = shopData.days || shopData.availableDays || [];
+    document.querySelectorAll('input[name="availableDays"]').forEach(cb => {
+        cb.checked = availableDays.includes(cb.value);
+    });
+
+    const closingDaySelect = document.getElementById("closingDay");
+    if (closingDaySelect) {
+        closingDaySelect.value = shopData.closingDay || "None";
+    }
+
+    const products = shopData.products || [];
+    if (products.length === 0) {
+        addProductRow();
+    } else {
+        products.forEach(p => {
+            if (typeof p === "string") {
+                addProductRow(p, "", true);
+            } else {
+                const name = p.name || p.productName || p.title || "";
+                const desc = p.description || p.details || "";
+                const isAvail = p.available !== false && p.status !== "Unavailable";
+                addProductRow(name, desc, isAvail);
+            }
+        });
+    }
+}
+
+// =====================================================
+// STATISTICS CALCULATION
+// =====================================================
+function updateStatistics(products, status) {
+    const total = Array.isArray(products) ? products.length : 0;
+    let availableCount = 0;
+
+    if (Array.isArray(products)) {
+        products.forEach(p => {
+            if (typeof p === "string") {
+                availableCount++;
+            } else {
+                if (p.available !== false && p.status !== "Unavailable") {
+                    availableCount++;
+                }
+            }
+        });
+    }
+
+    const unavailableCount = total - availableCount;
+
+    setText("statTotalProducts", total);
+    setText("statAvailableProducts", availableCount);
+    setText("statUnavailableProducts", unavailableCount);
+
+    updateStatusBadge(status);
+}
+
+// =====================================================
+// PRODUCT CATALOG OVERVIEW RENDERING
+// =====================================================
+function renderProductCatalogOverview(products) {
+    const container = document.getElementById("productCatalogContainer");
+    if (!container) return;
+
+    if (!Array.isArray(products) || products.length === 0) {
+        container.innerHTML = `
+            <div class="empty-products-state">
+                <span class="empty-icon">📦</span>
+                <h3>No Products Added Yet</h3>
+                <p>Your shop catalog is currently empty. Click the button below to add your products and showcase them to customers.</p>
+                <button type="button" class="btn btn-primary" onclick="focusAddProduct(); return false;">
+                    + Add Product
+                </button>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = products.map((prod, index) => {
+        let name = "";
+        let desc = "";
+        let isAvailable = true;
+
+        if (typeof prod === "string") {
+            name = prod;
+        } else {
+            name = prod.name || prod.productName || prod.title || `Product #${index + 1}`;
+            desc = prod.description || prod.details || "";
+            isAvailable = prod.available !== false && prod.status !== "Unavailable";
+        }
+
+        const badgeHtml = isAvailable
+            ? `<span class="badge badge-success">Available</span>`
+            : `<span class="badge badge-danger">Unavailable</span>`;
+
+        const descHtml = desc
+            ? `<p class="product-catalog-desc">${escapeHtml(desc)}</p>`
+            : `<p class="product-catalog-desc" style="color: #94a3b8; font-style: italic;">No description provided</p>`;
+
+        return `
+            <div class="product-catalog-card">
+                <div class="product-catalog-header">
+                    <h4 class="product-catalog-title">${escapeHtml(name)}</h4>
+                    ${badgeHtml}
+                </div>
+                ${descHtml}
+            </div>
+        `;
+    }).join("");
+}
+
+// =====================================================
+// ADD PRODUCT ROW IN FORM
+// =====================================================
+function addProductRow(productName = "", productDescription = "", isAvailable = true) {
+    const container = document.getElementById("productsContainer");
+    if (!container) return;
+
+    const row = document.createElement("div");
+    row.className = "product-row";
 
     row.innerHTML = `
-
         <input
             type="text"
             class="product-name"
-            placeholder="Product name"
+            placeholder="Product name (e.g. Masala Dosa)"
             value="${escapeAttribute(productName)}"
+            required
         >
-
         <input
             type="text"
             class="product-description"
-            placeholder="Product description"
+            placeholder="Description or price details"
             value="${escapeAttribute(productDescription)}"
         >
-
-        <button
-            type="button"
-            class="remove-product-btn"
-        >
+        <select class="product-availability">
+            <option value="true" ${isAvailable ? "selected" : ""}>Available</option>
+            <option value="false" ${!isAvailable ? "selected" : ""}>Unavailable</option>
+        </select>
+        <button type="button" class="remove-product-btn" title="Remove product">
             Remove
         </button>
-
     `;
 
+    const removeBtn = row.querySelector(".remove-product-btn");
+    removeBtn.addEventListener("click", function () {
+        row.remove();
+    });
 
-    const removeButton =
-        row.querySelector(
-            ".remove-product-btn"
-        );
-
-
-    removeButton.addEventListener(
-        "click",
-        function () {
-
-            row.remove();
-
-        }
-    );
-
-
-    container.appendChild(
-        row
-    );
-
+    container.appendChild(row);
 }
 
-
-// ================================================
-// ESCAPE ATTRIBUTE
-// ================================================
-
-function escapeAttribute(value) {
-
-    return String(
-        value || ""
-    )
-        .replace(
-            /&/g,
-            "&amp;"
-        )
-        .replace(
-            /"/g,
-            "&quot;"
-        )
-        .replace(
-            /</g,
-            "&lt;"
-        )
-        .replace(
-            />/g,
-            "&gt;"
-        );
-
-}
-
-
-// ================================================
-// GET PRODUCTS
-// ================================================
-
+// =====================================================
+// GET PRODUCTS FROM FORM ROWS
+// =====================================================
 function getProducts() {
-
-    const rows =
-        document.querySelectorAll(
-            ".product-row"
-        );
-
-
+    const rows = document.querySelectorAll(".product-row");
     const products = [];
 
+    rows.forEach(row => {
+        const nameInput = row.querySelector(".product-name");
+        const descInput = row.querySelector(".product-description");
+        const availSelect = row.querySelector(".product-availability");
 
-    rows.forEach(
-        function (row) {
+        const name = nameInput ? nameInput.value.trim() : "";
+        const description = descInput ? descInput.value.trim() : "";
+        const available = availSelect ? availSelect.value === "true" : true;
 
-            const name =
-                row.querySelector(
-                    ".product-name"
-                ).value.trim();
-
-
-            const description =
-                row.querySelector(
-                    ".product-description"
-                ).value.trim();
-
-
-            if (name) {
-
-                products.push({
-
-                    name:
-                        name,
-
-                    description:
-                        description
-
-                });
-
-            }
-
+        if (name) {
+            products.push({
+                name: name,
+                description: description,
+                available: available
+            });
         }
-    );
-
+    });
 
     return products;
-
 }
 
-
-// ================================================
+// =====================================================
 // SAVE SHOP DETAILS
-// ================================================
-
+// =====================================================
 async function saveShopDetails() {
-
     const vendorId =
-        localStorage.getItem(
-            "loggedInVendorId"
-        );
-
+        localStorage.getItem("userId") ||
+        localStorage.getItem("loggedInVendorId");
 
     const token =
-        localStorage.getItem(
-            "vendorToken"
-        );
-
+        localStorage.getItem("authToken") ||
+        localStorage.getItem("vendorToken");
 
     if (!vendorId || !token) {
-
-        window.location.href =
-            "login.html";
-
+        window.location.href = "login.html";
         return;
-
     }
 
+    const availableDays = Array.from(
+        document.querySelectorAll('input[name="availableDays"]:checked')
+    ).map(cb => cb.value);
 
-    const availableDays =
-        Array.from(
-            document.querySelectorAll(
-                'input[name="availableDays"]:checked'
-            )
-        ).map(
-            function (checkbox) {
+    const closingDayElement = document.getElementById("closingDay");
+    const closingDayValue = closingDayElement ? (closingDayElement.value || "None") : "None";
 
-                return checkbox.value;
+    const openingTimeVal = document.getElementById("openingTime")?.value || "";
+    const closingTimeVal = document.getElementById("closingTime")?.value || "";
 
+    const message = document.getElementById("shopDetailsMessage");
+
+    if (!openingTimeVal || !closingTimeVal) {
+        if (message) {
+            message.style.color = "#dc3545";
+            message.textContent = "Please provide both Opening Time and Closing Time.";
+        }
+        return;
+    }
+
+    const products = getProducts();
+
+    const shopPayload = {
+        days: availableDays,
+        closingDay: closingDayValue,
+        products: products,
+        openingTime: openingTimeVal,
+        closingTime: closingTimeVal
+    };
+
+    try {
+        if (message) {
+            message.style.color = "#495057";
+            message.textContent = "Saving shop details...";
+        }
+
+        const response = await fetch(
+            `${API_BASE_URL}/vendors/${encodeURIComponent(vendorId)}/shop-details`,
+            {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify(shopPayload)
             }
         );
 
-
-    const closingDayElement =
-        document.getElementById(
-            "closingDay"
-        );
-
-
-    const shopDetails = {
-
-        days:
-            availableDays,
-
-        closingDay:
-            closingDayElement
-                ? closingDayElement.value
-                : "",
-
-        products:
-            getProducts(),
-
-        openingTime:
-            document.getElementById(
-                "openingTime"
-            ).value,
-
-        closingTime:
-            document.getElementById(
-                "closingTime"
-            ).value
-
-    };
-
-
-    const message =
-        document.getElementById(
-            "shopDetailsMessage"
-        );
-
-
-    try {
-
-        const response =
-            await fetch(
-                `${API_BASE_URL}/vendors/${encodeURIComponent(vendorId)}/shop-details`,
-                {
-
-                    method:
-                        "PUT",
-
-                    headers: {
-
-                        "Content-Type":
-                            "application/json",
-
-                        Authorization:
-                            `Bearer ${token}`
-
-                    },
-
-                    body:
-                        JSON.stringify(
-                            shopDetails
-                        )
-
-                }
-            );
-
-
-        const result =
-            await response.json();
-
+        const result = await response.json();
 
         if (!response.ok) {
-
-            throw new Error(
-                result.message ||
-                "Unable to save shop details."
-            );
-
+            throw new Error(result.message || "Unable to save shop details.");
         }
 
-
-        // ========================================
-        // KEEP LOCAL STORAGE
-        // ========================================
-
-        const localShopDetails = {
-
-            description:
-                document.getElementById(
-                    "shopDescription"
-                ).value.trim(),
-
-            address:
-                document.getElementById(
-                    "shopAddress"
-                ).value.trim(),
-
-            contact:
-                document.getElementById(
-                    "shopContact"
-                ).value.trim(),
-
-            openingTime:
-                document.getElementById(
-                    "openingTime"
-                ).value,
-
-            closingTime:
-                document.getElementById(
-                    "closingTime"
-                ).value,
-
-            availableDays:
-                availableDays,
-
-            closingDay:
-                closingDayElement
-                    ? closingDayElement.value
-                    : "",
-
-            products:
-                getProducts(),
-
-            additionalInformation:
-                document.getElementById(
-                    "additionalInformation"
-                ).value.trim()
-
+        // Keep local draft cache with extra optional fields
+        const localCache = {
+            description: document.getElementById("shopDescription")?.value.trim() || "",
+            address: document.getElementById("shopAddress")?.value.trim() || "",
+            contact: document.getElementById("shopContact")?.value.trim() || "",
+            openingTime: openingTimeVal,
+            closingTime: closingTimeVal,
+            availableDays: availableDays,
+            days: availableDays,
+            closingDay: closingDayValue,
+            products: products,
+            additionalInformation: document.getElementById("additionalInformation")?.value.trim() || ""
         };
 
+        localStorage.setItem(`shopDetails_${vendorId}`, JSON.stringify(localCache));
 
-        localStorage.setItem(
-            `shopDetails_${vendorId}`,
-            JSON.stringify(
-                localShopDetails
-            )
-        );
+        // Update operational display
+        populateOperationalInfo(localCache);
 
+        // Update product catalog overview
+        renderProductCatalogOverview(products);
+
+        // Update statistics cards
+        const currentStatus = currentVendorData ? currentVendorData.status : "Pending";
+        updateStatistics(products, currentStatus);
 
         if (message) {
-
-            message.style.color =
-                "green";
-
-
-            message.textContent =
-                "Shop details saved successfully.";
-
+            message.style.color = "#15803d";
+            message.textContent = "✅ Shop details and products saved successfully!";
         }
-
 
     } catch (error) {
-
-        console.error(
-            "Shop details save error:",
-            error
-        );
-
-
+        console.error("Shop details save error:", error);
         if (message) {
-
-            message.style.color =
-                "red";
-
-
-            message.textContent =
-                error.message ||
-                "Unable to save shop details.";
-
+            message.style.color = "#dc3545";
+            message.textContent = error.message || "Unable to save shop details.";
         }
-
     }
-
 }
 
-
-// ================================================
-// LOAD SHOP DETAILS
-// ================================================
-
-function loadShopDetails() {
-
+// =====================================================
+// SAVE PROFILE EDIT
+// =====================================================
+async function saveProfileEdit() {
     const vendorId =
-        localStorage.getItem(
-            "loggedInVendorId"
-        );
+        localStorage.getItem("userId") ||
+        localStorage.getItem("loggedInVendorId");
 
+    const token =
+        localStorage.getItem("authToken") ||
+        localStorage.getItem("vendorToken");
 
-    if (!vendorId) {
-
+    if (!vendorId || !token) {
+        window.location.href = "login.html";
         return;
-
     }
 
+    const payload = {
+        name: document.getElementById("editName")?.value.trim(),
+        mobile: document.getElementById("editMobile")?.value.trim(),
+        email: document.getElementById("editEmail")?.value.trim(),
+        businessName: document.getElementById("editBusinessName")?.value.trim(),
+        category: document.getElementById("editCategory")?.value,
+        district: document.getElementById("editDistrict")?.value.trim(),
+        address: document.getElementById("editAddress")?.value.trim(),
+        years: document.getElementById("editYears")?.value,
+        description: document.getElementById("editDescription")?.value.trim()
+    };
 
-    const savedData =
-        localStorage.getItem(
-            `shopDetails_${vendorId}`
-        );
-
-
-    if (!savedData) {
-
-        addProductRow();
-
-        return;
-
-    }
-
+    const message = document.getElementById("editProfileMessage");
 
     try {
-
-        const shop =
-            JSON.parse(
-                savedData
-            );
-
-
-        setValue(
-            "shopDescription",
-            shop.description
-        );
-
-
-        setValue(
-            "shopAddress",
-            shop.address
-        );
-
-
-        setValue(
-            "shopContact",
-            shop.contact
-        );
-
-
-        setValue(
-            "openingTime",
-            shop.openingTime
-        );
-
-
-        setValue(
-            "closingTime",
-            shop.closingTime
-        );
-
-
-        setValue(
-            "additionalInformation",
-            shop.additionalInformation
-        );
-
-
-        // ========================================
-        // AVAILABLE DAYS
-        // ========================================
-
-        const availableDays =
-            shop.availableDays ||
-            shop.days ||
-            [];
-
-
-        document
-            .querySelectorAll(
-                'input[name="availableDays"]'
-            )
-            .forEach(
-                function (checkbox) {
-
-                    checkbox.checked =
-                        availableDays.includes(
-                            checkbox.value
-                        );
-
-                }
-            );
-
-
-        // ========================================
-        // CLOSING DAY
-        // ========================================
-
-        const closingDayElement =
-            document.getElementById(
-                "closingDay"
-            );
-
-
-        if (closingDayElement) {
-
-            closingDayElement.value =
-                shop.closingDay ||
-                "";
-
+        if (message) {
+            message.style.color = "#495057";
+            message.textContent = "Updating profile...";
         }
 
+        const response = await fetch(
+            `${API_BASE_URL}/vendors/${encodeURIComponent(vendorId)}`,
+            {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify(payload)
+            }
+        );
 
-        // ========================================
-        // PRODUCTS
-        // ========================================
+        const result = await response.json();
 
-        const container =
-            document.getElementById(
-                "productsContainer"
-            );
-
-
-        if (container) {
-
-            container.innerHTML = "";
-
+        if (!response.ok) {
+            throw new Error(result.message || "Failed to update profile.");
         }
 
-
-        const products =
-            shop.products ||
-            [];
-
-
-        if (products.length === 0) {
-
-            addProductRow();
-
-        } else {
-
-            products.forEach(
-                function (product) {
-
-                    if (
-                        typeof product ===
-                        "string"
-                    ) {
-
-                        addProductRow(
-                            product,
-                            ""
-                        );
-
-                    } else {
-
-                        addProductRow(
-
-                            product.name ||
-                            product.productName ||
-                            product.title ||
-                            "",
-
-                            product.description ||
-                            product.details ||
-                            ""
-
-                        );
-
-                    }
-
-                }
-            );
-
+        // Update stored name
+        if (payload.name) {
+            localStorage.setItem("userName", payload.name);
         }
 
+        if (message) {
+            message.style.color = "#15803d";
+            message.textContent = "✅ Profile updated successfully!";
+        }
+
+        // Reload dashboard data
+        setTimeout(() => {
+            cancelEdit();
+            loadVendorDashboard();
+            if (message) message.textContent = "";
+        }, 1000);
 
     } catch (error) {
-
-        console.error(
-            "Shop details loading error:",
-            error
-        );
-
-
-        addProductRow();
-
+        console.error("Profile update error:", error);
+        if (message) {
+            message.style.color = "#dc3545";
+            message.textContent = error.message || "Failed to update profile.";
+        }
     }
-
 }
 
+// =====================================================
+// UI ACTIONS & HELPERS
+// =====================================================
+function focusAddProduct() {
+    scrollToShopForm();
+    addProductRow();
+    const rows = document.querySelectorAll(".product-row");
+    if (rows.length > 0) {
+        const lastRowInput = rows[rows.length - 1].querySelector(".product-name");
+        if (lastRowInput) {
+            lastRowInput.focus();
+        }
+    }
+}
 
-// ================================================
-// EDIT PROFILE
-// ================================================
+function scrollToShopForm() {
+    const section = document.getElementById("shopDetailsFormSection");
+    if (section) {
+        section.scrollIntoView({ behavior: "smooth" });
+    }
+}
 
 function showEditProfile() {
-
-    const section =
-        document.getElementById(
-            "editProfileSection"
-        );
-
-
+    const section = document.getElementById("editProfileSection");
     if (section) {
-
-        section.style.display =
-            "block";
-
-
-        section.scrollIntoView({
-
-            behavior:
-                "smooth"
-
-        });
-
+        section.style.display = "block";
+        section.scrollIntoView({ behavior: "smooth" });
     }
-
 }
-
 
 function cancelEdit() {
-
-    const section =
-        document.getElementById(
-            "editProfileSection"
-        );
-
-
+    const section = document.getElementById("editProfileSection");
     if (section) {
-
-        section.style.display =
-            "none";
-
+        section.style.display = "none";
     }
-
 }
 
+function setText(elementId, value) {
+    const el = document.getElementById(elementId);
+    if (el) {
+        el.textContent = (value !== undefined && value !== null && String(value).trim() !== "")
+            ? value
+            : "Not provided";
+    }
+}
+
+function setValue(elementId, value) {
+    const el = document.getElementById(elementId);
+    if (el) {
+        el.value = (value !== undefined && value !== null) ? value : "";
+    }
+}
+
+function escapeHtml(value) {
+    if (value === null || value === undefined) return "";
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+function escapeAttribute(value) {
+    return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/"/g, "&quot;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+}
+
+function formatTime(timeStr) {
+    if (!timeStr || typeof timeStr !== "string") return "";
+    const parts = timeStr.split(":");
+    if (parts.length < 2) return timeStr;
+    let hours = parseInt(parts[0], 10);
+    const minutes = parts[1];
+    if (isNaN(hours)) return timeStr;
+    const ampm = hours >= 12 ? "PM" : "AM";
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+    return `${hours}:${minutes} ${ampm}`;
+}
 </script>
 
 </body>

@@ -749,14 +749,12 @@ function openReviewModal(
 ) {
 
     const token =
-        localStorage.getItem(
-            "customerToken"
-        );
+        localStorage.getItem("authToken") ||
+        localStorage.getItem("customerToken");
 
     const role =
-        localStorage.getItem(
-            "customerRole"
-        );
+        localStorage.getItem("userRole") ||
+        localStorage.getItem("customerRole");
 
 
     if (
@@ -954,14 +952,12 @@ if (reviewForm) {
 
 
             const token =
-                localStorage.getItem(
-                    "customerToken"
-                );
+                localStorage.getItem("authToken") ||
+                localStorage.getItem("customerToken");
 
             const role =
-                localStorage.getItem(
-                    "customerRole"
-                );
+                localStorage.getItem("userRole") ||
+                localStorage.getItem("customerRole");
 
 
             if (

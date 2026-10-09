@@ -4400,3 +4400,489 @@ footer {
     }
 
 }
+
+/* =====================================================
+   VENDOR DASHBOARD - ENHANCED STYLING
+===================================================== */
+
+/* Top Header / Welcome Hero */
+.vendor-dashboard .vendor-hero-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 30px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-left: 6px solid #198754;
+    gap: 20px;
+}
+
+.vendor-dashboard .vendor-hero-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.vendor-dashboard .vendor-hero-icon {
+    font-size: 42px;
+    background: #e8f5e9;
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.vendor-dashboard .vendor-hero-tag {
+    display: inline-block;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 700;
+    color: #198754;
+    margin-bottom: 4px;
+}
+
+.vendor-dashboard .vendor-hero-left h1 {
+    margin: 0 0 10px 0;
+    font-size: 28px;
+    color: #123b2a;
+}
+
+.vendor-dashboard .vendor-hero-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 15px;
+    font-size: 15px;
+}
+
+.vendor-dashboard .meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #495057;
+}
+
+.vendor-dashboard .code-badge {
+    background: #eef2f7;
+    color: #1e293b;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 14px;
+    font-weight: 600;
+    border: 1px solid #cbd5e1;
+}
+
+.vendor-dashboard .status-pill {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+}
+
+.vendor-dashboard .status-verified,
+.vendor-dashboard .status-pill.status-verified {
+    background: #d1e7dd;
+    color: #0f5132;
+    border: 1px solid #a3cfbb;
+}
+
+.vendor-dashboard .status-pending,
+.vendor-dashboard .status-pill.status-pending {
+    background: #fff3cd;
+    color: #664d03;
+    border: 1px solid #ffe69c;
+}
+
+.vendor-dashboard .status-rejected,
+.vendor-dashboard .status-pill.status-rejected {
+    background: #f8d7da;
+    color: #842029;
+    border: 1px solid #f1aeb5;
+}
+
+.vendor-dashboard .btn-outline-logout {
+    background: transparent;
+    border: 1.5px solid #dc3545;
+    color: #dc3545;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.vendor-dashboard .btn-outline-logout:hover {
+    background: #dc3545;
+    color: #ffffff;
+}
+
+/* Statistics Section */
+.vendor-dashboard .vendor-stats-section {
+    margin-bottom: 25px;
+}
+
+.vendor-dashboard .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+.vendor-dashboard .stat-card {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 22px 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    border: 1px solid #edf2f7;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.vendor-dashboard .stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+.vendor-dashboard .stat-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.vendor-dashboard .stat-icon-products {
+    background: #e0f2fe;
+}
+
+.vendor-dashboard .stat-icon-available {
+    background: #dcfce7;
+}
+
+.vendor-dashboard .stat-icon-unavailable {
+    background: #fee2e2;
+}
+
+.vendor-dashboard .stat-icon-status {
+    background: #fef3c7;
+}
+
+.vendor-dashboard .stat-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.vendor-dashboard .stat-label {
+    font-size: 13px;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: #64748b;
+    letter-spacing: 0.4px;
+}
+
+.vendor-dashboard .stat-value {
+    font-size: 28px;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 4px 0 2px 0;
+    line-height: 1.1;
+}
+
+.vendor-dashboard .stat-sub {
+    font-size: 12px;
+    color: #94a3b8;
+}
+
+/* Common Card Containers */
+.vendor-dashboard .vendor-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 30px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+    border: 1px solid #edf2f7;
+}
+
+.vendor-dashboard .card-header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.vendor-dashboard .card-header-flex h2,
+.vendor-dashboard .vendor-card h2 {
+    margin: 0 0 6px 0;
+    color: #123b2a;
+    font-size: 22px;
+}
+
+.vendor-dashboard .section-subtitle {
+    margin: 0;
+    color: #64748b;
+    font-size: 14px;
+}
+
+.vendor-dashboard .btn-sm {
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.vendor-dashboard .btn-secondary {
+    background: #475569;
+    color: white;
+}
+
+.vendor-dashboard .btn-secondary:hover {
+    background: #334155;
+}
+
+/* Operational Info Grid */
+.vendor-dashboard .ops-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.vendor-dashboard .ops-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: #f8fafc;
+    padding: 16px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.vendor-dashboard .ops-icon {
+    font-size: 22px;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.vendor-dashboard .ops-item strong {
+    display: block;
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 4px;
+}
+
+.vendor-dashboard .ops-item span:not(.ops-icon) {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1e293b;
+    word-break: break-word;
+}
+
+.vendor-dashboard .description-block {
+    margin-top: 15px;
+    padding: 16px;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.vendor-dashboard .description-block strong {
+    display: block;
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 6px;
+}
+
+.vendor-dashboard .description-block p {
+    margin: 0;
+    color: #334155;
+    line-height: 1.5;
+}
+
+/* Product Catalog Overview */
+.vendor-dashboard .catalog-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.vendor-dashboard .product-catalog-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.vendor-dashboard .product-catalog-card:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.vendor-dashboard .product-catalog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.vendor-dashboard .product-catalog-title {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.vendor-dashboard .product-catalog-desc {
+    margin: 0;
+    font-size: 14px;
+    color: #64748b;
+    line-height: 1.5;
+}
+
+.vendor-dashboard .empty-products-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 45px 25px;
+    background: #f8fafc;
+    border: 2px dashed #cbd5e1;
+    border-radius: 12px;
+}
+
+.vendor-dashboard .empty-products-state .empty-icon {
+    font-size: 44px;
+    margin-bottom: 12px;
+    display: block;
+}
+
+.vendor-dashboard .empty-products-state h3 {
+    margin: 0 0 8px 0;
+    color: #1e293b;
+    font-size: 19px;
+}
+
+.vendor-dashboard .empty-products-state p {
+    margin: 0 auto 20px auto;
+    color: #64748b;
+    max-width: 450px;
+    font-size: 14px;
+}
+
+/* Badges */
+.vendor-dashboard .badge {
+    display: inline-block;
+    padding: 3px 9px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+}
+
+.vendor-dashboard .badge-success {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.vendor-dashboard .badge-danger {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+/* Product Row in Form */
+.vendor-dashboard .product-row {
+    display: grid;
+    grid-template-columns: 1.5fr 2fr 1.2fr auto;
+    gap: 12px;
+    align-items: center;
+    padding: 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: #f8fafc;
+}
+
+.vendor-dashboard .product-row input,
+.vendor-dashboard .product-row select {
+    padding: 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 992px) {
+    .vendor-dashboard .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .vendor-dashboard .ops-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .vendor-dashboard {
+        padding: 30px 4%;
+    }
+
+    .vendor-dashboard .vendor-hero-card {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 22px 20px;
+    }
+
+    .vendor-dashboard .vendor-hero-left {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+    }
+
+    .vendor-dashboard .vendor-hero-actions {
+        width: 100%;
+    }
+
+    .vendor-dashboard .btn-outline-logout {
+        width: 100%;
+        text-align: center;
+    }
+
+    .vendor-dashboard .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .vendor-dashboard .ops-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .vendor-dashboard .product-row {
+        grid-template-columns: 1fr;
+    }
+
+    .vendor-dashboard .card-header-flex {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .vendor-dashboard .card-header-flex .btn {
+        width: 100%;
+        text-align: center;
+    }
+}

@@ -120,6 +120,13 @@ function isValidMobile(value) {
     return typeof value === "string" && /^[0-9]{10}$/.test(value.trim());
 }
 
+function isValidEmail(value) {
+    if (typeof value !== "string") return false;
+    const trimmed = value.trim();
+    // Safe standard RFC 5322 compatible regex
+    return /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/.test(trimmed);
+}
+
 function allStrings(...values) {
     return values.every(v => typeof v === "string");
 }
@@ -584,6 +591,12 @@ if (!isValidMobile(mobile)) {
     });
 }
 
+if (!isValidEmail(email)) {
+    return res.status(400).json({
+        message: "Please enter a valid email address."
+    });
+}
+
 const yearsNumber = Number(years);
 if (!Number.isFinite(yearsNumber) || yearsNumber < 0 || yearsNumber > 100) {
     return res.status(400).json({
@@ -795,6 +808,9 @@ app.put(
   }
   if (mobile !== undefined && !isValidMobile(mobile)) {
       return res.status(400).json({ message: "Mobile number must be exactly 10 digits." });
+  }
+  if (email !== undefined && !isValidEmail(email)) {
+      return res.status(400).json({ message: "Please enter a valid email address." });
   }
   if (years !== undefined) {
       const y = Number(years);
@@ -1183,18 +1199,15 @@ app.post(
                 password
             } = req.body;
 
-            if (
-                !id ||
-                !password
-            ) 
-              if (!allStrings(id, password)) {
-               return res.status(400).json({ message: "Invalid login data." });
-             }
-            {
-
+            if (!id || !password) {
                 return res.status(400).json({
-                    message:
-                        "Vendor ID and password are required."
+                    message: "Vendor ID and password are required."
+                });
+            }
+
+            if (!allStrings(id, password)) {
+                return res.status(400).json({
+                    message: "Invalid login data."
                 });
             }
 
@@ -1432,14 +1445,27 @@ app.post(
                 !mobile ||
                 !email ||
                 !password
-            ) 
-            if (!allStrings(name, mobile, email, password)) { return res.status(400).json({ message: "Invalid data." }); } 
-             if (!isValidMobile(mobile)) { return res.status(400).json({ message: "Mobile number must be exactly 10 digits." }); }
-            {
-
+            ) {
                 return res.status(400).json({
-                    message:
-                        "All fields are required."
+                    message: "All fields are required."
+                });
+            }
+
+            if (!allStrings(name, mobile, email, password)) {
+                return res.status(400).json({
+                    message: "Invalid data."
+                });
+            }
+
+            if (!isValidMobile(mobile)) {
+                return res.status(400).json({
+                    message: "Mobile number must be exactly 10 digits."
+                });
+            }
+
+            if (!isValidEmail(email)) {
+                return res.status(400).json({
+                    message: "Please enter a valid email address."
                 });
             }
 
@@ -1546,68 +1572,54 @@ app.post(
                 password
             } = req.body;
 
-            if (
-                !loginId ||
-                !password
-            ) if (!allStrings(loginId, password)) { return res.status(400).json({ message: "Invalid login data." }); }
-            
-            {
-
+            if (!loginId || !password) {
                 return res.status(400).json({
-                    message:
-                        "Customer ID and password are required."
+                    message: "Customer ID, email, or mobile number and password are required."
                 });
             }
 
-            const customer =
-                await customersCollection.findOne({
-                    id: loginId.trim()
+            if (!allStrings(loginId, password)) {
+                return res.status(400).json({
+                    message: "Invalid login data."
                 });
+            }
+
+            const identifier = loginId.trim();
+            const customer = await customersCollection.findOne({
+                $or: [
+                    { id: identifier },
+                    { email: identifier.toLowerCase() },
+                    { mobile: identifier }
+                ]
+            });
 
             if (!customer) {
-
                 return res.status(401).json({
-                    message:
-                        "Invalid Customer ID or password."
+                    message: "Invalid ID/email/mobile or password."
                 });
             }
 
-            let valid =
-                await verifyPassword(
-                    password,
-                    customer.password
-                );
+            let valid = await verifyPassword(
+                password,
+                customer.password
+            );
 
             // Legacy plaintext password support
             if (
                 !valid &&
                 customer.password === password
             ) {
-
                 valid = true;
-
-                const newPassword =
-                    await hashPassword(password);
-
+                const newPassword = await hashPassword(password);
                 await customersCollection.updateOne(
-                    {
-                        id:
-                            customer.id
-                    },
-                    {
-                        $set: {
-                            password:
-                                newPassword
-                        }
-                    }
+                    { id: customer.id },
+                    { $set: { password: newPassword } }
                 );
             }
 
             if (!valid) {
-
                 return res.status(401).json({
-                    message:
-                        "Invalid Customer ID or password."
+                    message: "Invalid ID/email/mobile or password."
                 });
             }
 

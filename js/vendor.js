@@ -5,12 +5,37 @@
 const API_BASE_URL = "http://localhost:5000/api";
 
 // =====================================================
-// LOCAL STORAGE KEYS
+// LOCAL STORAGE KEYS (Standardized & Backward Compatible)
 // =====================================================
+
+const AUTH_TOKEN_KEY = "authToken";
+const USER_ROLE_KEY = "userRole";
+const USER_ID_KEY = "userId";
+const USER_NAME_KEY = "userName";
 
 const VENDOR_TOKEN_KEY = "vendorToken";
 const VENDOR_ROLE_KEY = "vendorRole";
 const VENDOR_ID_KEY = "loggedInVendorId";
+
+function getVendorAuthToken() {
+    return localStorage.getItem(AUTH_TOKEN_KEY) || localStorage.getItem(VENDOR_TOKEN_KEY);
+}
+
+function getVendorAuthRole() {
+    return localStorage.getItem(USER_ROLE_KEY) || localStorage.getItem(VENDOR_ROLE_KEY);
+}
+
+function getVendorAuthId() {
+    return localStorage.getItem(USER_ID_KEY) || localStorage.getItem(VENDOR_ID_KEY);
+}
+
+function getCustomerReviewToken() {
+    return localStorage.getItem(AUTH_TOKEN_KEY) || localStorage.getItem("customerToken");
+}
+
+function getCustomerReviewRole() {
+    return localStorage.getItem(USER_ROLE_KEY) || localStorage.getItem("customerRole");
+}
 
 
 // =====================================================
@@ -224,23 +249,21 @@ async function handleVendorLogin(event) {
             );
         }
 
-        // Save vendor login information
-        localStorage.setItem(
-            VENDOR_TOKEN_KEY,
-            result.token
-        );
+        const token = result.token;
+        const role = result.role || "vendor";
+        const id = result.vendor?.id || result.id || vendorId;
+        const name = result.vendor?.name || result.name || "Vendor";
 
-        localStorage.setItem(
-            VENDOR_ROLE_KEY,
-            result.role || "vendor"
-        );
+        // Standardized authentication keys
+        localStorage.setItem(AUTH_TOKEN_KEY, token);
+        localStorage.setItem(USER_ROLE_KEY, role);
+        localStorage.setItem(USER_ID_KEY, id);
+        localStorage.setItem(USER_NAME_KEY, name);
 
-        localStorage.setItem(
-            VENDOR_ID_KEY,
-            result.vendor?.id ||
-            result.id ||
-            vendorId
-        );
+        // Backward-compatible keys
+        localStorage.setItem(VENDOR_TOKEN_KEY, token);
+        localStorage.setItem(VENDOR_ROLE_KEY, role);
+        localStorage.setItem(VENDOR_ID_KEY, id);
 
         console.log("Vendor login saved successfully.");
 
@@ -269,11 +292,15 @@ async function handleVendorLogin(event) {
 // =====================================================
 
 function logoutVendor() {
+    localStorage.removeItem(AUTH_TOKEN_KEY);
+    localStorage.removeItem(USER_ROLE_KEY);
+    localStorage.removeItem(USER_ID_KEY);
+    localStorage.removeItem(USER_NAME_KEY);
     localStorage.removeItem(VENDOR_TOKEN_KEY);
     localStorage.removeItem(VENDOR_ROLE_KEY);
     localStorage.removeItem(VENDOR_ID_KEY);
 
-    window.location.href = "login.html";
+    window.location.href = "../index.html";
 }
 
 
@@ -282,11 +309,8 @@ function logoutVendor() {
 // =====================================================
 
 async function loadVendorProfile() {
-    const token =
-        localStorage.getItem(VENDOR_TOKEN_KEY);
-
-    const vendorId =
-        localStorage.getItem(VENDOR_ID_KEY);
+    const token = getVendorAuthToken();
+    const vendorId = getVendorAuthId();
 
     if (!token || !vendorId) {
         window.location.href = "login.html";
@@ -364,11 +388,8 @@ function displayVendorProfile(vendor) {
 // =====================================================
 
 function isCustomerLoggedIn() {
-    const token =
-        localStorage.getItem("customerToken");
-
-    const role =
-        localStorage.getItem("customerRole");
+    const token = getCustomerReviewToken();
+    const role = getCustomerReviewRole();
 
     return Boolean(
         token &&
@@ -1414,11 +1435,8 @@ async function submitReview(event) {
     const reviewText =
         reviewTextElement.value.trim();
 
-    const token =
-        localStorage.getItem("customerToken");
-
-    const customerRole =
-        localStorage.getItem("customerRole");
+    const token = getCustomerReviewToken();
+    const customerRole = getCustomerReviewRole();
 
     const rating =
         Number(selectedRating);
@@ -1968,15 +1986,8 @@ document.addEventListener(
                 "customerVendorDirectory"
             );
 
-        const customerToken =
-            localStorage.getItem(
-                "customerToken"
-            );
-
-        const customerRole =
-            localStorage.getItem(
-                "customerRole"
-            );
+        const customerToken = getCustomerReviewToken();
+        const customerRole = getCustomerReviewRole();
 
         if (
             customerDirectory &&

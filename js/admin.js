@@ -4,6 +4,28 @@
 
 const API_BASE_URL = "http://localhost:5000/api";
 
+// Standardized Authentication Storage Keys
+const AUTH_TOKEN_KEY = "authToken";
+const USER_ROLE_KEY = "userRole";
+const USER_ID_KEY = "userId";
+const USER_NAME_KEY = "userName";
+
+function getAdminAuthToken() {
+    return localStorage.getItem(AUTH_TOKEN_KEY) || localStorage.getItem("token");
+}
+
+function getAdminAuthRole() {
+    return localStorage.getItem(USER_ROLE_KEY) || localStorage.getItem("userRole");
+}
+
+function clearAdminAuth() {
+    localStorage.removeItem(AUTH_TOKEN_KEY);
+    localStorage.removeItem(USER_ROLE_KEY);
+    localStorage.removeItem(USER_ID_KEY);
+    localStorage.removeItem(USER_NAME_KEY);
+    localStorage.removeItem("token");
+}
+
 // In-memory state for fast filtering and statistics
 let allVendors = [];
 let notificationTimeout = null;
@@ -144,7 +166,13 @@ if (adminLoginForm) {
                 return;
             }
 
-            // Save admin token and role
+            // Standardized authentication keys
+            localStorage.setItem(AUTH_TOKEN_KEY, result.token);
+            localStorage.setItem(USER_ROLE_KEY, result.role || "admin");
+            localStorage.setItem(USER_ID_KEY, result.username || "admin");
+            localStorage.setItem(USER_NAME_KEY, "Administrator");
+
+            // Backward-compatible keys
             localStorage.setItem("token", result.token);
             localStorage.setItem("userRole", result.role || "admin");
 
@@ -179,8 +207,8 @@ if (adminLoginForm) {
 const vendorTableBody = document.getElementById("vendorTableBody");
 
 if (vendorTableBody) {
-    const token = localStorage.getItem("token");
-    const userRole = localStorage.getItem("userRole");
+    const token = getAdminAuthToken();
+    const userRole = getAdminAuthRole();
 
     // Guard: verify admin authorization
     if (!token || userRole !== "admin") {
@@ -237,7 +265,7 @@ function initAdminDashboard() {
 // =====================================================
 
 async function loadVendorData(isManualRefresh = false) {
-    const token = localStorage.getItem("token");
+    const token = getAdminAuthToken();
 
     if (!token) {
         alert("Session expired. Please log in again.");
@@ -510,7 +538,7 @@ function updateStatistics(vendors) {
 // =====================================================
 
 async function updateVendorStatus(vendorId, newStatus, buttonElement) {
-    const token = localStorage.getItem("token");
+    const token = getAdminAuthToken();
 
     if (!token) {
         alert("Session expired. Please log in again.");
@@ -586,9 +614,8 @@ window.rejectVendor = function (vendorId) {
 };
 
 function logout() {
-    localStorage.removeItem("token");
-    localStorage.removeItem("userRole");
-    window.location.href = "login.html";
+    clearAdminAuth();
+    window.location.href = "../index.html";
 }
 
 window.logout = logout;
