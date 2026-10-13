@@ -55,6 +55,18 @@ function escapeHtml(value) {
         .replace(/'/g, "&#039;");
 }
 
+function debounce(func, delay = 250) {
+    let timeoutId;
+
+    return function (...args) {
+        clearTimeout(timeoutId);
+
+        timeoutId = setTimeout(() => {
+            func.apply(this, args);
+        }, delay);
+    };
+}
+
 
 // =====================================================
 // API RESPONSE HELPER
@@ -506,9 +518,14 @@ function renderVendorProfile(vendor) {
                 return `
                     <div class="profile-product-item">
 
-                        <h4>
-                            ${escapeHtml(product)}
-                        </h4>
+                        <div class="product-item-header">
+                            <h4>
+                                ${escapeHtml(product)}
+                            </h4>
+                            <span class="product-badge badge badge-success">
+                                In Stock
+                            </span>
+                        </div>
 
                     </div>
                 `;
@@ -532,12 +549,26 @@ function renderVendorProfile(vendor) {
                     ? product.price
                     : "";
 
-            return `
-                <div class="profile-product-item">
+            const statusText = String(product.status || "").trim().toLowerCase();
+            const isOutOfStock =
+                product.available === false ||
+                statusText === "unavailable" ||
+                statusText === "out of stock";
+            const isAvailable = !isOutOfStock;
 
-                    <h4>
-                        ${escapeHtml(productName)}
-                    </h4>
+            const badgeHtml = isAvailable
+                ? `<span class="product-badge badge badge-success">In Stock</span>`
+                : `<span class="product-badge badge badge-danger">Out of Stock</span>`;
+
+            return `
+                <div class="profile-product-item ${isAvailable ? "" : "product-out-of-stock"}">
+
+                    <div class="product-item-header">
+                        <h4>
+                            ${escapeHtml(productName)}
+                        </h4>
+                        ${badgeHtml}
+                    </div>
 
                     ${
                         productDescription
@@ -995,58 +1026,274 @@ function renderVendorProfile(vendor) {
 // LOAD VERIFIED VENDOR DIRECTORY
 // =====================================================
 
-async function loadVendorDirectory() {
-    const mainContent =
-        document.getElementById("mainContent");
+let allDirectoryVendors = [];
 
-    if (!mainContent) {
+function populateDirectoryFilters(vendors) {
+    const categorySelect = document.getElementById("categoryFilter");
+    const districtSelect = document.getElementById("districtFilter");
+
+    if (categorySelect) {
+        const currentCategory = categorySelect.value;
+        const categories = Array.from(
+            new Set(
+                vendors
+                    .map(v => (v.category || "").trim())
+                    .filter(Boolean)
+            )
+        ).sort((a, b) => a.localeCompare(b));
+
+        categorySelect.innerHTML = '<option value="">All Categories</option>';
+        categories.forEach(cat => {
+            const opt = document.createElement("option");
+            opt.value = cat;
+            opt.textContent = cat;
+            if (cat === currentCategory) {
+                opt.selected = true;
+            }
+            categorySelect.appendChild(opt);
+        });
+    }
+
+    if (districtSelect) {
+        const currentDistrict = districtSelect.value;
+        const districts = Array.from(
+            new Set(
+                vendors
+                    .map(v => (v.district || "").trim())
+                    .filter(Boolean)
+            )
+        ).sort((a, b) => a.localeCompare(b));
+
+        districtSelect.innerHTML = '<option value="">All Districts</option>';
+        districts.forEach(dist => {
+            const opt = document.createElement("option");
+            opt.value = dist;
+            opt.textContent = dist;
+            if (dist === currentDistrict) {
+                opt.selected = true;
+            }
+            districtSelect.appendChild(opt);
+        });
+    }
+}
+
+function setupDirectoryFilters() {
+    const searchInput = document.getElementById("searchVendor");
+    const categorySelect = document.getElementById("categoryFilter");
+    const districtSelect = document.getElementById("districtFilter");
+
+    if (!searchInput || !categorySelect || !districtSelect) {
         return;
     }
 
-    try {
-        const response = await fetch(
-            `${API_BASE_URL}/public/vendors`
-        );
+    if (searchInput.dataset.filtersBound === "true") {
+        return;
+    }
+    searchInput.dataset.filtersBound = "true";
 
-        const vendors =
-            await getResponseData(response);
+    searchInput.addEventListener("input", debounce(filterAndRenderDirectory, 200));
+    categorySelect.addEventListener("change", filterAndRenderDirectory);
+    districtSelect.addEventListener("change", filterAndRenderDirectory);
+}
 
-        if (!response.ok) {
-            throw new Error(
-                vendors.message ||
-                "Unable to load vendors."
-            );
-        }
+function filterAndRenderDirectory() {
+    const searchInput = document.getElementById("searchVendor");
+    const categorySelect = document.getElementById("categoryFilter");
+    const districtSelect = document.getElementById("districtFilter");
+    const container =
+        document.getElementById("vendorDirectory") ||
+        document.querySelector(".vendor-grid");
 
-        renderVendorDirectory(vendors);
+    if (!container) {
+        return;
+    }
 
-    } catch (error) {
-        console.error(
-            "Vendor directory error:",
-            error
-        );
+    const query = (searchInput?.value || "").trim().toLowerCase();
+    const selectedCategory = (categorySelect?.value || "").trim().toLowerCase();
+    const selectedDistrict = (districtSelect?.value || "").trim().toLowerCase();
 
+    const filtered = allDirectoryVendors.filter(vendor => {
+        const ownerName = String(vendor.name || "").toLowerCase();
+        const businessName = String(vendor.businessName || "").toLowerCase();
+        const category = String(vendor.category || "").trim().toLowerCase();
+        const district = String(vendor.district || "").trim().toLowerCase();
+
+        const matchesSearch =
+            !query ||
+            ownerName.includes(query) ||
+            businessName.includes(query);
+
+        const matchesCategory =
+            !selectedCategory ||
+            category === selectedCategory;
+
+        const matchesDistrict =
+            !selectedDistrict ||
+            district === selectedDistrict;
+
+        return matchesSearch && matchesCategory && matchesDistrict;
+    });
+
+    renderVendorCards(filtered, container);
+}
+
+function renderVendorCards(vendors, container) {
+    if (!container) {
+        return;
+    }
+
+    if (!Array.isArray(vendors) || vendors.length === 0) {
+        container.innerHTML = `
+            <div class="no-vendors" style="grid-column: 1 / -1;">
+                <h2>No verified vendors found.</h2>
+                <p>No vendors match your search and filter criteria.</p>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = vendors.map(vendor => {
+        const rating = vendor.rating || {};
+        const averageRating = Number(rating.averageRating || 0).toFixed(1);
+        const reviewCount = Number(rating.reviewCount || 0);
+
+        return `
+            <div class="vendor-card">
+                <h2>
+                    ${escapeHtml(vendor.businessName || "Vendor Business")}
+                </h2>
+
+                <p>
+                    <strong>Owner:</strong>
+                    ${escapeHtml(vendor.name || "N/A")}
+                </p>
+
+                <p>
+                    <strong>Category:</strong>
+                    ${escapeHtml(vendor.category || "N/A")}
+                </p>
+
+                <p>
+                    <strong>District:</strong>
+                    ${escapeHtml(vendor.district || "N/A")}
+                </p>
+
+                <p class="vendor-card-rating">
+                    ★ ${averageRating}
+                    <span>(${reviewCount} reviews)</span>
+                </p>
+
+                <a
+                    class="view-profile-btn"
+                    href="vendors.html?id=${encodeURIComponent(vendor.id)}"
+                >
+                    View Profile
+                </a>
+            </div>
+        `;
+    }).join("");
+}
+
+function ensureDirectoryDOM() {
+    const mainContent = document.getElementById("mainContent");
+    if (!mainContent) {
+        return null;
+    }
+
+    let dirContainer = document.getElementById("vendorDirectory");
+    let searchInput = document.getElementById("searchVendor");
+
+    if (!dirContainer || !searchInput) {
         mainContent.innerHTML = `
             <section class="directory-page">
 
                 <div class="directory-header">
+                    <h1>Vendor Directory</h1>
+                    <p>Explore verified street vendors.</p>
+                </div>
 
-                    <h1>
-                        Vendor Directory
-                    </h1>
+                <div class="directory-filters vendor-filters">
+                    <input
+                        type="text"
+                        id="searchVendor"
+                        placeholder="Search vendor by name or business..."
+                        aria-label="Search vendor by name or business"
+                    >
 
-                    <p>
-                        Unable to load vendors.
-                    </p>
+                    <select id="categoryFilter" aria-label="Filter by category">
+                        <option value="">All Categories</option>
+                    </select>
 
-                    <p>
-                        ${escapeHtml(error.message)}
-                    </p>
+                    <select id="districtFilter" aria-label="Filter by district">
+                        <option value="">All Districts</option>
+                    </select>
+                </div>
 
+                <div id="vendorDirectory" class="vendor-grid">
+                    <p>Loading verified vendors...</p>
                 </div>
 
             </section>
         `;
+        dirContainer = document.getElementById("vendorDirectory");
+    }
+
+    return dirContainer;
+}
+
+async function loadVendorDirectory() {
+    const mainContent = document.getElementById("mainContent");
+    if (!mainContent) {
+        return;
+    }
+
+    if (window.location.search) {
+        try {
+            window.history.pushState({}, "", "vendors.html");
+        } catch {
+            // Ignore in restricted environments
+        }
+    }
+
+    const dirContainer = ensureDirectoryDOM();
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/public/vendors`);
+        const vendors = await getResponseData(response);
+
+        if (!response.ok) {
+            throw new Error(
+                vendors.message || "Unable to load vendors."
+            );
+        }
+
+        const verifiedVendors = Array.isArray(vendors)
+            ? vendors.filter(v => !v.status || String(v.status).toLowerCase() === "verified")
+            : [];
+
+        await renderVendorDirectory(verifiedVendors);
+
+    } catch (error) {
+        console.error("Vendor directory error:", error);
+
+        if (dirContainer) {
+            dirContainer.innerHTML = `
+                <div class="no-vendors" style="grid-column: 1 / -1;">
+                    <h2>Unable to load vendors.</h2>
+                    <p>${escapeHtml(error.message)}</p>
+                </div>
+            `;
+        } else {
+            mainContent.innerHTML = `
+                <section class="directory-page">
+                    <div class="directory-header">
+                        <h1>Vendor Directory</h1>
+                        <p>Unable to load vendors.</p>
+                        <p>${escapeHtml(error.message)}</p>
+                    </div>
+                </section>
+            `;
+        }
     }
 }
 
@@ -1102,161 +1349,38 @@ async function getVendorRating(vendorId) {
 // =====================================================
 
 async function renderVendorDirectory(vendors) {
-    const mainContent =
-        document.getElementById("mainContent");
-
-    if (!mainContent) {
+    const container = ensureDirectoryDOM();
+    if (!container) {
         return;
     }
 
-    if (
-        !Array.isArray(vendors) ||
-        vendors.length === 0
-    ) {
-        mainContent.innerHTML = `
-            <section class="directory-page">
-
-                <div class="directory-header">
-
-                    <h1>
-                        Vendor Directory
-                    </h1>
-
-                    <p>
-                        No verified vendors available.
-                    </p>
-
-                </div>
-
-            </section>
-        `;
-
+    if (!Array.isArray(vendors) || vendors.length === 0) {
+        allDirectoryVendors = [];
+        populateDirectoryFilters([]);
+        setupDirectoryFilters();
+        renderVendorCards([], container);
         return;
     }
-
 
     // Load ratings
-    const vendorsWithRatings =
-        await Promise.all(
-            vendors.map(async vendor => {
-                const rating =
-                    await getVendorRating(
-                        vendor.id
-                    );
+    const vendorsWithRatings = await Promise.all(
+        vendors.map(async vendor => {
+            if (vendor.rating) {
+                return vendor;
+            }
+            const rating = await getVendorRating(vendor.id);
+            return {
+                ...vendor,
+                rating
+            };
+        })
+    );
 
-                return {
-                    ...vendor,
-                    rating
-                };
-            })
-        );
+    allDirectoryVendors = vendorsWithRatings;
 
-
-    mainContent.innerHTML = `
-        <section class="directory-page">
-
-            <div class="directory-header">
-
-                <h1>
-                    Vendor Directory
-                </h1>
-
-                <p>
-                    Explore verified street vendors.
-                </p>
-
-            </div>
-
-
-            <div class="vendor-grid">
-
-                ${vendorsWithRatings.map(vendor => {
-
-                    const rating =
-                        vendor.rating || {};
-
-                    const averageRating =
-                        Number(
-                            rating.averageRating || 0
-                        ).toFixed(1);
-
-                    const reviewCount =
-                        Number(
-                            rating.reviewCount || 0
-                        );
-
-                    return `
-                        <div class="vendor-card">
-
-                            <h2>
-                                ${escapeHtml(
-                                    vendor.businessName
-                                )}
-                            </h2>
-
-
-                            <p>
-                                <strong>
-                                    Owner:
-                                </strong>
-
-                                ${escapeHtml(
-                                    vendor.name
-                                )}
-                            </p>
-
-
-                            <p>
-                                <strong>
-                                    Category:
-                                </strong>
-
-                                ${escapeHtml(
-                                    vendor.category
-                                )}
-                            </p>
-
-
-                            <p>
-                                <strong>
-                                    District:
-                                </strong>
-
-                                ${escapeHtml(
-                                    vendor.district
-                                )}
-                            </p>
-
-
-                            <p class="vendor-card-rating">
-
-                                ★ ${averageRating}
-
-                                <span>
-                                    (${reviewCount} reviews)
-                                </span>
-
-                            </p>
-
-
-                            <a
-                                class="view-profile-btn"
-                                href="vendors.html?id=${encodeURIComponent(
-                                    vendor.id
-                                )}"
-                            >
-                                View Profile
-                            </a>
-
-                        </div>
-                    `;
-
-                }).join("")}
-
-            </div>
-
-        </section>
-    `;
+    populateDirectoryFilters(allDirectoryVendors);
+    setupDirectoryFilters();
+    filterAndRenderDirectory();
 }
 
 

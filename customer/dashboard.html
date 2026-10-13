@@ -1,166 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Customer Dashboard</title>
-
-    <link rel="stylesheet" href="../css/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Customer Dashboard</title>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/dashboard.css">
 </head>
+<body class="dash" data-dash-role="customer" data-login-url="login.html">
+<header class="dash-mobilebar"><button id="dashMenuBtn" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="dashSidebar"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button><strong>StreetVendor</strong></header>
+<div id="dashOverlay" class="dash-overlay" aria-hidden="true"></div>
+<aside id="dashSidebar" class="dash-sidebar" aria-label="Customer navigation">
 
-<body>
+<nav class="dash-nav" aria-label="Customer navigation"><p class="dash-nav-title">Menu</p><ul class="dash-menu"><li><a class="dash-link active" href="#overview" data-section="overview" aria-current="page" title="Dashboard"><span class="dash-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg></span><span class="dash-label">Dashboard</span></a></li><li><a class="dash-link" href="../directory/vendors.html" title="Explore Vendors"><span class="dash-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span><span class="dash-label">Explore Vendors</span></a></li><li><a class="dash-link" href="#profile" data-section="profile" title="My Profile"><span class="dash-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><span class="dash-label">My Profile</span></a></li></ul></nav>
+<div class="dash-sidebar-foot"><ul class="dash-menu" style="margin:0"><li><a class="dash-link" href="../index.html" id="customerLogout" title="Logout"><span class="dash-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span><span class="dash-label">Logout</span></a></li></ul></div></aside>
+<div class="dash-content">
+<main class="customer-dashboard" id="top">
+<section id="overview" aria-labelledby="welcomeTitle">
+<div class="dash-header"><div><p class="dash-crumb">Customer / Dashboard</p>
+<h1 id="welcomeTitle">Welcome, <span id="customerName">Customer</span></h1>
+<p class="sub">Find verified street vendors near you, check their ratings, and leave a review after you visit.</p></div>
+<div class="dash-user"><div class="dash-chip"><span class="dash-avatar" id="dashAvatar" aria-hidden="true">C</span><span id="dashUserName">Customer</span></div>
 
-    <!-- Navbar -->
-    <nav class="navbar">
-
-            <div class="logo">
-    <a href="../index.html">
-        <img src="../img/logo.png" alt="Street Vendor Management System">
-    </a>
-</div>
-
-
-        <div class="nav-links">
-
-            <a href="../index.html">Home</a>
-
-            <a href="../directory/vendors.html">
-                Vendor Directory
-            </a>
-
-            <a href="../index.html" id="customerLogout">
-                Logout
-            </a>
-
-        </div>
-
-    </nav>
-
-
-    <!-- Dashboard -->
-    <main class="customer-dashboard">
-
-        <section class="customer-welcome">
-
-            <h1>
-                Welcome, <span id="customerName">Customer</span>!
-            </h1>
-
-            <p>
-                Discover verified street vendors near you.
-            </p>
-
-        </section>
-
-
-        <!-- Customer Profile -->
-        <section class="customer-profile">
-
-            <h2>My Profile</h2>
-
-            <div class="profile-details">
-
-                <p>
-                    <strong>Customer ID:</strong>
-                    <span id="customerId">Loading...</span>
-                </p>
-
-                <p>
-                    <strong>Name:</strong>
-                    <span id="profileName">Loading...</span>
-                </p>
-
-                <p>
-                    <strong>Email:</strong>
-                    <span id="profileEmail">Loading...</span>
-                </p>
-
-            </div>
-
-        </section>
-
-
-        <!-- Vendor Search -->
-        <section class="vendor-discovery">
-
-            <h2>Find Verified Vendors</h2>
-
-            <p>
-                Browse vendors approved by the administration.
-            </p>
-
-
-            <div class="vendor-filters">
-
-                <input
-                    type="text"
-                    id="vendorSearch"
-                    placeholder="Search vendor by name..."
-                >
-
-
-                <select id="categoryFilter">
-
-                    <option value="">
-                        All Categories
-                    </option>
-
-                    <option value="Food">
-                        Food
-                    </option>
-
-                    <option value="Clothing">
-                        Clothing
-                    </option>
-
-                    <option value="Fruits and Vegetables">
-                        Fruits and Vegetables
-                    </option>
-
-                    <option value="Accessories">
-                        Accessories
-                    </option>
-
-                    <option value="Grocery">
-                        Grocery
-                    </option>
-
-                    <option value="Other">
-                        Other
-                    </option>
-
-                </select>
-
-
-                <select id="districtFilter">
-
-                    <option value="">
-                        All Districts
-                    </option>
-
-                </select>
-
-            </div>
-
-
-            <!-- Vendor Cards -->
-            <div
-                id="vendorList"
-                class="vendor-list"
-            >
-
-                <p>
-                    Loading verified vendors...
-                </p>
-
-            </div>
-
-        </section>
-
-    </main>
-
+<div class="dash-stats">
+<div class="dash-stat"><h3>Verified vendors</h3><p id="statVendors">–</p></div>
+<div class="dash-stat"><h3>Districts covered</h3><p id="statDistricts">–</p></div>
+<div class="dash-stat"><h3>Matching your filters</h3><p id="statShowing">–</p></div></div></section>
+<section id="profile" class="dash-card customer-profile" aria-labelledby="profTitle"><h2 id="profTitle">My profile</h2><p class="sub">The details you registered with.</p>
+<dl class="dash-profile profile-details"><div><dt>Customer ID</dt><dd id="customerId">Loading…</dd></div><div><dt>Name</dt><dd id="profileName">Loading…</dd></div><div><dt>Email</dt><dd id="profileEmail">Loading…</dd></div></dl></section>
+<section id="vendors" class="dash-card vendor-discovery" aria-labelledby="discTitle"><h2 id="discTitle">Find verified vendors</h2><p class="sub">Only vendors approved by the administration are listed.</p>
+<div class="vendor-filters"><input type="search" id="vendorSearch" placeholder="Search by stall or owner name" aria-label="Search vendors">
+<select id="categoryFilter" aria-label="Category"><option value="">All categories</option><option value="Food">Food</option><option value="Clothing">Clothing</option><option value="Fruits and Vegetables">Fruits and Vegetables</option><option value="Accessories">Accessories</option><option value="Grocery">Grocery</option><option value="Other">Other</option></select>
+<select id="districtFilter" aria-label="District"><option value="">All districts</option></select>
+<button type="button" class="dash-btn ghost" id="clearFilters">Clear filters</button></div>
+<div id="vendorList" class="vendor-list" aria-live="polite"><p>Loading verified vendors…</p></div></section>
+</main>
 <!-- =====================================================
      CUSTOMER RATING & REVIEW MODAL
 ===================================================== -->
@@ -251,17 +125,9 @@
     </div>
 
 </div>
-    <footer>
-
-        <p>
-            © 2026 Street Vendor Management System
-        </p>
-
-    </footer>
-
-
-    <script src="../js/customer.js"></script>
-
+<footer class="dash-footer">© 2026 Street Vendor Management System</footer>
+</div>
+<script src="../js/customer.js"></script>
+<script src="../js/dashboard-shell.js"></script>
 </body>
-
 </html>

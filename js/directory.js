@@ -34,13 +34,50 @@ function debounce(func, delay = 250) {
 // LOAD VERIFIED VENDORS
 // =====================================================
 
+function populateDirectoryFilterOptions(vendors) {
+    const catSelect = document.getElementById("categoryFilter");
+    const distSelect = document.getElementById("districtFilter");
+
+    if (catSelect) {
+        const curCat = catSelect.value;
+        const cats = Array.from(
+            new Set(vendors.map(v => (v.category || "").trim()).filter(Boolean))
+        ).sort((a, b) => a.localeCompare(b));
+
+        catSelect.innerHTML = '<option value="">All Categories</option>';
+        cats.forEach(c => {
+            const opt = document.createElement("option");
+            opt.value = c;
+            opt.textContent = c;
+            if (c === curCat) opt.selected = true;
+            catSelect.appendChild(opt);
+        });
+    }
+
+    if (distSelect) {
+        const curDist = distSelect.value;
+        const dists = Array.from(
+            new Set(vendors.map(v => (v.district || "").trim()).filter(Boolean))
+        ).sort((a, b) => a.localeCompare(b));
+
+        distSelect.innerHTML = '<option value="">All Districts</option>';
+        dists.forEach(d => {
+            const opt = document.createElement("option");
+            opt.value = d;
+            opt.textContent = d;
+            if (d === curDist) opt.selected = true;
+            distSelect.appendChild(opt);
+        });
+    }
+}
+
 async function loadDirectory() {
 
     try {
 
         const response =
             await fetch(
-                "http://localhost:5000/api/vendors"
+                "http://localhost:5000/api/public/vendors"
             );
 
         const vendors =
@@ -55,16 +92,18 @@ async function loadDirectory() {
         }
 
         const verifiedVendors =
-            vendors.filter(function (vendor) {
-
-                return String(
-                    vendor.status || ""
-                ).toLowerCase() === "verified";
-
-            });
+            Array.isArray(vendors)
+                ? vendors.filter(function (vendor) {
+                    return !vendor.status || String(
+                        vendor.status || ""
+                    ).toLowerCase() === "verified";
+                })
+                : [];
 
         allVerifiedVendors =
             verifiedVendors;
+
+        populateDirectoryFilterOptions(verifiedVendors);
 
         if (
             verifiedVendors.length === 0
@@ -364,7 +403,7 @@ async function displayVendors(vendors) {
                 }
 
                 window.location.href =
-                    `vendor.html?id=${encodeURIComponent(vendor.id)}`;
+                    `vendors.html?id=${encodeURIComponent(vendor.id)}`;
 
             }
         );

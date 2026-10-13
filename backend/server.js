@@ -1033,6 +1033,141 @@ app.put(
                 });
             }
 
+            // Validate products
+            const validatedProducts = [];
+            const seenProductNames = new Set();
+
+            for (let i = 0; i < products.length; i++) {
+                const product = products[i];
+
+                if (
+                    typeof product !== "object" ||
+                    product === null ||
+                    Array.isArray(product)
+                ) {
+                    return res.status(400).json({
+                        message: `Product at index ${i} must be a valid object.`
+                    });
+                }
+
+                if (typeof product.name !== "string") {
+                    return res.status(400).json({
+                        message: `Product at index ${i} must have a valid string name.`
+                    });
+                }
+
+                const trimmedName = product.name.trim();
+
+                if (!trimmedName) {
+                    return res.status(400).json({
+                        message: `Product at index ${i} name cannot be empty.`
+                    });
+                }
+
+                if (trimmedName.length > 100) {
+                    return res.status(400).json({
+                        message: `Product "${trimmedName}" name cannot exceed 100 characters.`
+                    });
+                }
+
+                const normalizedName = trimmedName.toLowerCase();
+
+                if (seenProductNames.has(normalizedName)) {
+                    return res.status(400).json({
+                        message: `Duplicate product name: "${trimmedName}". Product names must be unique.`
+                    });
+                }
+                seenProductNames.add(normalizedName);
+
+                let description = "";
+                if (
+                    product.description !== undefined &&
+                    product.description !== null
+                ) {
+                    if (typeof product.description !== "string") {
+                        return res.status(400).json({
+                            message: `Product "${trimmedName}" description must be a string.`
+                        });
+                    }
+
+                    if (product.description.length > 300) {
+                        return res.status(400).json({
+                            message: `Product "${trimmedName}" description cannot exceed 300 characters.`
+                        });
+                    }
+
+                    description = product.description.trim();
+                }
+
+                let available = true;
+                if (
+                    product.available !== undefined &&
+                    product.available !== null
+                ) {
+                    if (typeof product.available !== "boolean") {
+                        return res.status(400).json({
+                            message: `Product "${trimmedName}" available field must be a boolean.`
+                        });
+                    }
+
+                    available = product.available;
+                }
+
+                const validatedProduct = {
+                    name: trimmedName,
+                    description: description,
+                    available: available
+                };
+
+                if (
+                    product.price !== undefined &&
+                    product.price !== null &&
+                    product.price !== ""
+                ) {
+                    const numPrice = typeof product.price === "number" ? product.price : Number(product.price);
+
+                    if (!Number.isFinite(numPrice) || numPrice < 0) {
+                        return res.status(400).json({
+                            message: `Product "${trimmedName}" price must be a finite, non-negative number.`
+                        });
+                    }
+
+                    validatedProduct.price = numPrice;
+                }
+
+                validatedProducts.push(validatedProduct);
+            }
+
+            // Check if vendor exists
+            const existingVendor =
+                await vendorsCollection.findOne({
+                    id: vendorId
+                });
+
+            if (!existingVendor) {
+                return res.status(404).json({
+                    message:
+                        "Vendor not found."
+                });
+            }
+
+            const existingShopDetails =
+                existingVendor.shopDetails &&
+                typeof existingVendor.shopDetails === "object" &&
+                !Array.isArray(existingVendor.shopDetails)
+                    ? existingVendor.shopDetails
+                    : {};
+
+            const updatedShopDetails = {
+                ...existingShopDetails,
+                days: days,
+                closingDay: closingDay.trim(),
+                products: validatedProducts,
+                openingTime: openingTime.trim(),
+                closingTime: closingTime.trim(),
+                updatedAt: new Date()
+            };
+
             // Save shop details
             const result =
                 await vendorsCollection.updateOne(
@@ -1041,30 +1176,7 @@ app.put(
                     },
                     {
                         $set: {
-                            shopDetails: {
-
-                                // Opening days
-                                days: days,
-
-                                // Closing day
-                                closingDay:
-                                    closingDay.trim(),
-
-                                // Products
-                                products: products,
-
-                                // Opening time
-                                openingTime:
-                                    openingTime.trim(),
-
-                                // Closing time
-                                closingTime:
-                                    closingTime.trim(),
-
-                                // Last updated
-                                updatedAt:
-                                    new Date()
-                            }
+                            shopDetails: updatedShopDetails
                         }
                     }
                 );
@@ -1080,16 +1192,7 @@ app.put(
             res.json({
                 message:
                     "Shop details updated successfully.",
-                shopDetails: {
-                    days,
-                    closingDay:
-                        closingDay.trim(),
-                    products,
-                    openingTime:
-                        openingTime.trim(),
-                    closingTime:
-                        closingTime.trim()
-                }
+                shopDetails: updatedShopDetails
             });
 
         } catch (error) {
@@ -2395,10 +2498,14 @@ async function startServer() {
                 createdAt: -1
             }
         );
-             await reviewsCollection.createIndex(
-           { customerId: 1, vendorId: 1 },
-           { unique: true }
-          );
+
+await reviewsCollection.createIndex(
+    { customerId: 1, vendorId: 1 },
+    {
+        unique: true,
+        name: "reviews_one_per_customer_vendor"
+    }
+);
 
 
         app.listen(

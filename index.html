@@ -2,275 +2,430 @@
 <html lang="en">
 
 <head>
-
     <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
-    <title>Street Vendor Management System</title>
-
-    <link rel="stylesheet"
-          href="css/style.css">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Street Vendor Management System | Local Marketplace</title>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 
-<body class = "landing-page">
+<body class="landing-page">
 
+    <!-- Mobile Top Navigation Header (visible on screens <= 900px) -->
+    <header class="mobile-header">
+        <button id="mobileMenuBtn" class="mobile-menu-btn" aria-label="Toggle navigation menu" aria-expanded="false">
+            <svg class="menu-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+        <a href="index.html" class="mobile-brand">
+            <img src="img/logo.png" alt="Street Vendor Management System" class="mobile-logo-img">
+            <span class="mobile-brand-text">StreetVendor</span>
+        </a>
+    </header>
 
-<!-- ===============================
-     NAVIGATION BAR
-================================ -->
+    <!-- Translucent Overlay for Mobile Sidebar Drawer -->
+    <div id="sidebarOverlay" class="sidebar-overlay" aria-hidden="true"></div>
 
-<header>
-
-    <nav>
-
-        <div class="logo">
-    <a href="index.html">
-        <img src="img/logo.png" alt="Street Vendor Management System">
-    </a>
-</div>
-
-
-        <ul class="nav-links">
-
-            <li>
-                <a href="index.html">
-                    Home
+    <div class="landing-layout">
+        <!-- =========================================
+             FIXED COLLAPSIBLE LEFT SIDEBAR
+        ========================================= -->
+        <aside id="sidebar" class="sidebar" aria-label="Main Navigation">
+            <div class="sidebar-header">
+                <a href="index.html" class="sidebar-brand" title="Street Vendor Management System">
+                    <img src="img/logo.png" alt="Street Vendor Management System Logo" class="sidebar-logo-img">
+                    <span class="sidebar-brand-name">StreetVendor</span>
                 </a>
-            </li>
-
-            <li>
-                <a href="vendor/register.html">
-                    Vendor Register
-                </a>
-            </li>
-
-            <li>
-                <a href="vendor/login.html">
-                    Vendor Login
-                </a>
-            </li>
-            <li>
-                <a href="customer/login.html">
-                    Customer Login
-                </a>
-            </li>
-
-            <li>
-                <a href="admin/login.html">
-                    Admin Login
-                </a>
-            </li>
-
-        </ul>
-
-    </nav>
-
-</header>
-
-
-<!-- ===============================
-     HERO SECTION
-================================ -->
-
-<main>
-
-    <section class="hero">
-
-        <div class="hero-content">
-
-            <h1>
-                Street Vendor Management System
-            </h1>
-
-            <p>
-                Empowering street vendors with digital
-                registration, verification and customer
-                connectivity.
-            </p>
-
-        </div>
-
-    </section>
-
-
-    <!-- ===============================
-         ROLE SELECTION
-    ================================ -->
-
-    <section class="role-selection">
-
-        <h2>
-            Choose Your Role
-        </h2>
-
-        <p>
-            Select how you want to continue.
-        </p>
-
-
-        <div class="role-container">
-
-
-            <!-- ===============================
-                 VENDOR
-            ================================ -->
-
-            <div class="role-card vendor-role">
-
-                <h3>
-                    Vendor
-                </h3>
-
-                <p>
-                    Register your street vending business,
-                    manage your profile and reach customers.
-                </p>
-
-
-                <!-- VENDOR LOGIN -->
-
-                <a href="./vendor/login.html"
-                   class="btn role-btn">
-
-                    Continue as Vendor
-
-                </a>
-
-
-                <p class="role-register">
-
-                    New Vendor?
-
-                    <a href="./vendor/register.html">
-                        Register here
-                    </a>
-
-                </p>
-
+                <button id="sidebarCollapseBtn" class="sidebar-collapse-btn" aria-label="Toggle sidebar collapse" title="Collapse or Expand sidebar">
+                    <svg class="chevron-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                </button>
             </div>
 
+            <nav class="sidebar-nav">
+                <div class="nav-section-title">Main Menu</div>
+                <ul class="sidebar-menu">
+                    <li class="menu-item">
+                        <a href="index.html" class="menu-link active" title="Home">
+                            <span class="link-icon">
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                                </svg>
+                            </span>
+                            <span class="link-text">Home</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="directory/vendors.html" class="menu-link" title="Explore Vendors">
+                            <span class="link-icon">
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="11" cy="11" r="8"></circle>
+                                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                </svg>
+                            </span>
+                            <span class="link-text">Explore Vendors</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="customer/login.html" class="menu-link" title="Customer Portal">
+                            <span class="link-icon">
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="12" cy="7" r="4"></circle>
+                                </svg>
+                            </span>
+                            <span class="link-text">Customer</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="vendor/login.html" class="menu-link" title="Vendor Portal">
+                            <span class="link-icon">
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                    <rect x="9" y="13" width="6" height="9"></rect>
+                                </svg>
+                            </span>
+                            <span class="link-text">Vendor</span>
+                        </a>
+                    </li>
+                </ul>
 
+                <div class="nav-section-title">Portals & Access</div>
+                <ul class="sidebar-menu">
+                    <li class="menu-item">
+                        <a href="vendor/register.html" class="menu-link" title="Vendor Registration">
+                            <span class="link-icon">
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="8.5" cy="7" r="4"></circle>
+                                    <line x1="20" y1="8" x2="20" y2="14"></line>
+                                    <line x1="23" y1="11" x2="17" y2="11"></line>
+                                </svg>
+                            </span>
+                            <span class="link-text">Vendor Register</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="customer/register.html" class="menu-link" title="Customer Registration">
+                            <span class="link-icon">
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                                    <path d="M16 10a4 4 0 0 1-8 0"></path>
+                                </svg>
+                            </span>
+                            <span class="link-text">Customer Register</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="admin/login.html" class="menu-link" title="Admin Login">
+                            <span class="link-icon">
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                                </svg>
+                            </span>
+                            <span class="link-text">Admin Login</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
 
-            <!-- ===============================
-                 CUSTOMER
-            ================================ -->
-
-            <div class="role-card customer-role">
-
-                <h3>
-                    Customer
-                </h3>
-
-                <p>
-                    Discover verified street vendors
-                    and explore local businesses.
-                </p>
-
-
-                <!-- CUSTOMER LOGIN -->
-
-                <a href="./customer/login.html"
-                   class="btn customer-btn">
-
-                    Continue as Customer
-
-                </a>
-
-
-                <p class="role-register">
-
-                    New Customer?
-
-                    <a href="./customer/register.html">
-                        Register here
-                    </a>
-
-                </p>
-
+            <div class="sidebar-footer">
+                <div class="sidebar-footer-badge">
+                    <span class="status-dot"></span>
+                    <span class="badge-text">Marketplace Online</span>
+                </div>
             </div>
+        </aside>
 
-        </div>
+        <!-- =========================================
+             MAIN CONTENT AREA
+        ========================================= -->
+        <main class="landing-main">
+            <!-- Hero Section -->
+            <section class="hero-section" id="hero">
+                <div class="hero-container">
+                    <div class="hero-text-content">
+                        <div class="hero-badge">
+                            <span class="hero-badge-dot"></span>
+                            LOCAL • FRESH • CONNECTED
+                        </div>
+                        <h1 class="hero-title">
+                            Your Local Marketplace Starts Here.
+                        </h1>
+                        <p class="hero-description">
+                            Discover local street vendors, explore their products, and connect with small businesses in your community.
+                        </p>
+                        <div class="hero-actions">
+                            <a href="directory/vendors.html" class="btn-hero-primary">
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <circle cx="11" cy="11" r="8"></circle>
+                                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                </svg>
+                                <span>Explore Vendors</span>
+                            </a>
+                            <a href="vendor/register.html" class="btn-hero-secondary">
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                    <rect x="9" y="13" width="6" height="9"></rect>
+                                </svg>
+                                <span>Join as a Vendor</span>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="hero-visual">
+                        <div class="hero-image-wrapper">
+<img src="C:\Users\as\Downloads\vendor.jpg"
+     alt="Busy Indian street market with fruit and vegetable sellers, a tea stall, clothing and accessories vendors, and customers"
+     class="hero-img"
+     loading="eager"
+     onerror="this.onerror=null;this.src='img/logo.png';this.classList.add('logo-fallback');">
+                            <div class="hero-image-caption">
+                                <span class="caption-icon" aria-hidden="true">📍</span>
+                                <span>Empowering Community Micro-Entrepreneurs</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
-    </section>
+            <!-- Customer and Vendor Choice Section -->
+            <section class="choice-section" id="roles">
+                <div class="choice-container">
+                    <div class="section-header">
+                        <h2 class="section-title">How Would You Like to Continue?</h2>
+                        <p class="section-subtitle">Select your account type to access personalized tools, explore markets, or manage stall operations.</p>
+                    </div>
 
+                    <div class="choice-cards-grid">
+                        <!-- Customer Card -->
+                        <div class="choice-card customer-choice-card">
+                            <div class="card-top">
+                                <div class="card-icon-container customer-icon-bg">
+                                    <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                                        <path d="M16 10a4 4 0 0 1-8 0"></path>
+                                    </svg>
+                                </div>
+                                <span class="card-role-tag">Customer Portal</span>
+                                <h3 class="card-title">I'm a Customer</h3>
+                                <p class="card-description">
+                                    Discover local vendors, explore products, and find your favourite stalls in your neighbourhood.
+                                </p>
+                            </div>
 
+                            <div class="card-bottom">
+                                <a href="customer/login.html" class="btn-choice-customer">
+                                    <span>Continue as Customer</span>
+                                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="arrow-icon" aria-hidden="true">
+                                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                                        <polyline points="12 5 19 12 12 19"></polyline>
+                                    </svg>
+                                </a>
+                                <div class="card-meta-link">
+                                    New Customer? <a href="customer/register.html">Register here</a>
+                                </div>
+                            </div>
+                        </div>
 
-    <!-- ===============================
-         FEATURES
-    ================================ -->
+                        <!-- Vendor Card -->
+                        <div class="choice-card vendor-choice-card">
+                            <div class="card-top">
+                                <div class="card-icon-container vendor-icon-bg">
+                                    <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                        <rect x="9" y="13" width="6" height="9"></rect>
+                                    </svg>
+                                </div>
+                                <span class="card-role-tag">Vendor Portal</span>
+                                <h3 class="card-title">I'm a Vendor</h3>
+                                <p class="card-description">
+                                    Register your business, manage products, and keep your shop information up to date to attract more customers.
+                                </p>
+                            </div>
 
-    <section class="features">
+                            <div class="card-bottom">
+                                <a href="vendor/login.html" class="btn-choice-vendor">
+                                    <span>Continue as Vendor</span>
+                                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="arrow-icon" aria-hidden="true">
+                                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                                        <polyline points="12 5 19 12 12 19"></polyline>
+                                    </svg>
+                                </a>
+                                <div class="card-meta-link">
+                                    New Vendor? <a href="vendor/register.html">Register here</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
-        <h2>
-            Key Features
-        </h2>
+            <!-- Features Section -->
+            <section class="features-section" id="features">
+                <div class="features-container">
+                    <div class="section-header">
+                        <h2 class="section-title">Built for Local Commerce</h2>
+                        <p class="section-subtitle">Everything you need to discover street commerce or grow your vending business.</p>
+                    </div>
 
-        <div class="feature-container">
+                    <div class="features-grid">
+                        <div class="feature-box">
+                            <div class="feature-icon-wrapper">
+                                <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                    <circle cx="12" cy="10" r="3"></circle>
+                                </svg>
+                            </div>
+                            <h3 class="feature-heading">Discover Local Vendors</h3>
+                            <p class="feature-text">
+                                Find verified neighborhood street stalls, view their business categories, and explore authentic local goods.
+                            </p>
+                        </div>
 
-            <div class="feature-card">
+                        <div class="feature-box">
+                            <div class="feature-icon-wrapper">
+                                <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M9 11l3 3L22 4"></path>
+                                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                                </svg>
+                            </div>
+                            <h3 class="feature-heading">Explore Product Availability</h3>
+                            <p class="feature-text">
+                                Check real-time in-stock products, prices, and catalog details before visiting your favorite street vendors.
+                            </p>
+                        </div>
 
-                <h3>
-                    Vendor Registration
-                </h3>
+                        <div class="feature-box">
+                            <div class="feature-icon-wrapper">
+                                <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                                </svg>
+                            </div>
+                            <h3 class="feature-heading">Support Small Businesses</h3>
+                            <p class="feature-text">
+                                Empower grassroots micro-entrepreneurs and celebrate community culture through transparent digital connectivity.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
-                <p>
-                    Vendors can digitally register
-                    their businesses.
-                </p>
+            <!-- Homepage Footer -->
+            <footer class="landing-footer">
+                <div class="footer-content">
+                    <div class="footer-brand">
+                        <img src="img/logo.png" alt="Street Vendor Management System Logo" class="footer-logo">
+                        <span class="footer-title">StreetVendor</span>
+                    </div>
+                    <p class="footer-message">
+                        Bridging the gap between local street vendors and their community. Empowering neighbourhood commerce with digital visibility.
+                    </p>
+                    <div class="footer-bottom">
+                        <p>© 2026 Street Vendor Management System • Designed for community commerce</p>
+                    </div>
+                </div>
+            </footer>
+        </main>
+    </div>
 
-            </div>
+    <!-- Vanilla JavaScript for Sidebar Interaction -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var sidebar = document.getElementById('sidebar');
+            var layout = document.querySelector('.landing-layout');
+            var collapseBtn = document.getElementById('sidebarCollapseBtn');
+            var mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            var overlay = document.getElementById('sidebarOverlay');
+            var menuLinks = document.querySelectorAll('.sidebar-menu .menu-link');
 
+            // Restore desktop collapsed preference
+            var savedCollapse = localStorage.getItem('sv_sidebar_collapsed') === 'true';
+            if (savedCollapse && window.innerWidth > 900) {
+                sidebar.classList.add('collapsed');
+                if (layout) layout.classList.add('collapsed');
+            }
 
-            <div class="feature-card">
+            // Desktop Collapse/Expand Toggle
+            if (collapseBtn) {
+                collapseBtn.addEventListener('click', function () {
+                    var isNowCollapsed = sidebar.classList.toggle('collapsed');
+                    if (layout) layout.classList.toggle('collapsed', isNowCollapsed);
+                    localStorage.setItem('sv_sidebar_collapsed', isNowCollapsed ? 'true' : 'false');
+                });
+            }
 
-                <h3>
-                    Vendor Verification
-                </h3>
+            // Mobile Drawer Toggle
+            function openMobileSidebar() {
+                sidebar.classList.add('open');
+                overlay.classList.add('active');
+                if (mobileMenuBtn) mobileMenuBtn.setAttribute('aria-expanded', 'true');
+                document.body.classList.add('sidebar-open');
+            }
 
-                <p>
-                    Admin can verify and manage
-                    registered vendors.
-                </p>
+            function closeMobileSidebar() {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('active');
+                if (mobileMenuBtn) mobileMenuBtn.setAttribute('aria-expanded', 'false');
+                document.body.classList.remove('sidebar-open');
+            }
 
-            </div>
+            if (mobileMenuBtn) {
+                mobileMenuBtn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    if (sidebar.classList.contains('open')) {
+                        closeMobileSidebar();
+                    } else {
+                        openMobileSidebar();
+                    }
+                });
+            }
 
+            if (overlay) {
+                overlay.addEventListener('click', closeMobileSidebar);
+            }
 
-            <div class="feature-card">
+            // Close mobile sidebar on link click
+            menuLinks.forEach(function (link) {
+                link.addEventListener('click', function () {
+                    if (window.innerWidth <= 900) {
+                        closeMobileSidebar();
+                    }
+                });
+            });
 
-                <h3>
-                    Vendor Directory
-                </h3>
+            // Keyboard navigation: Escape key closes mobile sidebar
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && sidebar.classList.contains('open')) {
+                    closeMobileSidebar();
+                }
+            });
 
-                <p>
-                    Customers can discover
-                    verified street vendors.
-                </p>
-
-            </div>
-
-        </div>
-
-    </section>
-
-</main>
-
-
-<!-- ===============================
-     FOOTER
-================================ -->
-
-<footer>
-
-    <p>
-        © 2026 Street Vendor Management System
-    </p>
-
-</footer>
-
-
+            // Window resize adjustment
+            window.addEventListener('resize', function () {
+                if (window.innerWidth > 900) {
+                    closeMobileSidebar();
+                    var pref = localStorage.getItem('sv_sidebar_collapsed') === 'true';
+                    if (pref) {
+                        sidebar.classList.add('collapsed');
+                        if (layout) layout.classList.add('collapsed');
+                    } else {
+                        sidebar.classList.remove('collapsed');
+                        if (layout) layout.classList.remove('collapsed');
+                    }
+                } else {
+                    sidebar.classList.remove('collapsed');
+                    if (layout) layout.classList.remove('collapsed');
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>

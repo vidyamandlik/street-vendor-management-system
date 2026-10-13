@@ -813,36 +813,39 @@ function applyVendorFilters() {
                         vendor.name || ""
                     ).toLowerCase();
 
+                const businessName =
+                    String(
+                        vendor.businessName || ""
+                    ).toLowerCase();
 
                 const vendorCategory =
                     String(
                         vendor.category || ""
                     ).toLowerCase();
 
-
                 const vendorDistrict =
                     String(
                         vendor.district || ""
                     ).toLowerCase();
 
-
                 const matchesSearch =
+                    !searchText ||
                     vendorName.includes(
                         searchText
+                    ) ||
+                    businessName.includes(
+                        searchText
                     );
-
 
                 const matchesCategory =
                     !selectedCategory ||
                     vendorCategory ===
                     selectedCategory;
 
-
                 const matchesDistrict =
                     !selectedDistrict ||
                     vendorDistrict ===
                     selectedDistrict;
-
 
                 return (
                     matchesSearch &&
