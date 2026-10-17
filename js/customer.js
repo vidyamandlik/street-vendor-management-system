@@ -1331,104 +1331,179 @@ function addVendorDetail(
 // VIEW VENDOR REVIEWS
 // =====================================================
 
+function closeVendorReviewsModal() {
+    const existing = document.getElementById("vendorReviewsModal");
+
+    if (existing) {
+        existing.remove();
+    }
+
+    document.removeEventListener("keydown", closeReviewsOnEscape);
+    document.body.classList.remove("reviews-modal-open");
+}
+
+function closeReviewsOnEscape(event) {
+    if (event.key === "Escape") {
+        closeVendorReviewsModal();
+    }
+}
+
+function createReviewsElement(tag, className, text) {
+    const node = document.createElement(tag);
+
+    if (className) {
+        node.className = className;
+    }
+
+    if (text !== undefined) {
+        node.textContent = text;
+    }
+
+    return node;
+}
+
+function buildStars(rating) {
+    const count = Math.max(
+        0,
+        Math.min(5, Math.round(Number(rating) || 0))
+    );
+
+    return "★".repeat(count) + "☆".repeat(5 - count);
+}
+
+function openVendorReviewsModal(vendorName) {
+    closeVendorReviewsModal();
+
+    const overlay = createReviewsElement("div", "vreviews-overlay");
+    overlay.id = "vendorReviewsModal";
+
+    overlay.addEventListener("click", function (event) {
+        if (event.target === overlay) {
+            closeVendorReviewsModal();
+        }
+    });
+
+    const dialog = createReviewsElement("div", "vreviews-dialog");
+    dialog.setAttribute("role", "dialog");
+    dialog.setAttribute("aria-modal", "true");
+    dialog.setAttribute("aria-labelledby", "vendorReviewsTitle");
+
+    const closeButton = createReviewsElement("button", "vreviews-close", "×");
+    closeButton.type = "button";
+    closeButton.setAttribute("aria-label", "Close reviews");
+    closeButton.addEventListener("click", closeVendorReviewsModal);
+
+    const title = createReviewsElement(
+        "h2",
+        "vreviews-title",
+        vendorName ? "Reviews for " + vendorName : "Reviews"
+    );
+    title.id = "vendorReviewsTitle";
+
+    const summary = createReviewsElement("p", "vreviews-summary", "");
+    const list = createReviewsElement("div", "vreviews-list");
+
+    list.appendChild(
+        createReviewsElement("p", "vreviews-message", "Loading reviews...")
+    );
+
+    dialog.appendChild(closeButton);
+    dialog.appendChild(title);
+    dialog.appendChild(summary);
+    dialog.appendChild(list);
+    overlay.appendChild(dialog);
+    document.body.appendChild(overlay);
+
+    document.body.classList.add("reviews-modal-open");
+    document.addEventListener("keydown", closeReviewsOnEscape);
+    closeButton.focus();
+
+    return { summary: summary, list: list };
+}
+
 async function showVendorReviews(
     vendorId,
     vendorName
 ) {
+    const view = openVendorReviewsModal(vendorName);
 
-    try {
-
-        const response =
-            await fetch(
-                `${API_BASE_URL}/reviews/vendor/${encodeURIComponent(vendorId)}`
-            );
-
-
-        const data =
-            await parseJsonResponse(
-                response
-            );
-
-
-        if (!response.ok) {
-
-            alert(
-                (data && data.message) ||
-                "Unable to load reviews."
-            );
-
-            return;
-        }
-
-
-        const reviews =
-            data.reviews || [];
-
-
-        // No reviews
-
-        if (reviews.length === 0) {
-
-            alert(
-                `${vendorName}\n\nNo reviews available yet.`
-            );
-
-            return;
-        }
-
-
-        const reviewText =
-            reviews.map(
-                function (item, index) {
-
-                    const customerName =
-                        item.customerName ||
-                        item.name ||
-                        "Customer";
-
-
-                    const rating =
-                        item.rating || 0;
-
-
-                    const review =
-                        item.review ||
-                        "No review text.";
-
-
-                    return (
-                        `${index + 1}. ${customerName}\n` +
-                        `Rating: ${rating}/5\n` +
-                        `${review}`
-                    );
-
-                }
-            ).join("\n\n");
-
-
-        alert(
-            `${vendorName}\n\n` +
-            `Average Rating: ${data.averageRating || 0}/5\n` +
-            `Total Reviews: ${data.reviewCount || reviews.length}\n\n` +
-            `${reviewText}`
-        );
-
-
-    } catch (error) {
-
-        console.error(
-            "Error loading vendor reviews:",
-            error
-        );
-
-
-        alert(
-            "Unable to load vendor reviews."
+    function showMessage(text) {
+        view.list.replaceChildren(
+            createReviewsElement("p", "vreviews-message", text)
         );
     }
+
+    try {
+        const response = await fetch(
+            `${API_BASE_URL}/reviews/vendor/${encodeURIComponent(vendorId)}`
+        );
+
+        const data = await parseJsonResponse(response);
+
+        if (!response.ok) {
+            showMessage(
+                (data && data.message) || "Unable to load reviews."
+            );
+            return;
+        }
+
+        const reviews = (data && data.reviews) || [];
+
+        if (reviews.length === 0) {
+            view.summary.textContent = "No ratings yet";
+            showMessage("No reviews available yet.");
+            return;
+        }
+
+        const average = Number(data.averageRating) || 0;
+        const total = data.reviewCount || reviews.length;
+
+        view.summary.textContent =
+            buildStars(average) + "  " + average.toFixed(1) + " / 5  -  " +
+            total + (total === 1 ? " review" : " reviews");
+
+        view.list.replaceChildren();
+
+        reviews.forEach(function (item) {
+            const card = createReviewsElement("article", "vreviews-item");
+            const header = createReviewsElement("div", "vreviews-item-head");
+
+            header.appendChild(
+                createReviewsElement(
+                    "strong",
+                    "vreviews-name",
+                    item.customerName || item.name || "Customer"
+                )
+            );
+
+            const stars = createReviewsElement(
+                "span",
+                "vreviews-stars",
+                buildStars(item.rating)
+            );
+            stars.setAttribute(
+                "aria-label",
+                "Rated " + (Number(item.rating) || 0) + " out of 5"
+            );
+            header.appendChild(stars);
+
+            card.appendChild(header);
+            card.appendChild(
+                createReviewsElement(
+                    "p",
+                    "vreviews-text",
+                    item.review || "No review text."
+                )
+            );
+
+            view.list.appendChild(card);
+        });
+
+    } catch (error) {
+        console.error("Error loading vendor reviews:", error);
+        showMessage("Unable to load vendor reviews.");
+    }
 }
-
-
 
 // =====================================================
 // CUSTOMER REVIEW MODAL
