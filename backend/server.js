@@ -806,6 +806,21 @@ app.put(
   if (!allStrings(...provided)) {
       return res.status(400).json({ message: "Invalid data." });
   }
+  if (name !== undefined && name.trim() === "") {
+      return res.status(400).json({ message: "Name cannot be empty." });
+  }
+  if (businessName !== undefined && businessName.trim() === "") {
+      return res.status(400).json({ message: "Business name cannot be empty." });
+  }
+  if (category !== undefined && category.trim() === "") {
+      return res.status(400).json({ message: "Category cannot be empty." });
+  }
+  if (district !== undefined && district.trim() === "") {
+      return res.status(400).json({ message: "District cannot be empty." });
+  }
+  if (address !== undefined && address.trim() === "") {
+      return res.status(400).json({ message: "Address cannot be empty." });
+  }
   if (mobile !== undefined && !isValidMobile(mobile)) {
       return res.status(400).json({ message: "Mobile number must be exactly 10 digits." });
   }
@@ -1527,6 +1542,48 @@ app.get(
 
 
 // =====================================================
+// GENERATE CUSTOMER ID
+// =====================================================
+
+async function generateCustomerId() {
+    let customerId;
+    let exists = true;
+    let attempts = 0;
+    const MAX_ATTEMPTS = 100;
+
+    while (exists && attempts < MAX_ATTEMPTS) {
+        attempts++;
+        const number =
+            Math.floor(
+                1000 +
+                Math.random() * 9000
+            );
+
+        customerId =
+            `CUS-${number}`;
+
+        const existing =
+            await customersCollection.findOne({
+                id: customerId
+            });
+
+        exists = Boolean(existing);
+    }
+
+    if (exists) {
+        const fallbackId = `CUS-${Date.now().toString().slice(-6)}`;
+        const fallbackExisting = await customersCollection.findOne({ id: fallbackId });
+        if (!fallbackExisting) {
+            return fallbackId;
+        }
+        return `CUS-${Date.now()}`;
+    }
+
+    return customerId;
+}
+
+
+// =====================================================
 // CUSTOMER REGISTRATION
 // =====================================================
 
@@ -1604,7 +1661,7 @@ app.post(
             }
 
             const customerId =
-                `CUS-${randomUUID()}`;
+                await generateCustomerId();
 
             const hashedPassword =
                 await hashPassword(password);
@@ -2503,7 +2560,7 @@ await reviewsCollection.createIndex(
     { customerId: 1, vendorId: 1 },
     {
         unique: true,
-        name: "reviews_one_per_customer_vendor"
+      name: "customerId_1_vendorId_1"
     }
 );
 

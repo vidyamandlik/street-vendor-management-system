@@ -2,7 +2,7 @@
 // STREET VENDOR MANAGEMENT SYSTEM - CUSTOMER MODULE
 // =====================================================
 
-const API_BASE_URL = "http://localhost:5000/api";
+const API_BASE_URL = window.APP_CONFIG.API_BASE_URL;
 
 // Utility: HTML Escaping for XSS prevention
 function escapeHtml(str) {
@@ -447,6 +447,9 @@ async function loadCustomerProfile(
     // Token expired or invalid: log the user out cleanly
     if (response.status === 401 || response.status === 403) {
         clearCustomerAuth();
+        localStorage.removeItem("customerToken");
+        localStorage.removeItem("customerRole");
+        localStorage.removeItem("customerId");
         window.location.href = "login.html";
     }
     return;

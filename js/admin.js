@@ -2,7 +2,7 @@
 // STREET VENDOR MANAGEMENT SYSTEM - ADMIN MODULE
 // =====================================================
 
-const API_BASE_URL = "http://localhost:5000/api";
+const API_BASE_URL = window.APP_CONFIG.API_BASE_URL;
 
 // Standardized Authentication Storage Keys
 const AUTH_TOKEN_KEY = "authToken";

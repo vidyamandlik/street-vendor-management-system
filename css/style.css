@@ -5503,6 +5503,7 @@ body.dash .customer-dashboard{padding:32px 28px;background:none;max-width:1200px
 .dash-card h2{margin:0 0 4px;font-size:1.25rem;color:var(--forest)}
 .dash-card .sub{margin:0 0 18px;color:var(--muted)}
 .dash-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px}
+
 .dash-stat{background:#fff;border:1px solid var(--line);border-left:5px solid var(--emerald);border-radius:14px;padding:18px 20px}
 .dash-stat h3{margin:0;font-size:.95rem;font-weight:500;color:var(--muted)}
 .dash-stat p{margin:4px 0 0;font-size:2rem;font-weight:700;color:var(--forest);line-height:1.1}
