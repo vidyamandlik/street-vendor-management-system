@@ -74,7 +74,7 @@ app.use(
     cors({
         origin: (origin, callback) => {
 
-            console.log("REQUEST ORIGIN:", origin);
+            //console.log("REQUEST ORIGIN:", origin);
 
             // Allow:
             // - requests without origin
@@ -443,7 +443,7 @@ app.get(
                         status: "Verified"
                     })
                     .project({
-                        password: 0
+                        password: 0, email: 0
                     })
                     .toArray();
 
@@ -481,7 +481,7 @@ app.get(
                 await vendorsCollection
                     .find({})
                     .project({
-                        password: 0
+                        password: 0, email: 0
                     })
                     .toArray();
 
@@ -732,7 +732,7 @@ app.get(
                     },
                     {
                         projection: {
-                            password: 0
+                            password: 0, email: 0
                         }
                     }
                 );
@@ -1420,7 +1420,7 @@ app.get(
                         status: "Verified"
                     })
                     .project({
-                        password: 0
+                        password: 0, email: 0
                     })
                     .toArray();
 
@@ -1463,7 +1463,7 @@ app.get(
                     },
                     {
                         projection: {
-                            password: 0
+                            password: 0, email: 0
                         }
                     }
                 );
@@ -1698,8 +1698,14 @@ app.post(
 
                 customerId
             });
+                     } catch (error) {
 
-        } catch (error) {
+            if (error && error.code === 11000) {
+                return res.status(409).json({
+                    message:
+                        "Email or mobile number already registered."
+                });
+            }
 
             console.error(
                 "Customer registration error:",
