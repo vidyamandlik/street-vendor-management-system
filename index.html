@@ -180,7 +180,7 @@
                     </div>
                     <div class="hero-visual">
                         <div class="hero-image-wrapper">
-<img src="C:\Users\as\Downloads\vendor.jpg"
+<img src="img/vendor.jpeg"
      alt="Busy Indian street market with fruit and vegetable sellers, a tea stall, clothing and accessories vendors, and customers"
      class="hero-img"
      loading="eager"
@@ -335,97 +335,8 @@
         </main>
     </div>
 
-    <!-- Vanilla JavaScript for Sidebar Interaction -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            var sidebar = document.getElementById('sidebar');
-            var layout = document.querySelector('.landing-layout');
-            var collapseBtn = document.getElementById('sidebarCollapseBtn');
-            var mobileMenuBtn = document.getElementById('mobileMenuBtn');
-            var overlay = document.getElementById('sidebarOverlay');
-            var menuLinks = document.querySelectorAll('.sidebar-menu .menu-link');
-
-            // Restore desktop collapsed preference
-            var savedCollapse = localStorage.getItem('sv_sidebar_collapsed') === 'true';
-            if (savedCollapse && window.innerWidth > 900) {
-                sidebar.classList.add('collapsed');
-                if (layout) layout.classList.add('collapsed');
-            }
-
-            // Desktop Collapse/Expand Toggle
-            if (collapseBtn) {
-                collapseBtn.addEventListener('click', function () {
-                    var isNowCollapsed = sidebar.classList.toggle('collapsed');
-                    if (layout) layout.classList.toggle('collapsed', isNowCollapsed);
-                    localStorage.setItem('sv_sidebar_collapsed', isNowCollapsed ? 'true' : 'false');
-                });
-            }
-
-            // Mobile Drawer Toggle
-            function openMobileSidebar() {
-                sidebar.classList.add('open');
-                overlay.classList.add('active');
-                if (mobileMenuBtn) mobileMenuBtn.setAttribute('aria-expanded', 'true');
-                document.body.classList.add('sidebar-open');
-            }
-
-            function closeMobileSidebar() {
-                sidebar.classList.remove('open');
-                overlay.classList.remove('active');
-                if (mobileMenuBtn) mobileMenuBtn.setAttribute('aria-expanded', 'false');
-                document.body.classList.remove('sidebar-open');
-            }
-
-            if (mobileMenuBtn) {
-                mobileMenuBtn.addEventListener('click', function (e) {
-                    e.stopPropagation();
-                    if (sidebar.classList.contains('open')) {
-                        closeMobileSidebar();
-                    } else {
-                        openMobileSidebar();
-                    }
-                });
-            }
-
-            if (overlay) {
-                overlay.addEventListener('click', closeMobileSidebar);
-            }
-
-            // Close mobile sidebar on link click
-            menuLinks.forEach(function (link) {
-                link.addEventListener('click', function () {
-                    if (window.innerWidth <= 900) {
-                        closeMobileSidebar();
-                    }
-                });
-            });
-
-            // Keyboard navigation: Escape key closes mobile sidebar
-            document.addEventListener('keydown', function (e) {
-                if (e.key === 'Escape' && sidebar.classList.contains('open')) {
-                    closeMobileSidebar();
-                }
-            });
-
-            // Window resize adjustment
-            window.addEventListener('resize', function () {
-                if (window.innerWidth > 900) {
-                    closeMobileSidebar();
-                    var pref = localStorage.getItem('sv_sidebar_collapsed') === 'true';
-                    if (pref) {
-                        sidebar.classList.add('collapsed');
-                        if (layout) layout.classList.add('collapsed');
-                    } else {
-                        sidebar.classList.remove('collapsed');
-                        if (layout) layout.classList.remove('collapsed');
-                    }
-                } else {
-                    sidebar.classList.remove('collapsed');
-                    if (layout) layout.classList.remove('collapsed');
-                }
-            });
-        });
-    </script>
+    <!-- Shared Sidebar JavaScript -->
+    <script src="js/sidebar.js"></script>
 </body>
 
 </html>

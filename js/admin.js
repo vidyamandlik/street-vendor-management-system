@@ -229,8 +229,50 @@ function initAdminDashboard() {
         searchInput.addEventListener("input", debounce(applyVendorFilters, 200));
     }
 
+    // Sidebar status filter shortcut links
+    const sidebarLinks = document.querySelectorAll(".dash-sidebar .dash-link");
+    sidebarLinks.forEach(link => {
+        link.addEventListener("click", function () {
+            const filter = this.getAttribute("data-status-filter");
+            const section = this.getAttribute("data-section");
+
+            if (filter !== null && statusFilter) {
+                statusFilter.value = filter;
+                window.currentPage = 1;
+                applyVendorFilters();
+            } else if (section === "vendors" && statusFilter) {
+                statusFilter.value = "";
+                window.currentPage = 1;
+                applyVendorFilters();
+            }
+
+            // Update active state in sidebar
+            sidebarLinks.forEach(l => {
+                l.classList.remove("active");
+                l.removeAttribute("aria-current");
+            });
+            this.classList.add("active");
+            this.setAttribute("aria-current", "page");
+        });
+    });
+
     if (statusFilter) {
-        statusFilter.addEventListener("change", applyVendorFilters);
+        statusFilter.addEventListener("change", () => {
+            applyVendorFilters();
+            // Sync sidebar active highlight with selected dropdown option
+            const currentStatus = statusFilter.value;
+            sidebarLinks.forEach(l => {
+                const linkFilter = l.getAttribute("data-status-filter");
+                const linkSection = l.getAttribute("data-section");
+                if ((currentStatus && linkFilter === currentStatus) || (!currentStatus && linkSection === "vendors")) {
+                    l.classList.add("active");
+                    l.setAttribute("aria-current", "page");
+                } else if (linkFilter || linkSection === "vendors") {
+                    l.classList.remove("active");
+                    l.removeAttribute("aria-current");
+                }
+            });
+        });
     }
 
     if (refreshBtn) {
