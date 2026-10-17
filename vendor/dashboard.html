@@ -552,7 +552,19 @@ async function loadVendorDashboard() {
             }
         );
 
-        const result = await response.json();
+              const result = await response.json();
+
+        if (response.status === 401 || response.status === 403) {
+            localStorage.removeItem("authToken");
+            localStorage.removeItem("vendorToken");
+            localStorage.removeItem("userId");
+            localStorage.removeItem("loggedInVendorId");
+            localStorage.removeItem("userName");
+            localStorage.removeItem("userRole");
+            localStorage.removeItem("vendorRole");
+            window.location.href = "login.html";
+            return;
+        }
 
         if (!response.ok) {
             throw new Error(
