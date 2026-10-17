@@ -169,13 +169,17 @@
                  VENDOR FORM
             ================================ -->
 
-            <form id="vendorForm">
+            <form id="vendorForm" novalidate>
+
+                <p class="form-required-note">
+                    Fields marked with <span class="required">*</span> are required
+                </p>
 
 
                 <!-- Vendor Name -->
 
                 <label for="vendorName">
-                    Vendor / Owner Name
+                    Vendor / Owner Name <span class="required">*</span>
                 </label>
 
                 <input
@@ -189,7 +193,7 @@
                 <!-- Mobile -->
 
                 <label for="mobile">
-                    Mobile Number
+                    Mobile Number <span class="required">*</span>
                 </label>
 
                 <input
@@ -205,7 +209,7 @@
                 <!-- Email -->
 
                 <label for="email">
-                    Email Address
+                    Email Address <span class="required">*</span>
                 </label>
 
                 <input
@@ -216,22 +220,64 @@
                 >
 
                 <label for="vendorPassword">
-                    Password
+                    Password <span class="required">*</span>
                 </label>
 
-                <input
-                    type="password"
-                    id="vendorPassword"
-                    placeholder="Create a password"
-                    minlength="8"
-                    required
-                >
+                <div class="password-input-wrapper">
+                    <input
+                        type="password"
+                        id="vendorPassword"
+                        placeholder="Create a password"
+                        minlength="8"
+                        required
+                    >
+                    <button
+                        type="button"
+                        id="toggleVendorPassword"
+                        class="password-toggle-btn"
+                        aria-label="Show password"
+                        title="Show password"
+                    >
+                        <svg class="eye-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Confirm Password -->
+
+                <label for="confirmPassword">
+                    Confirm Password <span class="required">*</span>
+                </label>
+
+                <div class="password-input-wrapper">
+                    <input
+                        type="password"
+                        id="confirmPassword"
+                        placeholder="Confirm your password"
+                        minlength="8"
+                        required
+                    >
+                    <button
+                        type="button"
+                        id="toggleConfirmPassword"
+                        class="password-toggle-btn"
+                        aria-label="Show password"
+                        title="Show password"
+                    >
+                        <svg class="eye-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                    </button>
+                </div>
 
 
                 <!-- Business Name -->
 
                 <label for="businessName">
-                    Business Name
+                    Business Name <span class="required">*</span>
                 </label>
 
                 <input
@@ -245,7 +291,7 @@
                 <!-- Category -->
 
                 <label for="category">
-                    Business Category
+                    Business Category <span class="required">*</span>
                 </label>
                 <select id="category" name="category" required>
                     <option value="" disabled selected>Select Business Category</option>
@@ -261,7 +307,7 @@
                 <!-- District -->
 
                 <label for="district">
-                    District
+                    District <span class="required">*</span>
                 </label>
 
                 <input
@@ -275,7 +321,7 @@
                 <!-- Address -->
 
                 <label for="address">
-                    Business Address
+                    Business Address <span class="required">*</span>
                 </label>
 
                 <textarea
@@ -289,7 +335,7 @@
                 <!-- Years -->
 
                 <label for="years">
-                    Years in Business
+                    Years in Business <span class="required">*</span>
                 </label>
 
                 <input
@@ -305,7 +351,7 @@
                 <!-- Description -->
 
                 <label for="description">
-                    Business Description
+                    Business Description <span class="required">*</span>
                 </label>
 
                 <textarea
@@ -321,6 +367,12 @@
                     Register as Vendor
                 </button>
 
+                <!-- Registration Error -->
+
+                <p
+                    id="vendorRegisterError"
+                    style="color: #dc2626; margin-top: 14px; text-align: center; font-weight: 500;"
+                ></p>
 
             </form>
 
@@ -405,7 +457,7 @@
 </div><!-- /.landing-layout -->
 
 <script src="../js/config.js"></script>
-<script src="../js/vendor.js"></script>
+<script src="../js/vendor.js?v=4"></script>
 
 <script src="../js/sidebar.js"></script>
 </body>

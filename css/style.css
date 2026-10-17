@@ -2831,6 +2831,21 @@ body.landing-page.sidebar-open {
     font-weight: 600;
 }
 
+.vendor-registration-container label .required,
+.vendor-registration-container .required {
+    color: #dc2626;
+    font-weight: 700;
+    margin-left: 2px;
+}
+
+.vendor-registration-container .form-required-note {
+    font-size: 13px;
+    color: #64748b;
+    margin-top: -10px;
+    margin-bottom: 20px;
+    text-align: left;
+}
+
 .vendor-registration-container input,
 .vendor-registration-container select,
 .vendor-registration-container textarea {
@@ -2872,6 +2887,12 @@ body.landing-page.sidebar-open {
 .vendor-registration-container button:hover {
     background: #126b42;
     transform: translateY(-1px);
+}
+
+.vendor-registration-container button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
 }
 
 .vendor-registration-success {
@@ -3023,7 +3044,13 @@ body.landing-page.sidebar-open {
     padding-right: 44px;
 }
 
-.vendor-login-container .password-toggle-btn {
+.password-input-wrapper input::-ms-reveal,
+.password-input-wrapper input::-ms-clear {
+    display: none;
+}
+
+.vendor-login-container .password-toggle-btn,
+.vendor-registration-container .password-toggle-btn {
     position: absolute;
     right: 12px;
     top: 50%;
@@ -3045,13 +3072,15 @@ body.landing-page.sidebar-open {
     transition: color 0.2s ease;
 }
 
-.vendor-login-container .password-toggle-btn:hover {
+.vendor-login-container .password-toggle-btn:hover,
+.vendor-registration-container .password-toggle-btn:hover {
     color: #16804f;
     background: transparent !important;
     transform: translateY(-50%) !important;
 }
 
-.vendor-login-container .password-toggle-btn:focus-visible {
+.vendor-login-container .password-toggle-btn:focus-visible,
+.vendor-registration-container .password-toggle-btn:focus-visible {
     outline: 2px solid #16804f;
     outline-offset: 1px;
 }

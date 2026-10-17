@@ -98,6 +98,13 @@ async function handleVendorRegistration(event) {
 
     const form = event.target;
 
+    const submitBtn =
+        form.querySelector("button[type='submit']") ||
+        document.querySelector("#vendorForm button[type='submit']");
+
+    const originalBtnText =
+        submitBtn ? submitBtn.textContent : "Register as Vendor";
+
     const data = {
         name: document.getElementById("vendorName")?.value.trim(),
         mobile: document.getElementById("mobile")?.value.trim(),
@@ -123,22 +130,79 @@ async function handleVendorRegistration(event) {
             document.getElementById("description")?.value.trim()
     };
 
+    const confirmPassword =
+        document.getElementById("confirmPassword")?.value;
+
+    const errorElement =
+        document.getElementById("vendorRegisterError");
+
+    if (errorElement) {
+        errorElement.textContent = "";
+    }
+
     if (
         !data.name ||
         !data.mobile ||
         !data.email ||
         !data.password ||
+        !confirmPassword ||
         !data.businessName ||
         !data.category ||
         !data.district ||
         !data.address ||
-        data.years === ""
+        data.years === "" ||
+        !data.description
     ) {
-        alert("Please fill all required fields.");
+        if (errorElement) {
+            errorElement.textContent =
+                "Please fill all required fields.";
+            errorElement.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+        return;
+    }
+
+    if (!/^[0-9]{10}$/.test(data.mobile)) {
+        if (errorElement) {
+            errorElement.textContent =
+                "Mobile number must be exactly 10 digits.";
+            errorElement.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+        return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+        if (errorElement) {
+            errorElement.textContent =
+                "Please enter a valid email address.";
+            errorElement.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+        return;
+    }
+
+    if (data.password.length < 8) {
+        if (errorElement) {
+            errorElement.textContent =
+                "Password must be at least 8 characters.";
+            errorElement.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+        return;
+    }
+
+    if (data.password !== confirmPassword) {
+        if (errorElement) {
+            errorElement.textContent =
+                "Passwords do not match.";
+            errorElement.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
         return;
     }
 
     try {
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Registering...";
+        }
+
         const response = await fetch(
             `${API_BASE_URL}/vendors`,
             {
@@ -190,10 +254,17 @@ async function handleVendorRegistration(event) {
     } catch (error) {
         console.error("Vendor registration error:", error);
 
-        alert(
-            error.message ||
-            "Vendor registration failed."
-        );
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalBtnText;
+        }
+
+        if (errorElement) {
+            errorElement.textContent =
+                error.message ||
+                "Vendor registration failed.";
+            errorElement.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
     }
 }
 
@@ -2046,6 +2117,45 @@ async function loadVendorReviews(vendorId) {
 // INITIALIZATION
 // =====================================================
 
+function setupPasswordVisibilityToggle(toggleBtnId, inputId) {
+    const toggleBtn =
+        document.getElementById(toggleBtnId);
+
+    const input =
+        document.getElementById(inputId);
+
+    if (toggleBtn && input) {
+        toggleBtn.addEventListener(
+            "click",
+            function () {
+                const isPassword =
+                    input.type === "password";
+
+                input.type =
+                    isPassword ? "text" : "password";
+
+                toggleBtn.setAttribute(
+                    "aria-label",
+                    isPassword
+                        ? "Hide password"
+                        : "Show password"
+                );
+
+                toggleBtn.setAttribute(
+                    "title",
+                    isPassword
+                        ? "Hide password"
+                        : "Show password"
+                );
+
+                toggleBtn.innerHTML = isPassword
+                    ? `<svg class="eye-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`
+                    : `<svg class="eye-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
+            }
+        );
+    }
+}
+
 document.addEventListener(
     "DOMContentLoaded",
     function () {
@@ -2060,6 +2170,16 @@ document.addEventListener(
             );
 
         if (vendorForm) {
+            setupPasswordVisibilityToggle(
+                "toggleVendorPassword",
+                "vendorPassword"
+            );
+
+            setupPasswordVisibilityToggle(
+                "toggleConfirmPassword",
+                "confirmPassword"
+            );
+
             vendorForm.addEventListener(
                 "submit",
                 handleVendorRegistration
@@ -2079,46 +2199,10 @@ document.addEventListener(
         if (vendorLoginForm) {
             checkExistingVendorSession();
 
-            const togglePasswordBtn =
-                document.getElementById(
-                    "toggleVendorPassword"
-                );
-
-            const passwordInput =
-                document.getElementById(
-                    "vendorPasswordLogin"
-                );
-
-            if (togglePasswordBtn && passwordInput) {
-                togglePasswordBtn.addEventListener(
-                    "click",
-                    function () {
-                        const isPassword =
-                            passwordInput.type === "password";
-
-                        passwordInput.type =
-                            isPassword ? "text" : "password";
-
-                        togglePasswordBtn.setAttribute(
-                            "aria-label",
-                            isPassword
-                                ? "Hide password"
-                                : "Show password"
-                        );
-
-                        togglePasswordBtn.setAttribute(
-                            "title",
-                            isPassword
-                                ? "Hide password"
-                                : "Show password"
-                        );
-
-                        togglePasswordBtn.innerHTML = isPassword
-                            ? `<svg class="eye-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`
-                            : `<svg class="eye-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
-                    }
-                );
-            }
+            setupPasswordVisibilityToggle(
+                "toggleVendorPassword",
+                "vendorPasswordLogin"
+            );
 
             vendorLoginForm.addEventListener(
                 "submit",
