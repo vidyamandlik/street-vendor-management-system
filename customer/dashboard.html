@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Customer Dashboard</title>
 <link rel="stylesheet" href="../css/style.css">
-<link rel="stylesheet" href="../css/dashboard.css">
 </head>
 <body class="dash" data-dash-role="customer" data-login-url="login.html">
 <header class="dash-mobilebar"><button id="dashMenuBtn" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="dashSidebar"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button><strong>StreetVendor</strong></header>
@@ -22,11 +21,9 @@
 <p class="sub">Find verified street vendors near you, check their ratings, and leave a review after you visit.</p></div>
 
 
-<div class="dash-stats">
- <!--<div class="dash-stat"><h3>Verified vendors</h3><p id="statVendors">–</p></div>
-<div class="dash-stat"><h3>Districts covered</h3><p id="statDistricts">–</p></div>
-<div class="dash-stat"><h3>Matching your filters</h3><p id="statShowing">–</p></div></div></section>-->
-<div class="dash-user"><div class="dash-chip"><span class="dash-avatar" id="dashAvatar" aria-hidden="true">C</span><span id="dashUserName">Customer</span></div></div></div></section>
+<div class="dash-user"><div class="dash-chip"><span class="dash-avatar" id="dashAvatar" aria-hidden="true">C</span><span id="dashUserName">Customer</span></div></div>
+</div>
+</section>
 <section id="profile" class="dash-card customer-profile" aria-labelledby="profTitle"><h2 id="profTitle">My profile</h2><p class="sub">The details you registered with.</p>
 <dl class="dash-profile profile-details"><div><dt>Customer ID</dt><dd id="customerId">Loading…</dd></div><div><dt>Name</dt><dd id="profileName">Loading…</dd></div><div><dt>Email</dt><dd id="profileEmail">Loading…</dd></div></dl></section>
 <section id="vendors" class="dash-card vendor-discovery" aria-labelledby="discTitle"><h2 id="discTitle">Find verified vendors</h2><p class="sub">Only vendors approved by the administration are listed.</p>
