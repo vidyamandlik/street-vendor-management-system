@@ -1570,7 +1570,7 @@ function openCustomerReviewModal(
 
 
     modal.style.display =
-        "block";
+        "flex";
 }
 
 
@@ -1814,7 +1814,34 @@ if (customerReviewForm) {
     );
 }
 
+const customerReviewModalEl =
+    document.getElementById(
+        "customerReviewModal"
+    );
 
+if (customerReviewModalEl) {
+    customerReviewModalEl.addEventListener(
+        "click",
+        function (event) {
+            if (event.target === customerReviewModalEl) {
+                closeCustomerReviewModal();
+            }
+        }
+    );
+}
+
+document.addEventListener(
+    "keydown",
+    function (event) {
+        if (
+            event.key === "Escape" &&
+            customerReviewModalEl &&
+            customerReviewModalEl.style.display === "flex"
+        ) {
+            closeCustomerReviewModal();
+        }
+    }
+);
 
 // =====================================================
 // CUSTOMER LOGOUT & SESSION MANAGEMENT

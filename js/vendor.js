@@ -205,6 +205,13 @@ async function handleVendorRegistration(event) {
 async function handleVendorLogin(event) {
     event.preventDefault();
 
+    const submitBtn =
+        event.target.querySelector("button[type='submit']") ||
+        document.querySelector("#vendorLoginForm button[type='submit']");
+
+    const originalBtnText =
+        submitBtn ? submitBtn.textContent : "Login as Vendor";
+
     const vendorId =
         document.getElementById("vendorIdLogin")?.value.trim();
 
@@ -228,6 +235,11 @@ async function handleVendorLogin(event) {
     }
 
     try {
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Logging in...";
+        }
+
         const response = await fetch(
             `${API_BASE_URL}/vendors/login`,
             {
@@ -245,8 +257,6 @@ async function handleVendorLogin(event) {
         );
 
         const result = await getResponseData(response);
-
-        console.log("Vendor login response:", result);
 
         if (!response.ok) {
             throw new Error(
@@ -285,6 +295,11 @@ async function handleVendorLogin(event) {
     } catch (error) {
         console.error("Vendor login error:", error);
 
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalBtnText;
+        }
+
         if (errorElement) {
             errorElement.textContent =
                 error.message ||
@@ -314,6 +329,62 @@ function logoutVendor() {
 
     window.location.href = "../index.html";
 }
+
+// Backwards-compatible alias for any template or inline calls
+function vendorLogout() {
+    logoutVendor();
+}
+
+function clearVendorSessionSilently() {
+    localStorage.removeItem(AUTH_TOKEN_KEY);
+    localStorage.removeItem(USER_ROLE_KEY);
+    localStorage.removeItem(USER_ID_KEY);
+    localStorage.removeItem(USER_NAME_KEY);
+    localStorage.removeItem(VENDOR_TOKEN_KEY);
+    localStorage.removeItem(VENDOR_ROLE_KEY);
+    localStorage.removeItem(VENDOR_ID_KEY);
+}
+
+function checkExistingVendorSession() {
+    const token = getVendorAuthToken();
+    const role = getVendorAuthRole();
+    const vendorId = getVendorAuthId();
+
+    if (!token || !role || !vendorId) {
+        return;
+    }
+
+    if (role !== "vendor") {
+        return;
+    }
+
+    try {
+        const parts = token.split(".");
+        if (parts.length !== 3) {
+            clearVendorSessionSilently();
+            return;
+        }
+
+        const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+        const jsonPayload = decodeURIComponent(
+            atob(base64)
+                .split("")
+                .map(c => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+                .join("")
+        );
+        const payload = JSON.parse(jsonPayload);
+
+        if (payload.role !== "vendor" || (payload.exp && payload.exp * 1000 <= Date.now())) {
+            clearVendorSessionSilently();
+            return;
+        }
+
+        window.location.replace("dashboard.html");
+    } catch {
+        clearVendorSessionSilently();
+    }
+}
+
 
 
 // =====================================================
@@ -1396,6 +1467,16 @@ let selectedRating = 0;
 // =====================================================
 
 function openReviewModal(vendorId, vendorName) {
+    const token = getCustomerReviewToken();
+    const role = getCustomerReviewRole();
+
+    if (!token || role !== "customer") {
+        if (confirm("You need to log in with a customer account to rate and review vendors.\n\nWould you like to go to the Customer Login page now?")) {
+            window.location.href = "../customer/login.html";
+        }
+        return;
+    }
+
     const modal =
         document.getElementById("reviewModal");
 
@@ -1460,6 +1541,9 @@ function closeReviewModal() {
         modal.style.display = "none";
     }
 }
+
+window.closeReviewModal = closeReviewModal;
+window.openReviewModal = openReviewModal;
 
 
 // =====================================================
@@ -1601,19 +1685,20 @@ async function submitReview(event) {
     // =================================================
 
     if (!token) {
-
+        messageElement.style.color = "#dc2626";
         messageElement.textContent =
             "Please login as a customer first.";
-
+        alert("Please login as a customer to submit a review.");
+        window.location.href = "../customer/login.html";
         return;
     }
 
 
     if (customerRole !== "customer") {
-
+        messageElement.style.color = "#dc2626";
         messageElement.textContent =
             "Please login using a customer account.";
-
+        alert("Only customer accounts can submit reviews.");
         return;
     }
 
@@ -1992,6 +2077,49 @@ document.addEventListener(
             );
 
         if (vendorLoginForm) {
+            checkExistingVendorSession();
+
+            const togglePasswordBtn =
+                document.getElementById(
+                    "toggleVendorPassword"
+                );
+
+            const passwordInput =
+                document.getElementById(
+                    "vendorPasswordLogin"
+                );
+
+            if (togglePasswordBtn && passwordInput) {
+                togglePasswordBtn.addEventListener(
+                    "click",
+                    function () {
+                        const isPassword =
+                            passwordInput.type === "password";
+
+                        passwordInput.type =
+                            isPassword ? "text" : "password";
+
+                        togglePasswordBtn.setAttribute(
+                            "aria-label",
+                            isPassword
+                                ? "Hide password"
+                                : "Show password"
+                        );
+
+                        togglePasswordBtn.setAttribute(
+                            "title",
+                            isPassword
+                                ? "Hide password"
+                                : "Show password"
+                        );
+
+                        togglePasswordBtn.innerHTML = isPassword
+                            ? `<svg class="eye-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`
+                            : `<svg class="eye-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
+                    }
+                );
+            }
+
             vendorLoginForm.addEventListener(
                 "submit",
                 handleVendorLogin
@@ -2042,13 +2170,25 @@ document.addEventListener(
 
 
         // =================================================
-        // CLOSE MODAL OUTSIDE CLICK
+        // CLOSE MODAL BUTTON & OUTSIDE CLICK
         // =================================================
 
         const reviewModal =
             document.getElementById(
                 "reviewModal"
             );
+
+        const closeReviewModalBtn =
+            document.getElementById(
+                "closeReviewModal"
+            );
+
+        if (closeReviewModalBtn) {
+            closeReviewModalBtn.addEventListener(
+                "click",
+                closeReviewModal
+            );
+        }
 
         if (reviewModal) {
             reviewModal.addEventListener(
@@ -2065,6 +2205,19 @@ document.addEventListener(
                 }
             );
         }
+
+        document.addEventListener(
+            "keydown",
+            function (event) {
+                if (
+                    event.key === "Escape" &&
+                    reviewModal &&
+                    reviewModal.style.display === "flex"
+                ) {
+                    closeReviewModal();
+                }
+            }
+        );
 
 
         // =================================================

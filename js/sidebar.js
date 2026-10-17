@@ -57,6 +57,58 @@
                     setCollapsed(false);
                 }
             });
+
+            // -------------------------------------------------
+            // Session awareness: show "My Dashboard" & "Logout" when logged in
+            // -------------------------------------------------
+            var hasDashboardLink = sidebar.querySelector('a[href*="dashboard.html"]');
+            if (!hasDashboardLink) {
+                var role = localStorage.getItem('userRole') ||
+                    (localStorage.getItem('adminToken') ? 'admin' :
+                    (localStorage.getItem('vendorToken') ? 'vendor' :
+                    (localStorage.getItem('customerToken') ? 'customer' : null)));
+
+                if (role) {
+                    var homeLink = sidebar.querySelector('a[href$="index.html"]');
+                    var prefix = (homeLink && homeLink.getAttribute('href').startsWith('../')) ? '../' : '';
+                    var dashboardUrl = prefix + (role === 'admin' ? 'admin/dashboard.html' : (role === 'vendor' ? 'vendor/dashboard.html' : 'customer/dashboard.html'));
+                    var dashboardLabel = (role === 'admin' ? 'Admin Dashboard' : (role === 'vendor' ? 'Vendor Dashboard' : 'My Dashboard'));
+
+                    var firstMenu = sidebar.querySelector('.sidebar-menu');
+                    if (firstMenu) {
+                        var dashLi = document.createElement('li');
+                        dashLi.className = 'menu-item session-item';
+                        dashLi.innerHTML = '<a href="' + dashboardUrl + '" class="menu-link session-dash-link" title="' + dashboardLabel + '" style="background:rgba(25,135,84,0.18);border:1px solid rgba(25,135,84,0.4);"><span class="link-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg></span><span class="link-text">' + dashboardLabel + '</span></a>';
+                        firstMenu.insertBefore(dashLi, firstMenu.firstChild);
+                    }
+
+                    var allMenus = sidebar.querySelectorAll('.sidebar-menu');
+                    var targetMenu = allMenus.length > 1 ? allMenus[allMenus.length - 1] : firstMenu;
+                    if (targetMenu) {
+                        var logoutLi = document.createElement('li');
+                        logoutLi.className = 'menu-item session-item';
+                        logoutLi.innerHTML = '<a href="#" class="menu-link session-logout-link" title="Logout" style="color:#FCA5A5;"><span class="link-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span><span class="link-text">Logout</span></a>';
+                        targetMenu.appendChild(logoutLi);
+
+                        logoutLi.querySelector('a').addEventListener('click', function (e) {
+                            e.preventDefault();
+                            localStorage.removeItem('customerToken');
+                            localStorage.removeItem('customerRole');
+                            localStorage.removeItem('customerId');
+                            localStorage.removeItem('vendorToken');
+                            localStorage.removeItem('vendorRole');
+                            localStorage.removeItem('vendorId');
+                            localStorage.removeItem('adminToken');
+                            localStorage.removeItem('adminRole');
+                            localStorage.removeItem('authToken');
+                            localStorage.removeItem('userRole');
+                            localStorage.removeItem('userId');
+                            localStorage.removeItem('userName');
+                            window.location.reload();
+                        });
+                    }
+                }
+            }
         }
 
         // -----------------------------------------------------
