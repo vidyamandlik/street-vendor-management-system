@@ -538,6 +538,15 @@ function updateStatistics(vendors) {
 // =====================================================
 
 async function updateVendorStatus(vendorId, newStatus, buttonElement) {
+     if (newStatus === "Rejected") {
+        const sure = confirm(
+            "Are you sure you want to reject vendor " + vendorId + "?"
+        );
+
+        if (!sure) {
+            return;
+        }
+    }
     const token = getAdminAuthToken();
 
     if (!token) {
