@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vendor Dashboard - Street Vendor Management System</title>
-    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/style.css?v=2">
 </head>
 <body class="has-sidebar">
 <header class="mobile-header">
@@ -441,16 +441,16 @@
                 <input type="number" id="editYears" min="0" required>
             </div>
 
-            <div class="edit-form-group">
+            <div class="edit-form-group full-width">
                 <label for="editDescription">Business Description</label>
                 <textarea id="editDescription"></textarea>
             </div>
 
-            <div style="display: flex; gap: 6px; margin-top: 10px;">
+            <div class="edit-profile-btn-row">
                 <button type="submit" class="btn">Save Profile Changes</button>
                 <button type="button" class="btn btn-secondary" onclick="cancelEdit()">Cancel</button>
             </div>
-            <p id="editProfileMessage" style="margin-top: 10px; font-weight: 600;"></p>
+            <p id="editProfileMessage"></p>
         </form>
     </section>
 
@@ -961,12 +961,21 @@ async function saveShopDetails() {
 
     const products = getProducts();
 
+    const shopDescriptionVal = document.getElementById("shopDescription")?.value.trim() || "";
+    const shopAddressVal = document.getElementById("shopAddress")?.value.trim() || "";
+    const shopContactVal = document.getElementById("shopContact")?.value.trim() || "";
+    const additionalInformationVal = document.getElementById("additionalInformation")?.value.trim() || "";
+
     const shopPayload = {
         days: availableDays,
         closingDay: closingDayValue,
         products: products,
         openingTime: openingTimeVal,
-        closingTime: closingTimeVal
+        closingTime: closingTimeVal,
+        description: shopDescriptionVal,
+        address: shopAddressVal,
+        contact: shopContactVal,
+        additionalInformation: additionalInformationVal
     };
 
     try {
@@ -993,24 +1002,17 @@ async function saveShopDetails() {
             throw new Error(result.message || "Unable to save shop details.");
         }
 
-        // Keep local draft cache with extra optional fields
-        const localCache = {
-            description: document.getElementById("shopDescription")?.value.trim() || "",
-            address: document.getElementById("shopAddress")?.value.trim() || "",
-            contact: document.getElementById("shopContact")?.value.trim() || "",
-            openingTime: openingTimeVal,
-            closingTime: closingTimeVal,
-            availableDays: availableDays,
-            days: availableDays,
-            closingDay: closingDayValue,
-            products: products,
-            additionalInformation: document.getElementById("additionalInformation")?.value.trim() || ""
-        };
+        const savedShopDetails = result.shopDetails || shopPayload;
 
-        localStorage.setItem(`shopDetails_${vendorId}`, JSON.stringify(localCache));
+        if (currentVendorData) {
+            currentVendorData.shopDetails = savedShopDetails;
+        }
+
+        // Keep local cache in sync with saved MongoDB shopDetails
+        localStorage.setItem(`shopDetails_${vendorId}`, JSON.stringify(savedShopDetails));
 
         // Update operational display
-        populateOperationalInfo(localCache);
+        populateOperationalInfo(savedShopDetails);
 
         // Update product catalog overview
         renderProductCatalogOverview(products);

@@ -58,14 +58,18 @@ function getCustomerAuthName() {
 }
 
 function clearCustomerAuth() {
-    localStorage.removeItem(AUTH_TOKEN_KEY);
-    localStorage.removeItem(USER_ROLE_KEY);
-    localStorage.removeItem(USER_ID_KEY);
-    localStorage.removeItem(USER_NAME_KEY);
+    const activeRole = localStorage.getItem(USER_ROLE_KEY) || localStorage.getItem("customerRole");
+    if (activeRole !== "vendor" && activeRole !== "admin") {
+        localStorage.removeItem(AUTH_TOKEN_KEY);
+        localStorage.removeItem(USER_ROLE_KEY);
+        localStorage.removeItem(USER_ID_KEY);
+        localStorage.removeItem(USER_NAME_KEY);
+    }
     localStorage.removeItem("customerToken");
     localStorage.removeItem("customerRole");
     localStorage.removeItem("customerId");
     localStorage.removeItem("customerName");
+    localStorage.removeItem("showVendorDirectory");
 }
 
 // Utility: Safely parse JSON response
@@ -168,7 +172,8 @@ if (customerRegisterForm) {
                                 name: name,
                                 mobile: mobile,
                                 email: email,
-                                password: password
+                                password: password,
+                                confirmPassword: confirmPassword
                             })
                         }
                     );
@@ -248,6 +253,121 @@ if (customerRegisterForm) {
 // CUSTOMER LOGIN
 // =====================================================
 
+function setCustomerLoginMessage(messageElement, text, type) {
+    if (!messageElement) return;
+    messageElement.textContent = text || "";
+    messageElement.classList.remove("status-message-success", "status-message-error");
+    if (type === "success") {
+        messageElement.classList.add("status-message-success");
+    } else if (type === "error") {
+        messageElement.classList.add("status-message-error");
+    }
+}
+
+function setupPasswordVisibilityToggle(toggleBtnId, inputId) {
+    const toggleBtn =
+        document.getElementById(toggleBtnId);
+
+    const input =
+        document.getElementById(inputId);
+
+    if (toggleBtn && input) {
+        toggleBtn.addEventListener(
+            "click",
+            function () {
+                const isPassword =
+                    input.type === "password";
+
+                input.type =
+                    isPassword ? "text" : "password";
+
+                const label = isPassword
+                    ? "Hide password"
+                    : "Show password";
+
+                toggleBtn.setAttribute(
+                    "aria-label",
+                    label
+                );
+
+                toggleBtn.setAttribute(
+                    "title",
+                    label
+                );
+
+                toggleBtn.innerHTML = isPassword
+                    ? `<svg class="eye-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`
+                    : `<svg class="eye-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
+            }
+        );
+    }
+}
+
+async function checkExistingCustomerSession() {
+    const token = getCustomerAuthToken();
+    const role = getCustomerAuthRole();
+    const customerId = getCustomerAuthId();
+
+    if (!token) {
+        return;
+    }
+
+    if (role === "vendor" || role === "admin") {
+        return;
+    }
+
+    let payload = null;
+    try {
+        const parts = token.split(".");
+        if (parts.length === 3) {
+            const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+            const jsonPayload = decodeURIComponent(
+                atob(base64)
+                    .split("")
+                    .map(c => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+                    .join("")
+            );
+            payload = JSON.parse(jsonPayload);
+        }
+    } catch {
+        payload = null;
+    }
+
+    if (!payload || (payload.exp && payload.exp * 1000 <= Date.now()) || payload.role !== "customer") {
+        clearCustomerAuth();
+        return;
+    }
+
+    const effectiveCustomerId = customerId || payload.id;
+    if (!effectiveCustomerId) {
+        clearCustomerAuth();
+        return;
+    }
+
+    try {
+        const response = await fetch(
+            `${API_BASE_URL}/customers/${encodeURIComponent(effectiveCustomerId)}`,
+            {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            }
+        );
+
+        if (response.ok) {
+            const data = await response.json();
+            if (data && (data.customer || data.id)) {
+                window.location.replace("dashboard.html");
+            }
+        } else if (response.status === 401 || response.status === 403 || response.status === 404) {
+            clearCustomerAuth();
+        }
+    } catch (error) {
+        console.warn("Backend unavailable while validating existing session:", error);
+    }
+}
+
 const customerLoginForm =
     document.getElementById(
         "customerLoginForm"
@@ -255,6 +375,12 @@ const customerLoginForm =
 
 
 if (customerLoginForm) {
+    checkExistingCustomerSession();
+
+    setupPasswordVisibilityToggle(
+        "toggleCustomerPassword",
+        "customerLoginPassword"
+    );
 
     customerLoginForm.addEventListener(
         "submit",
@@ -262,6 +388,14 @@ if (customerLoginForm) {
 
             event.preventDefault();
 
+            const submitBtn =
+                customerLoginForm.querySelector(
+                    'button[type="submit"]'
+                );
+
+            if (submitBtn && submitBtn.disabled) {
+                return;
+            }
 
             const loginId =
                 document
@@ -285,8 +419,16 @@ if (customerLoginForm) {
                     "customerLoginMessage"
                 );
 
+            setCustomerLoginMessage(message, "", "");
+
+            const originalBtnText =
+                submitBtn ? submitBtn.textContent : "Login";
 
             try {
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = "Logging in...";
+                }
 
                 const response =
                     await fetch(
@@ -311,12 +453,6 @@ if (customerLoginForm) {
                     await response.json();
 
 
-                console.log(
-                    "Customer login response:",
-                    data
-                );
-
-
                 if (response.ok) {
                     const token = data.token;
                     const role = data.role || "customer";
@@ -337,8 +473,12 @@ if (customerLoginForm) {
 
                     // Show Vendor Directory only for logged-in customers
                     localStorage.setItem("showVendorDirectory", "true");
-                    message.textContent = "Login successful!";
-                    message.style.color = "green";
+
+                    setCustomerLoginMessage(
+                        message,
+                        "Login successful!",
+                        "success"
+                    );
 
 
                     // Redirect to customer dashboard
@@ -352,25 +492,32 @@ if (customerLoginForm) {
 
 
                 } else {
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = originalBtnText;
+                    }
 
-                    message.textContent =
-                        data.message ||
-                        "Invalid email/mobile or password.";
-
-                    message.style.color =
-                        "red";
+                    setCustomerLoginMessage(
+                        message,
+                        data.message || "Invalid email/mobile or password.",
+                        "error"
+                    );
                 }
 
 
             } catch (error) {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalBtnText;
+                }
 
                 console.error(error);
 
-                message.textContent =
-                    "Cannot connect to backend server.";
-
-                message.style.color =
-                    "red";
+                setCustomerLoginMessage(
+                    message,
+                    "Cannot connect to backend server.",
+                    "error"
+                );
             }
         }
     );
@@ -396,7 +543,9 @@ if (customerDashboard) {
     // Check customer login
     if (!token || role !== "customer" || !customerId) {
         alert("Please login as a customer first.");
-        clearCustomerAuth();
+        if (role !== "vendor" && role !== "admin") {
+            clearCustomerAuth();
+        }
         window.location.href = "login.html";
     } else {
         // Load customer profile
@@ -404,7 +553,67 @@ if (customerDashboard) {
 
         // Load verified vendors
         loadVerifiedVendors();
+
+        // Setup dashboard navigation & active state
+        setupCustomerDashboardNavigation();
     }
+}
+
+
+// =====================================================
+// DASHBOARD SIDEBAR NAVIGATION & ACTIVE STATE
+// =====================================================
+
+function setupCustomerDashboardNavigation() {
+    const navLinks = document.querySelectorAll("#dashSidebar .dash-nav .dash-link");
+    if (!navLinks.length) return;
+
+    function setActiveSection(targetSection) {
+        let matched = false;
+        navLinks.forEach(link => {
+            const section = link.getAttribute("data-section") || link.getAttribute("href")?.replace(/^#/, "");
+            if (section && section === targetSection) {
+                link.classList.add("active");
+                link.setAttribute("aria-current", "page");
+                matched = true;
+            } else {
+                link.classList.remove("active");
+                link.removeAttribute("aria-current");
+            }
+        });
+
+        // Default to overview if no section matched
+        if (!matched && (!targetSection || targetSection === "top" || targetSection === "overview")) {
+            navLinks.forEach(link => {
+                const section = link.getAttribute("data-section");
+                if (section === "overview") {
+                    link.classList.add("active");
+                    link.setAttribute("aria-current", "page");
+                }
+            });
+        }
+    }
+
+    navLinks.forEach(link => {
+        link.addEventListener("click", function () {
+            const target = this.getAttribute("data-section") || this.getAttribute("href")?.replace(/^#/, "");
+            if (target) {
+                setActiveSection(target);
+            }
+        });
+    });
+
+    function syncFromHash() {
+        const hash = window.location.hash.replace(/^#/, "");
+        if (hash) {
+            setActiveSection(hash);
+        } else {
+            setActiveSection("overview");
+        }
+    }
+
+    window.addEventListener("hashchange", syncFromHash);
+    syncFromHash();
 }
 
 
@@ -471,33 +680,59 @@ async function loadCustomerProfile(
         }
 
 
-        // Profile name
+        // Profile name, welcome name, header name and avatar
+
+        const rawName =
+            typeof data.name === "string"
+                ? data.name.trim()
+                : "";
+
+        const displayName =
+            rawName || "Customer";
+
+        const initial =
+            rawName
+                ? rawName.charAt(0).toUpperCase()
+                : "C";
 
         const profileName =
             document.getElementById(
                 "profileName"
             );
 
-
         if (profileName) {
-
             profileName.textContent =
-                data.name || "-";
+                rawName || "-";
         }
-
-
-        // Welcome name
 
         const welcomeName =
             document.getElementById(
                 "customerName"
             );
 
-
         if (welcomeName) {
-
             welcomeName.textContent =
-                data.name || "Customer";
+                displayName;
+        }
+
+        const dashUserName =
+            document.getElementById(
+                "dashUserName"
+            );
+
+        if (dashUserName) {
+            dashUserName.textContent =
+                displayName;
+        }
+
+        const dashAvatar =
+            document.getElementById(
+                "dashAvatar"
+            );
+
+        if (dashAvatar) {
+            dashAvatar.textContent =
+                initial;
         }
 
 
@@ -513,6 +748,22 @@ async function loadCustomerProfile(
 
             profileEmail.textContent =
                 data.email || "-";
+        }
+
+
+        // Mobile Number
+
+        const profileMobile =
+            document.getElementById(
+                "profileMobile"
+            );
+
+        if (profileMobile) {
+
+            profileMobile.textContent =
+                (typeof data.mobile === "string" && data.mobile.trim())
+                    ? data.mobile.trim()
+                    : "-";
         }
 
 
@@ -751,6 +1002,26 @@ function setupVendorFilters() {
         "change",
         applyVendorFilters
     );
+
+
+    // Clear filters button
+
+    const clearFiltersBtn =
+        document.getElementById(
+            "clearFilters"
+        );
+
+    if (clearFiltersBtn) {
+        clearFiltersBtn.addEventListener(
+            "click",
+            function () {
+                searchInput.value = "";
+                categoryFilter.value = "";
+                districtFilter.value = "";
+                applyVendorFilters();
+            }
+        );
+    }
 }
 
 
@@ -1513,6 +1784,20 @@ let selectedCustomerRating = 0;
 
 
 
+function setCustomerReviewMessage(text, type) {
+    const msgEl = document.getElementById("customerReviewMessage");
+    if (!msgEl) return;
+    if (!text) {
+        msgEl.textContent = "";
+        msgEl.className = "customer-review-message";
+        msgEl.style.display = "none";
+        return;
+    }
+    msgEl.textContent = text;
+    msgEl.className = "customer-review-message " + (type === "success" ? "status-message-success" : "status-message-error");
+    msgEl.style.display = "block";
+}
+
 function openCustomerReviewModal(
     vendorId,
     vendorName
@@ -1568,6 +1853,8 @@ function openCustomerReviewModal(
 
     selectCustomerRating(0);
 
+    setCustomerReviewMessage("", "");
+
 
     modal.style.display =
         "flex";
@@ -1588,6 +1875,8 @@ function closeCustomerReviewModal() {
         modal.style.display =
             "none";
     }
+
+    setCustomerReviewMessage("", "");
 }
 
 
@@ -1687,15 +1976,21 @@ if (customerReviewForm) {
                 );
 
 
+            setCustomerReviewMessage("", "");
+
+
             if (!token) {
 
-                alert(
-                    "Your session has expired. Please log in again."
+                setCustomerReviewMessage(
+                    "Your session has expired. Please log in again.",
+                    "error"
                 );
 
 
-                window.location.href =
-                    "login.html";
+                setTimeout(function () {
+                    window.location.href =
+                        "login.html";
+                }, 1500);
 
 
                 return;
@@ -1704,8 +1999,9 @@ if (customerReviewForm) {
 
             if (!selectedCustomerRating) {
 
-                alert(
-                    "Please select a rating."
+                setCustomerReviewMessage(
+                    "Please select a rating from 1 to 5 stars.",
+                    "error"
                 );
 
                 return;
@@ -1714,8 +2010,9 @@ if (customerReviewForm) {
 
             if (!review) {
 
-                alert(
-                    "Please enter a review."
+                setCustomerReviewMessage(
+                    "Please enter your review text.",
+                    "error"
                 );
 
                 return;
@@ -1777,15 +2074,18 @@ if (customerReviewForm) {
                 }
 
 
-                closeCustomerReviewModal();
-
-
-                alert(
-                    "Thank you for your review."
+                setCustomerReviewMessage(
+                    "Thank you! Your review has been submitted successfully.",
+                    "success"
                 );
 
 
                 loadVerifiedVendors();
+
+
+                setTimeout(function () {
+                    closeCustomerReviewModal();
+                }, 1200);
 
 
             } catch (error) {
@@ -1796,9 +2096,10 @@ if (customerReviewForm) {
                 );
 
 
-                alert(
+                setCustomerReviewMessage(
                     error.message ||
-                    "Unable to submit your review."
+                    "Unable to submit your review.",
+                    "error"
                 );
 
 

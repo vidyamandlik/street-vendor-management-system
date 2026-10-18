@@ -105,11 +105,15 @@ async function handleVendorRegistration(event) {
     const originalBtnText =
         submitBtn ? submitBtn.textContent : "Register as Vendor";
 
+    const confirmPassword =
+        document.getElementById("confirmPassword")?.value;
+
     const data = {
         name: document.getElementById("vendorName")?.value.trim(),
         mobile: document.getElementById("mobile")?.value.trim(),
         email: document.getElementById("email")?.value.trim(),
         password: document.getElementById("vendorPassword")?.value,
+        confirmPassword,
 
         businessName:
             document.getElementById("businessName")?.value.trim(),
@@ -130,15 +134,16 @@ async function handleVendorRegistration(event) {
             document.getElementById("description")?.value.trim()
     };
 
-    const confirmPassword =
-        document.getElementById("confirmPassword")?.value;
-
     const errorElement =
         document.getElementById("vendorRegisterError");
 
     if (errorElement) {
         errorElement.textContent = "";
     }
+
+    form.querySelectorAll("input, select, textarea").forEach(el => {
+        el.removeAttribute("aria-invalid");
+    });
 
     if (
         !data.name ||
@@ -153,6 +158,36 @@ async function handleVendorRegistration(event) {
         data.years === "" ||
         !data.description
     ) {
+        const requiredFields = [
+            { val: data.name, id: "vendorName" },
+            { val: data.mobile, id: "mobile" },
+            { val: data.email, id: "email" },
+            { val: data.password, id: "vendorPassword" },
+            { val: confirmPassword, id: "confirmPassword" },
+            { val: data.businessName, id: "businessName" },
+            { val: data.category, id: "category" },
+            { val: data.district, id: "district" },
+            { val: data.address, id: "address" },
+            { val: data.years !== "" ? data.years : "", id: "years" },
+            { val: data.description, id: "description" }
+        ];
+
+        let firstInvalid = null;
+        for (const field of requiredFields) {
+            if (!field.val) {
+                const el = document.getElementById(field.id);
+                if (el) {
+                    el.setAttribute("aria-invalid", "true");
+                    if (!firstInvalid) {
+                        firstInvalid = el;
+                    }
+                }
+            }
+        }
+        if (firstInvalid) {
+            firstInvalid.focus();
+        }
+
         if (errorElement) {
             errorElement.textContent =
                 "Please fill all required fields.";
@@ -162,6 +197,11 @@ async function handleVendorRegistration(event) {
     }
 
     if (!/^[0-9]{10}$/.test(data.mobile)) {
+        const el = document.getElementById("mobile");
+        if (el) {
+            el.setAttribute("aria-invalid", "true");
+            el.focus();
+        }
         if (errorElement) {
             errorElement.textContent =
                 "Mobile number must be exactly 10 digits.";
@@ -171,6 +211,11 @@ async function handleVendorRegistration(event) {
     }
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+        const el = document.getElementById("email");
+        if (el) {
+            el.setAttribute("aria-invalid", "true");
+            el.focus();
+        }
         if (errorElement) {
             errorElement.textContent =
                 "Please enter a valid email address.";
@@ -180,6 +225,11 @@ async function handleVendorRegistration(event) {
     }
 
     if (data.password.length < 8) {
+        const el = document.getElementById("vendorPassword");
+        if (el) {
+            el.setAttribute("aria-invalid", "true");
+            el.focus();
+        }
         if (errorElement) {
             errorElement.textContent =
                 "Password must be at least 8 characters.";
@@ -189,9 +239,29 @@ async function handleVendorRegistration(event) {
     }
 
     if (data.password !== confirmPassword) {
+        const el = document.getElementById("confirmPassword");
+        if (el) {
+            el.setAttribute("aria-invalid", "true");
+            el.focus();
+        }
         if (errorElement) {
             errorElement.textContent =
                 "Passwords do not match.";
+            errorElement.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+        return;
+    }
+
+    const yearsNumber = Number(data.years);
+    if (!Number.isFinite(yearsNumber) || yearsNumber < 0 || yearsNumber > 100) {
+        const el = document.getElementById("years");
+        if (el) {
+            el.setAttribute("aria-invalid", "true");
+            el.focus();
+        }
+        if (errorElement) {
+            errorElement.textContent =
+                "Years must be a number between 0 and 100.";
             errorElement.scrollIntoView({ behavior: "smooth", block: "nearest" });
         }
         return;
@@ -264,6 +334,21 @@ async function handleVendorRegistration(event) {
                 error.message ||
                 "Vendor registration failed.";
             errorElement.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+
+        const lowerMsg = (error.message || "").toLowerCase();
+        if (lowerMsg.includes("email")) {
+            const emailEl = document.getElementById("email");
+            if (emailEl) {
+                emailEl.setAttribute("aria-invalid", "true");
+                emailEl.focus();
+            }
+        } else if (lowerMsg.includes("mobile") || lowerMsg.includes("phone")) {
+            const mobileEl = document.getElementById("mobile");
+            if (mobileEl) {
+                mobileEl.setAttribute("aria-invalid", "true");
+                mobileEl.focus();
+            }
         }
     }
 }
@@ -849,19 +934,6 @@ function renderVendorProfile(vendor) {
 
                         <span>
                             ${escapeHtml(vendor.mobile || "N/A")}
-                        </span>
-
-                    </div>
-
-
-                    <div class="profile-detail">
-
-                        <strong>
-                            Email
-                        </strong>
-
-                        <span>
-                            ${escapeHtml(vendor.email || "N/A")}
                         </span>
 
                     </div>
@@ -2184,6 +2256,18 @@ document.addEventListener(
                 "submit",
                 handleVendorRegistration
             );
+
+            vendorForm.addEventListener("input", function (event) {
+                if (event.target && event.target.getAttribute("aria-invalid") === "true") {
+                    event.target.removeAttribute("aria-invalid");
+                }
+            });
+
+            vendorForm.addEventListener("change", function (event) {
+                if (event.target && event.target.getAttribute("aria-invalid") === "true") {
+                    event.target.removeAttribute("aria-invalid");
+                }
+            });
         }
 
 

@@ -44,6 +44,10 @@ const MONGODB_URI =
 
 const app = express();
 
+if (process.env.NODE_ENV === "production" || process.env.TRUST_PROXY === "true") {
+    app.set("trust proxy", 1);
+}
+
 
 // =====================================================
 // ALLOWED CORS ORIGINS
@@ -129,6 +133,30 @@ function isValidEmail(value) {
 
 function allStrings(...values) {
     return values.every(v => typeof v === "string");
+}
+
+const ALLOWED_VENDOR_CATEGORIES = [
+    "Food",
+    "Fruits and Vegetables",
+    "Clothing",
+    "Accessories",
+    "Grocery",
+    "Other"
+];
+
+function isValidVendorCategory(value) {
+    return typeof value === "string" && ALLOWED_VENDOR_CATEGORIES.includes(value.trim());
+}
+
+function formatDistrict(district) {
+    if (!district || typeof district !== "string") return "";
+    return district
+        .trim()
+        .replace(/\s+/g, " ")
+        .toLowerCase()
+        .split(" ")
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
 }
 
 
@@ -242,14 +270,128 @@ function limitLoginAttempts(req, res, next) {
 
 
 // =====================================================
+// REGISTRATION RATE LIMITER
+// =====================================================
+
+const registrationAttempts = new Map();
+
+function limitRegistrationAttempts(req, res, next) {
+
+    const ip =
+        req.ip ||
+        req.socket?.remoteAddress ||
+        "unknown";
+
+    const key = `register:${ip}`;
+    const now = Date.now();
+    const windowMs = 15 * 60 * 1000; // 15 minutes
+    const maxAttempts = 5; // Allow at most 5 registration requests per 15 min per IP
+
+    const attempts =
+        (
+            registrationAttempts.get(key) || []
+        ).filter(
+            time =>
+                now - time < windowMs
+        );
+
+    if (attempts.length >= maxAttempts) {
+
+        return res.status(429).json({
+            message:
+                "Too many registration attempts from this IP. Please try again after 15 minutes."
+        });
+    }
+
+    attempts.push(now);
+    registrationAttempts.set(key, attempts);
+
+    // Periodically clean up stale entries if map grows large
+    if (registrationAttempts.size > 10000) {
+        for (const [k, v] of registrationAttempts.entries()) {
+            const fresh = v.filter(t => now - t < windowMs);
+            if (fresh.length === 0) {
+                registrationAttempts.delete(k);
+            } else {
+                registrationAttempts.set(k, fresh);
+            }
+        }
+    }
+
+    next();
+}
+
+
+// =====================================================
+// REVIEW SUBMISSION RATE LIMITER
+// =====================================================
+
+const reviewAttempts = new Map();
+
+function limitReviewAttempts(req, res, next) {
+
+    const ip =
+        req.ip ||
+        req.socket?.remoteAddress ||
+        "unknown";
+
+    const customerId =
+        req.user?.id ||
+        req.user?.customerId ||
+        "anonymous";
+
+    const key = `review:${customerId}:${ip}`;
+    const now = Date.now();
+    const windowMs = 15 * 60 * 1000; // 15 minutes
+    const maxAttempts = 15; // Allow at most 15 review submissions per 15 min
+
+    const attempts =
+        (
+            reviewAttempts.get(key) || []
+        ).filter(
+            time =>
+                now - time < windowMs
+        );
+
+    if (attempts.length >= maxAttempts) {
+
+        return res.status(429).json({
+            message:
+                "Too many review submissions. Please try again after 15 minutes."
+        });
+    }
+
+    attempts.push(now);
+    reviewAttempts.set(key, attempts);
+
+    // Periodically clean up stale entries if map grows large
+    if (reviewAttempts.size > 10000) {
+        for (const [k, v] of reviewAttempts.entries()) {
+            const fresh = v.filter(t => now - t < windowMs);
+            if (fresh.length === 0) {
+                reviewAttempts.delete(k);
+            } else {
+                reviewAttempts.set(k, fresh);
+            }
+        }
+    }
+
+    next();
+}
+
+
+// =====================================================
 // MONGODB
 // =====================================================
 
 const client =
     new MongoClient(MONGODB_URI);
 
+const DB_NAME =
+    process.env.DB_NAME || "streetVendorDB";
+
 const db =
-    client.db("streetVendorDB");
+    client.db(DB_NAME);
 
 const vendorsCollection =
     db.collection("vendors");
@@ -541,6 +683,7 @@ async function generateVendorId() {
 
 app.post(
     "/api/vendors",
+    limitRegistrationAttempts,
     async (req, res) => {
 
         try {
@@ -550,6 +693,7 @@ app.post(
                 mobile,
                 email,
                 password,
+                confirmPassword,
                 businessName,
                 category,
                 district,
@@ -558,32 +702,34 @@ app.post(
                 description
             } = req.body;
 
+            if (!allStrings(name, mobile, email, password, confirmPassword,
+                businessName, category, district,
+                address, description)) {
+                return res.status(400).json({
+                    message: "Invalid data in the form."
+                });
+            }
+
             if (
-                !name ||
-                !mobile ||
-                !email ||
+                !name.trim() ||
+                !mobile.trim() ||
+                !email.trim() ||
                 !password ||
-                !businessName ||
-                !category ||
-                !district ||
-                !address ||
+                !confirmPassword ||
+                !businessName.trim() ||
+                !category.trim() ||
+                !district.trim() ||
+                !address.trim() ||
                 years === undefined ||
                 years === null ||
-                !description
+                String(years).trim() === "" ||
+                !description.trim()
             ) {
-
                 return res.status(400).json({
                     message:
                         "All required fields must be filled."
                 });
             }
-            if (!allStrings(name, mobile, email, password,
-                businessName, category, district,
-                address, description)) {
-    return res.status(400).json({
-        message: "Invalid data in the form."
-    });
-}
 
 if (!isValidMobile(mobile)) {
     return res.status(400).json({
@@ -604,11 +750,23 @@ if (!Number.isFinite(yearsNumber) || yearsNumber < 0 || yearsNumber > 100) {
     });
 }
 
+if (!isValidVendorCategory(category)) {
+    return res.status(400).json({
+        message: "Invalid business category selected."
+    });
+}
+
             if (password.length < 8) {
 
                 return res.status(400).json({
                     message:
                         "Password must be at least 8 characters."
+                });
+            }
+
+            if (password !== confirmPassword) {
+                return res.status(400).json({
+                    message: "Passwords do not match."
                 });
             }
 
@@ -628,15 +786,10 @@ if (!Number.isFinite(yearsNumber) || yearsNumber < 0 || yearsNumber > 100) {
                 });
             }
 
-            const vendorId =
-                await generateVendorId();
-
             const hashedPassword =
                 await hashPassword(password);
 
             const vendor = {
-
-                id: vendorId,
 
                 name: name.trim(),
 
@@ -653,7 +806,7 @@ if (!Number.isFinite(yearsNumber) || yearsNumber < 0 || yearsNumber > 100) {
                     category.trim(),
 
                 district:
-                    district.trim(),
+                    formatDistrict(district),
 
                 address:
                     address.trim(),
@@ -669,9 +822,34 @@ if (!Number.isFinite(yearsNumber) || yearsNumber < 0 || yearsNumber > 100) {
                 createdAt: new Date()
             };
 
-            await vendorsCollection.insertOne(
-                vendor
-            );
+            let vendorId;
+            let inserted = false;
+            let attempts = 0;
+            const maxAttempts = 3;
+
+            while (!inserted && attempts < maxAttempts) {
+                attempts++;
+                vendorId = await generateVendorId();
+                vendor.id = vendorId;
+
+                try {
+                    await vendorsCollection.insertOne(vendor);
+                    inserted = true;
+                } catch (insertError) {
+                    const isIdCollision =
+                        insertError &&
+                        insertError.code === 11000 &&
+                        (
+                            insertError.keyPattern?.id ||
+                            (typeof insertError.message === "string" && insertError.message.includes("id_1"))
+                        );
+
+                    if (isIdCollision && attempts < maxAttempts) {
+                        continue;
+                    }
+                    throw insertError;
+                }
+            }
 
             res.status(201).json({
                 message:
@@ -681,11 +859,22 @@ if (!Number.isFinite(yearsNumber) || yearsNumber < 0 || yearsNumber > 100) {
 
         } catch (error) {
 
-               if (error && error.code === 11000) {
-               return res.status(409).json({
-               message: "Email or mobile number already registered."
-               });
-              }
+            if (error && error.code === 11000) {
+                const isIdCollision =
+                    error.keyPattern?.id ||
+                    (typeof error.message === "string" && error.message.includes("id_1"));
+
+                if (isIdCollision) {
+                    console.error("Vendor ID collision could not be resolved after retries:", error);
+                    return res.status(500).json({
+                        message: "Failed to generate a unique Vendor ID. Please try again."
+                    });
+                }
+
+                return res.status(409).json({
+                    message: "Email or mobile number already registered."
+                });
+            }
             console.error(
                 "Vendor registration error:",
                 error
@@ -732,7 +921,7 @@ app.get(
                     },
                     {
                         projection: {
-                            password: 0, email: 0
+                            password: 0
                         }
                     }
                 );
@@ -812,8 +1001,8 @@ app.put(
   if (businessName !== undefined && businessName.trim() === "") {
       return res.status(400).json({ message: "Business name cannot be empty." });
   }
-  if (category !== undefined && category.trim() === "") {
-      return res.status(400).json({ message: "Category cannot be empty." });
+  if (category !== undefined && !isValidVendorCategory(category)) {
+      return res.status(400).json({ message: "Invalid business category selected." });
   }
   if (district !== undefined && district.trim() === "") {
       return res.status(400).json({ message: "District cannot be empty." });
@@ -856,7 +1045,7 @@ app.put(
 
             if (district !== undefined)
                 updateData.district =
-                    district.trim();
+                    formatDistrict(district);
 
             if (address !== undefined)
                 updateData.address =
@@ -992,8 +1181,66 @@ app.put(
                 closingDay,
                 products,
                 openingTime,
-                closingTime
+                closingTime,
+                description,
+                address,
+                contact,
+                additionalInformation
             } = req.body;
+
+            // Validate optional shop info fields if provided
+            if (description !== undefined && description !== null) {
+                if (typeof description !== "string") {
+                    return res.status(400).json({
+                        message: "Shop description must be a string."
+                    });
+                }
+                if (description.length > 500) {
+                    return res.status(400).json({
+                        message: "Shop description cannot exceed 500 characters."
+                    });
+                }
+            }
+
+            if (address !== undefined && address !== null) {
+                if (typeof address !== "string") {
+                    return res.status(400).json({
+                        message: "Shop address must be a string."
+                    });
+                }
+                if (address.length > 500) {
+                    return res.status(400).json({
+                        message: "Shop address cannot exceed 500 characters."
+                    });
+                }
+            }
+
+            if (contact !== undefined && contact !== null) {
+                if (typeof contact !== "string") {
+                    return res.status(400).json({
+                        message: "Shop contact must be a string."
+                    });
+                }
+                const trimmedContact = contact.trim();
+                if (trimmedContact !== "" && !isValidMobile(trimmedContact)) {
+                    return res.status(400).json({
+                        message: "Shop contact number must be exactly 10 digits."
+                    });
+                }
+            }
+
+            if (additionalInformation !== undefined && additionalInformation !== null) {
+                if (typeof additionalInformation !== "string") {
+                    return res.status(400).json({
+                        message: "Additional information must be a string."
+                    });
+                }
+                if (additionalInformation.length > 1000) {
+                    return res.status(400).json({
+                        message: "Additional information cannot exceed 1000 characters."
+                    });
+                }
+            }
 
             // Validate arrays
             if (!Array.isArray(days)) {
@@ -1182,6 +1429,22 @@ app.put(
                 closingTime: closingTime.trim(),
                 updatedAt: new Date()
             };
+
+            if (description !== undefined) {
+                updatedShopDetails.description = description !== null ? description.trim() : "";
+            }
+
+            if (address !== undefined) {
+                updatedShopDetails.address = address !== null ? address.trim() : "";
+            }
+
+            if (contact !== undefined) {
+                updatedShopDetails.contact = contact !== null ? contact.trim() : "";
+            }
+
+            if (additionalInformation !== undefined) {
+                updatedShopDetails.additionalInformation = additionalInformation !== null ? additionalInformation.trim() : "";
+            }
 
             // Save shop details
             const result =
@@ -1589,6 +1852,7 @@ async function generateCustomerId() {
 
 app.post(
     "/api/customers",
+    limitRegistrationAttempts,
     async (req, res) => {
 
         try {
@@ -1597,7 +1861,8 @@ app.post(
                 name,
                 mobile,
                 email,
-                password
+                password,
+                confirmPassword
             } = req.body;
 
             if (
@@ -1614,6 +1879,18 @@ app.post(
             if (!allStrings(name, mobile, email, password)) {
                 return res.status(400).json({
                     message: "Invalid data."
+                });
+            }
+
+            if (name.trim() === "") {
+                return res.status(400).json({
+                    message: "Name cannot be empty."
+                });
+            }
+
+            if (typeof confirmPassword !== "string" || password !== confirmPassword) {
+                return res.status(400).json({
+                    message: "Passwords do not match."
                 });
             }
 
@@ -1917,14 +2194,10 @@ app.post(
     "/api/reviews",
     authenticateToken,
     authorizeRole("customer"),
+    limitReviewAttempts,
     async (req, res) => {
 
         try {
-
-            console.log("========== ADD / UPDATE REVIEW ==========");
-            console.log("USER:", req.user);
-            console.log("BODY:", req.body);
-
 
             // =================================================
             // GET DATA

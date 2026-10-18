@@ -92,14 +92,25 @@
 
                         logoutLi.querySelector('a').addEventListener('click', function (e) {
                             e.preventDefault();
-                            localStorage.removeItem('customerToken');
-                            localStorage.removeItem('customerRole');
-                            localStorage.removeItem('customerId');
-                            localStorage.removeItem('vendorToken');
-                            localStorage.removeItem('vendorRole');
-                            localStorage.removeItem('vendorId');
-                            localStorage.removeItem('adminToken');
-                            localStorage.removeItem('adminRole');
+                            var activeRole = localStorage.getItem('userRole') || role;
+                            if (activeRole === 'customer') {
+                                localStorage.removeItem('customerToken');
+                                localStorage.removeItem('customerRole');
+                                localStorage.removeItem('customerId');
+                                localStorage.removeItem('customerName');
+                                localStorage.removeItem('showVendorDirectory');
+                            } else if (activeRole === 'vendor') {
+                                localStorage.removeItem('vendorToken');
+                                localStorage.removeItem('vendorRole');
+                                localStorage.removeItem('vendorId');
+                                localStorage.removeItem('vendorName');
+                                localStorage.removeItem('loggedInVendorId');
+                                localStorage.removeItem('vendorBusinessName');
+                            } else if (activeRole === 'admin') {
+                                localStorage.removeItem('adminToken');
+                                localStorage.removeItem('adminRole');
+                                localStorage.removeItem('adminUser');
+                            }
                             localStorage.removeItem('authToken');
                             localStorage.removeItem('userRole');
                             localStorage.removeItem('userId');

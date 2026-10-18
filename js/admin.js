@@ -11,19 +11,25 @@ const USER_ID_KEY = "userId";
 const USER_NAME_KEY = "userName";
 
 function getAdminAuthToken() {
-    return localStorage.getItem(AUTH_TOKEN_KEY) || localStorage.getItem("token");
+    return localStorage.getItem(AUTH_TOKEN_KEY) || localStorage.getItem("token") || localStorage.getItem("adminToken");
 }
 
 function getAdminAuthRole() {
-    return localStorage.getItem(USER_ROLE_KEY) || localStorage.getItem("userRole");
+    return localStorage.getItem(USER_ROLE_KEY) || localStorage.getItem("userRole") || localStorage.getItem("adminRole");
 }
 
 function clearAdminAuth() {
-    localStorage.removeItem(AUTH_TOKEN_KEY);
-    localStorage.removeItem(USER_ROLE_KEY);
-    localStorage.removeItem(USER_ID_KEY);
-    localStorage.removeItem(USER_NAME_KEY);
-    localStorage.removeItem("token");
+    const activeRole = localStorage.getItem(USER_ROLE_KEY) || localStorage.getItem("userRole");
+    if (activeRole === "admin") {
+        localStorage.removeItem(AUTH_TOKEN_KEY);
+        localStorage.removeItem(USER_ROLE_KEY);
+        localStorage.removeItem(USER_ID_KEY);
+        localStorage.removeItem(USER_NAME_KEY);
+        localStorage.removeItem("token");
+    }
+    localStorage.removeItem("adminToken");
+    localStorage.removeItem("adminUser");
+    localStorage.removeItem("adminRole");
 }
 
 // In-memory state for fast filtering and statistics
@@ -45,6 +51,18 @@ function escapeHtml(str) {
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
+}
+
+// Date formatting helper for table display
+function formatDate(value) {
+    if (!value) return "N/A";
+    const d = new Date(value);
+    if (isNaN(d.getTime())) return "N/A";
+    return d.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric"
+    });
 }
 
 // Debounce for input performance optimization
@@ -175,6 +193,9 @@ if (adminLoginForm) {
             // Backward-compatible keys
             localStorage.setItem("token", result.token);
             localStorage.setItem("userRole", result.role || "admin");
+            localStorage.setItem("adminToken", result.token);
+            localStorage.setItem("adminUser", result.username || "admin");
+            localStorage.setItem("adminRole", result.role || "admin");
 
             // Open admin dashboard
             window.location.href = "dashboard.html";
@@ -226,7 +247,10 @@ function initAdminDashboard() {
     const refreshBtn = document.getElementById("refreshVendorsBtn");
 
     if (searchInput) {
-        searchInput.addEventListener("input", debounce(applyVendorFilters, 200));
+        searchInput.addEventListener("input", debounce(() => {
+            window.currentPage = 1;
+            applyVendorFilters();
+        }, 200));
     }
 
     // Sidebar status filter shortcut links
@@ -258,6 +282,7 @@ function initAdminDashboard() {
 
     if (statusFilter) {
         statusFilter.addEventListener("change", () => {
+            window.currentPage = 1;
             applyVendorFilters();
             // Sync sidebar active highlight with selected dropdown option
             const currentStatus = statusFilter.value;
@@ -319,7 +344,7 @@ async function loadVendorData(isManualRefresh = false) {
     if (vendorTableBody.children.length === 0 || isManualRefresh) {
         vendorTableBody.innerHTML = `
             <tr>
-                <td colspan="7" class="table-state-cell">
+                <td colspan="8" class="table-state-cell">
                     Loading registered street vendors...
                 </td>
             </tr>
@@ -345,7 +370,7 @@ async function loadVendorData(isManualRefresh = false) {
             const errorMsg = (result && result.message) ? result.message : "Unable to load vendor data from server.";
             vendorTableBody.innerHTML = `
                 <tr>
-                    <td colspan="7" class="table-state-cell error-text">
+                    <td colspan="8" class="table-state-cell error-text">
                         ${escapeHtml(errorMsg)}
                     </td>
                 </tr>
@@ -371,7 +396,7 @@ async function loadVendorData(isManualRefresh = false) {
         console.error("Error loading vendor data:", error);
         vendorTableBody.innerHTML = `
             <tr>
-                <td colspan="7" class="table-state-cell error-text">
+                <td colspan="8" class="table-state-cell error-text">
                     Unable to connect to the backend server. Please verify the server is running.
                 </td>
             </tr>
@@ -470,7 +495,7 @@ function renderVendorTable(vendors) {
     if (!vendors || vendors.length === 0) {
         vendorTableBody.innerHTML = `
             <tr>
-                <td colspan="7" class="table-state-cell">
+                <td colspan="8" class="table-state-cell">
                     No vendors found matching your filter criteria.
                 </td>
             </tr>
@@ -497,7 +522,8 @@ function renderVendorTable(vendors) {
 
         // Action buttons tailored to current status
         let actionsHtml = "";
-        const escapedId = escapeHtml(vendor.id);
+        const rawId = String(vendor.id || vendor.vendorId || vendor._id || "");
+        const escapedId = escapeHtml(rawId);
 
         if (normalizedStatus === "pending") {
             actionsHtml = `
@@ -527,15 +553,55 @@ function renderVendorTable(vendors) {
             `;
         }
 
-        row.innerHTML = `
-            <td><strong>${escapedId}</strong></td>
-            <td>${escapeHtml(vendor.name || "N/A")}</td>
-            <td>${escapeHtml(vendor.businessName || "N/A")}</td>
-            <td>${escapeHtml(vendor.category || "N/A")}</td>
-            <td>${escapeHtml(vendor.district || "N/A")}</td>
-            <td>${badgeHtml}</td>
-            <td>${actionsHtml}</td>
-        `;
+        // 1. Vendor ID Cell
+        const idCell = document.createElement("td");
+        idCell.setAttribute("data-label", "Vendor ID");
+        const strong = document.createElement("strong");
+        strong.textContent = rawId || "N/A";
+        idCell.appendChild(strong);
+        row.appendChild(idCell);
+
+        // 2. Owner Name Cell
+        const nameCell = document.createElement("td");
+        nameCell.setAttribute("data-label", "Owner Name");
+        nameCell.textContent = vendor.name || "N/A";
+        row.appendChild(nameCell);
+
+        // 3. Business Name Cell
+        const businessCell = document.createElement("td");
+        businessCell.setAttribute("data-label", "Business Name");
+        businessCell.textContent = vendor.businessName || "N/A";
+        row.appendChild(businessCell);
+
+        // 4. Category Cell
+        const categoryCell = document.createElement("td");
+        categoryCell.setAttribute("data-label", "Category");
+        categoryCell.textContent = vendor.category || "N/A";
+        row.appendChild(categoryCell);
+
+        // 5. District Cell
+        const districtCell = document.createElement("td");
+        districtCell.setAttribute("data-label", "District");
+        districtCell.textContent = vendor.district || "N/A";
+        row.appendChild(districtCell);
+
+        // 6. Registered Date Cell
+        const registeredCell = document.createElement("td");
+        registeredCell.setAttribute("data-label", "Registered");
+        registeredCell.textContent = formatDate(vendor.createdAt);
+        row.appendChild(registeredCell);
+
+        // 7. Status Badge Cell (Trusted developer-defined HTML only)
+        const statusCell = document.createElement("td");
+        statusCell.setAttribute("data-label", "Status");
+        statusCell.innerHTML = badgeHtml;
+        row.appendChild(statusCell);
+
+        // 8. Actions Cell (Trusted markup with attribute-escaped ID)
+        const actionsCell = document.createElement("td");
+        actionsCell.setAttribute("data-label", "Actions");
+        actionsCell.innerHTML = actionsHtml;
+        row.appendChild(actionsCell);
 
         fragment.appendChild(row);
     });
@@ -670,3 +736,5 @@ function logout() {
 }
 
 window.logout = logout;
+window.applyFilters = applyVendorFilters;
+window.applyVendorFilters = applyVendorFilters;

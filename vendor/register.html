@@ -187,6 +187,7 @@
                     id="vendorName"
                     placeholder="Enter vendor name"
                     required
+                    aria-describedby="vendorRegisterError"
                 >
 
 
@@ -203,6 +204,7 @@
                     required pattern="[0-9]{10}"
                      maxlength="10" 
                      title="Enter a 10-digit mobile number"
+                    aria-describedby="vendorRegisterError"
                 >
 
 
@@ -217,6 +219,7 @@
                     id="email"
                     placeholder="Enter email address"
                     required
+                    aria-describedby="vendorRegisterError"
                 >
 
                 <label for="vendorPassword">
@@ -230,6 +233,7 @@
                         placeholder="Create a password"
                         minlength="8"
                         required
+                        aria-describedby="vendorRegisterError"
                     >
                     <button
                         type="button"
@@ -258,6 +262,7 @@
                         placeholder="Confirm your password"
                         minlength="8"
                         required
+                        aria-describedby="vendorRegisterError"
                     >
                     <button
                         type="button"
@@ -285,6 +290,7 @@
                     id="businessName"
                     placeholder="Enter business name"
                     required
+                    aria-describedby="vendorRegisterError"
                 >
 
 
@@ -293,7 +299,7 @@
                 <label for="category">
                     Business Category <span class="required">*</span>
                 </label>
-                <select id="category" name="category" required>
+                <select id="category" name="category" required aria-describedby="vendorRegisterError">
                     <option value="" disabled selected>Select Business Category</option>
                     <option value="Food">Food</option>
                     <option value="Fruits and Vegetables">Fruits and Vegetables</option>
@@ -315,6 +321,7 @@
                     id="district"
                     placeholder="Enter district"
                     required
+                    aria-describedby="vendorRegisterError"
                 >
 
 
@@ -329,6 +336,7 @@
                     placeholder="Enter business address"
                     rows="3"
                     required
+                    aria-describedby="vendorRegisterError"
                 ></textarea>
 
 
@@ -345,6 +353,7 @@
                     min="0" 
                     max="100"
                     required
+                    aria-describedby="vendorRegisterError"
                 >
 
 
@@ -358,6 +367,7 @@
                     id="description"
                     placeholder="Describe your business"
                     rows="4" required
+                    aria-describedby="vendorRegisterError"
                 ></textarea>
 
 
@@ -371,6 +381,8 @@
 
                 <p
                     id="vendorRegisterError"
+                    role="alert"
+                    aria-live="polite"
                     style="color: #dc2626; margin-top: 14px; text-align: center; font-weight: 500;"
                 ></p>
 
@@ -457,7 +469,7 @@
 </div><!-- /.landing-layout -->
 
 <script src="../js/config.js"></script>
-<script src="../js/vendor.js?v=4"></script>
+<script src="../js/vendor.js?v=6"></script>
 
 <script src="../js/sidebar.js"></script>
 </body>

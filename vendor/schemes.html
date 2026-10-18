@@ -15,44 +15,55 @@
 
 </head>
 
-<body>
-
-
-<header>
-
-    <nav>
-        <ul class="nav-links">
-
-            <li>
-                <a href="dashboard.html">
-                    Dashboard
+<body class="has-sidebar">
+<header class="mobile-header">
+        <button id="mobileMenuBtn" class="mobile-menu-btn" aria-label="Toggle navigation menu" aria-expanded="false">
+            <svg class="menu-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+        <a href="../index.html" class="mobile-brand">
+            <img src="../img/logo.png" alt="Street Vendor Management System" class="mobile-logo-img">
+            <span class="mobile-brand-text">StreetVendor</span>
+        </a>
+    </header>
+<div id="sidebarOverlay" class="sidebar-overlay" aria-hidden="true"></div>
+<div class="landing-layout">
+<aside id="sidebar" class="sidebar" aria-label="Main Navigation">
+            <div class="sidebar-header">
+                <a href="../index.html" class="sidebar-brand" title="Street Vendor Management System">
+                    <img src="../img/logo.png" alt="Street Vendor Management System Logo" class="sidebar-logo-img">
+                    <span class="sidebar-brand-name">StreetVendor</span>
                 </a>
-            </li>
+                <button id="sidebarCollapseBtn" class="sidebar-collapse-btn" aria-label="Toggle sidebar collapse" title="Collapse or Expand sidebar">
+                    <svg class="chevron-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                </button>
+            </div>
 
-            <li>
-                <a href="payment.html">
-                    Payment Info
-                </a>
-            </li>
+            <nav class="sidebar-nav"><div class="nav-section-title">Vendor Menu</div><ul class="sidebar-menu"><li class="menu-item"><a href="dashboard.html" class="menu-link" title="Dashboard"><span class="link-icon"><svg class="chevron-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg></span><span class="link-text">Dashboard</span></a></li><li class="menu-item"><a href="payment.html" class="menu-link" title="Payment Info"><span class="link-icon"><svg class="chevron-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></span><span class="link-text">Payment Info</span></a></li><li class="menu-item"><a href="schemes.html" class="menu-link active" title="Govt. Schemes" aria-current="page"><span class="link-icon"><svg class="chevron-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg></span><span class="link-text">Govt. Schemes</span></a></li><li class="menu-item"><a href="../directory/vendors.html" class="menu-link" title="Vendor Directory"><span class="link-icon">
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="11" cy="11" r="8"></circle>
+                                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                </svg>
+                            </span><span class="link-text">Vendor Directory</span></a></li></ul><div class="nav-section-title">Account</div><ul class="sidebar-menu"><li class="menu-item"><a href="../index.html" class="menu-link" title="Home"><span class="link-icon">
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                                </svg>
+                            </span><span class="link-text">Home</span></a></li><li class="menu-item"><a href="#" class="menu-link" title="Logout" onclick="logoutVendor(); return false;"><span class="link-icon"><svg class="chevron-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span><span class="link-text">Logout</span></a></li></ul></nav>
 
-            <li>
-                <a href="../directory/vendors.html">
-                    Vendor Directory
-                </a>
-            </li>
-
-            <li>
-                <a href="#"
-                   onclick="logoutVendor(); return false;">
-                    Logout
-                </a>
-            </li>
-
-        </ul>
-
-    </nav>
-
-</header>
+            <div class="sidebar-footer">
+                <div class="sidebar-footer-badge">
+                    <span class="status-dot"></span>
+                    <span class="badge-text">Marketplace Online</span>
+                </div>
+            </div>
+        </aside>
+<div class="landing-main page-with-sidebar">
 
 
 <main class="schemes-page">
@@ -371,16 +382,17 @@
 
 
 <footer>
-
     <p>
         © 2026 Street Vendor Management System
     </p>
-
 </footer>
 
+</div><!-- /.landing-main -->
+</div><!-- /.landing-layout -->
 
 <script src="../js/config.js"></script>
 <script src="../js/vendor.js"></script>
+<script src="../js/sidebar.js"></script>
 
 </body>
 
